@@ -45,7 +45,11 @@ export function LocalSetup({ setup, dispatch, onStart, onCancel }: LocalSetupPro
       return (
         <Handoff
           title={`Pass the device to ${COLOR_NAME[color]}`}
-          message={`${COLOR_NAME[opposite(color)]}'s army is locked in and hidden. ${COLOR_NAME[color]}, continue when you are ready to draft in private.`}
+          message={
+            setup.resume
+              ? `Setup was restored. ${COLOR_NAME[color]}, continue when you are ready to keep building your army in private.`
+              : `${COLOR_NAME[opposite(color)]}'s army is locked in and hidden. ${COLOR_NAME[color]}, continue when you are ready to draft in private.`
+          }
           action={`I'm ${COLOR_NAME[color]} — continue`}
           onContinue={() => dispatch({ type: 'continue' })}
         />

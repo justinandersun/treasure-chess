@@ -71,3 +71,17 @@
 .choice span {
   color: var(--muted);
 }
+
+.saved {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  text-decoration: underline;
+  cursor: pointer;
+}

@@ -1,52 +1,72 @@
-/** Top-level navigation as a small state machine. */
+/**
+ * Top-level app state: which view is showing, plus the one current session (a setup in progress or
+ * a game). The session survives going Home, so it can be continued; only starting a new game or
+ * discarding replaces it.
+ */
 
 import { createGameFromArmies, type GameState } from '@treasure-chess/game';
 import { initialSetup, type SetupAction, setupReducer, type SetupState } from './setup';
 
 export type GameMode = 'local' | 'computer';
 
-export type Screen =
-  | { readonly name: 'home' }
-  | { readonly name: 'choose-mode' }
-  | { readonly name: 'computer-pending' }
-  | { readonly name: 'local-setup'; readonly setup: SetupState }
-  | { readonly name: 'game'; readonly game: GameState };
+export type Session =
+  | { readonly kind: 'setup'; readonly setup: SetupState }
+  | { readonly kind: 'game'; readonly game: GameState };
+
+export type View = 'home' | 'choose-mode' | 'computer-pending' | 'session';
+
+export interface AppState {
+  readonly view: View;
+  readonly session: Session | null;
+}
 
 export type AppAction =
   | { readonly type: 'go-home' }
   | { readonly type: 'new-game' }
   | { readonly type: 'choose-mode'; readonly mode: GameMode }
+  | { readonly type: 'continue' }
+  | { readonly type: 'discard-session' }
   | { readonly type: 'setup'; readonly action: SetupAction }
   | { readonly type: 'start-game' }
   | { readonly type: 'update-game'; readonly game: GameState };
 
-export const initialScreen: Screen = { name: 'home' };
+export const initialAppState: AppState = { view: 'home', session: null };
 
-export function appReducer(screen: Screen, action: AppAction): Screen {
+export function appReducer(state: AppState, action: AppAction): AppState {
+  const { session } = state;
   switch (action.type) {
     case 'go-home':
-      return { name: 'home' };
+      return { ...state, view: 'home' };
     case 'new-game':
-      return { name: 'choose-mode' };
+      return { ...state, view: 'choose-mode' };
     case 'choose-mode':
       return action.mode === 'local'
-        ? { name: 'local-setup', setup: initialSetup() }
-        : { name: 'computer-pending' };
+        ? { view: 'session', session: { kind: 'setup', setup: initialSetup() } }
+        : { ...state, view: 'computer-pending' };
+    case 'continue':
+      return session ? { ...state, view: 'session' } : state;
+    case 'discard-session':
+      return { view: 'home', session: null };
     case 'setup':
-      if (screen.name !== 'local-setup') return screen;
-      return { ...screen, setup: setupReducer(screen.setup, action.action) };
+      if (session?.kind !== 'setup') return state;
+      return {
+        ...state,
+        session: { kind: 'setup', setup: setupReducer(session.setup, action.action) },
+      };
     case 'start-game': {
-      if (screen.name !== 'local-setup' || screen.setup.step !== 'reveal') return screen;
-      const { w, b } = screen.setup.deployments;
-      return { name: 'game', game: createGameFromArmies(w, b) };
+      if (session?.kind !== 'setup' || session.setup.step !== 'reveal') return state;
+      const { w, b } = session.setup.deployments;
+      return { ...state, session: { kind: 'game', game: createGameFromArmies(w, b) } };
     }
     case 'update-game':
-      return screen.name === 'game' ? { ...screen, game: action.game } : screen;
+      return session?.kind === 'game'
+        ? { ...state, session: { kind: 'game', game: action.game } }
+        : state;
   }
 }
 
-/** Whether leaving the current screen would discard a setup or an unfinished game. */
-export function hasUnsavedProgress(screen: Screen): boolean {
-  if (screen.name === 'local-setup') return true;
-  return screen.name === 'game' && screen.game.result === null && screen.game.ply > 0;
+/** Whether the session holds work that starting a new game would throw away. */
+export function isUnfinished(session: Session | null): boolean {
+  if (!session) return false;
+  return session.kind === 'setup' || session.game.result === null;
 }

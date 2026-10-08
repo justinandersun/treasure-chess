@@ -1,6 +1,12 @@
 import { parseDeployment, PRESETS } from '@treasure-chess/game';
 import { describe, expect, it } from 'vitest';
-import { initialSetup, type SetupAction, setupReducer, type SetupState } from './setup';
+import {
+  gateAfterReload,
+  initialSetup,
+  type SetupAction,
+  setupReducer,
+  type SetupState,
+} from './setup';
 
 const run = (state: SetupState, ...actions: SetupAction[]) => actions.reduce(setupReducer, state);
 const CLASSIC = PRESETS[0]!;
@@ -76,5 +82,30 @@ describe('local setup flow', () => {
     expect(run(s, { type: 'lock' })).toBe(s);
     expect(run(s, { type: 'continue' })).toBe(s);
     expect(run(s, { type: 'use-preset', presetId: 'nope' })).toBe(s);
+  });
+});
+
+describe('reloading during setup', () => {
+  it('hides a private step behind a handoff and resumes it', () => {
+    const placing = run(initialSetup(), { type: 'use-preset', presetId: 'classic' });
+    const gated = gateAfterReload(placing);
+    expect([gated.step, gated.color, gated.resume]).toEqual(['handoff', 'w', 'place']);
+    const resumed = run(gated, { type: 'continue' });
+    expect(resumed.step).toBe('place');
+    expect(resumed.resume).toBeUndefined();
+    expect(resumed.deployments.w).toEqual(placing.deployments.w);
+  });
+
+  it('leaves public steps alone', () => {
+    const ready = run(
+      initialSetup(),
+      { type: 'use-preset', presetId: 'classic' },
+      { type: 'lock' },
+      { type: 'continue' },
+      { type: 'use-preset', presetId: 'classic' },
+      { type: 'lock' },
+    );
+    expect(ready.step).toBe('ready');
+    expect(gateAfterReload(ready)).toBe(ready);
   });
 });

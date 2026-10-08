@@ -29,3 +29,21 @@
   width: 100%;
   padding: var(--gutter);
 }
+
+.notice {
+  max-width: 640px;
+  margin: 0 auto var(--gutter);
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.dismiss {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  text-decoration: underline;
+  cursor: pointer;
+}

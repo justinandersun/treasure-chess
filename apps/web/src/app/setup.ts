@@ -34,6 +34,8 @@ export type SetupStep =
 export interface SetupState {
   readonly step: SetupStep;
   readonly color: Color;
+  /** For a handoff: the private step `color` returns to (defaults to drafting). */
+  readonly resume?: 'draft' | 'place';
   readonly drafts: Readonly<Record<Color, ArmyDraft>>;
   readonly deployments: Readonly<Record<Color, Deployment>>;
 }
@@ -106,8 +108,20 @@ export function setupReducer(state: SetupState, action: SetupAction): SetupState
         : { ...state, step: 'ready' };
 
     case 'continue':
-      if (state.step === 'handoff') return { ...state, step: 'draft' };
+      if (state.step === 'handoff') {
+        const { resume, ...rest } = state;
+        return { ...rest, step: resume ?? 'draft' };
+      }
       if (state.step === 'ready') return { ...state, step: 'reveal' };
       return state;
   }
+}
+
+/**
+ * The state to show after a reload. A player who was drafting or placing goes back behind a
+ * handoff screen, so whoever holds the device cannot see that army until the player continues.
+ */
+export function gateAfterReload(state: SetupState): SetupState {
+  if (state.step !== 'draft' && state.step !== 'place') return state;
+  return { ...state, step: 'handoff', resume: state.step };
 }
