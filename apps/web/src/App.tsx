@@ -7,6 +7,7 @@ import { ChooseMode } from './screens/ChooseMode';
 import { Home } from './screens/Home';
 import { Preview } from './screens/Preview';
 import { RulesContent } from './screens/RulesContent';
+import { LocalSetup } from './screens/LocalSetup';
 import { SetupPlaceholder } from './screens/SetupPlaceholder';
 
 export function App() {
@@ -40,9 +41,18 @@ export function App() {
             onBack={goHome}
           />
         )}
-        {screen.name === 'setup' && (
-          <SetupPlaceholder mode={screen.mode} onBack={goHome} onPreview={openPreview} />
+        {screen.name === 'computer-pending' && (
+          <SetupPlaceholder onBack={goHome} onPreview={openPreview} />
         )}
+        {screen.name === 'local-setup' && (
+          <LocalSetup
+            setup={screen.setup}
+            dispatch={(action) => dispatch({ type: 'setup', action })}
+            onStart={() => dispatch({ type: 'start-game' })}
+            onCancel={() => dispatch({ type: 'new-game' })}
+          />
+        )}
+        {screen.name === 'game' && <Preview initialGame={screen.game} onBack={goHome} />}
         {screen.name === 'preview' && <Preview onBack={goHome} />}
       </main>
 

@@ -14,9 +14,8 @@ import {
 import { useMemo, useState } from 'react';
 import { Board, type TargetKind } from '../components/Board';
 import { Button } from '../components/Button';
+import { COLOR_NAME } from './labels';
 import styles from './Preview.module.css';
-
-const COLOR_NAME: Record<Color, string> = { w: 'White', b: 'Black' };
 
 function startGame(whiteId: string, blackId: string): GameState {
   const find = (id: string) => (PRESETS.find((p) => p.id === id) ?? PRESETS[0]!).deployment;
@@ -34,14 +33,20 @@ function describeResult(result: GameResult): string {
   }
 }
 
+interface PreviewProps {
+  /** A game to play; without one, preset armies can be chosen. */
+  readonly initialGame?: GameState;
+  readonly onBack: () => void;
+}
+
 /**
- * Temporary sandbox: two preset armies on the board, click to move. Promotions pick the first
- * eligible piece. Replaced by the real Play screen in a later milestone.
+ * Temporary play view: click to move. Promotions pick the first eligible piece. Replaced by the
+ * real Play screen in a later milestone.
  */
-export function Preview({ onBack }: { readonly onBack: () => void }) {
+export function Preview({ initialGame, onBack }: PreviewProps) {
   const [whiteId, setWhiteId] = useState('menagerie');
   const [blackId, setBlackId] = useState('cavalry');
-  const [game, setGame] = useState(() => startGame(whiteId, blackId));
+  const [game, setGame] = useState(() => initialGame ?? startGame(whiteId, blackId));
   const [selected, setSelected] = useState<Square | null>(null);
   const [orientation, setOrientation] = useState<Color>('w');
 
@@ -57,7 +62,7 @@ export function Preview({ onBack }: { readonly onBack: () => void }) {
   const check = inCheck(game) ? findKing(board, turn) : null;
 
   function reset(white = whiteId, black = blackId) {
-    setGame(startGame(white, black));
+    setGame(initialGame ?? startGame(white, black));
     setSelected(null);
   }
 
@@ -81,40 +86,44 @@ export function Preview({ onBack }: { readonly onBack: () => void }) {
     <section className={styles.preview} aria-labelledby="preview-title">
       <div className={styles.toolbar}>
         <h1 id="preview-title" className={styles.heading}>
-          Board preview
+          {initialGame ? 'Game' : 'Board preview'}
         </h1>
-        <label>
-          White{' '}
-          <select
-            value={whiteId}
-            onChange={(e) => {
-              setWhiteId(e.target.value);
-              reset(e.target.value, blackId);
-            }}
-          >
-            {PRESETS.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Black{' '}
-          <select
-            value={blackId}
-            onChange={(e) => {
-              setBlackId(e.target.value);
-              reset(whiteId, e.target.value);
-            }}
-          >
-            {PRESETS.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
-            ))}
-          </select>
-        </label>
+        {!initialGame && (
+          <>
+            <label>
+              White{' '}
+              <select
+                value={whiteId}
+                onChange={(e) => {
+                  setWhiteId(e.target.value);
+                  reset(e.target.value, blackId);
+                }}
+              >
+                {PRESETS.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Black{' '}
+              <select
+                value={blackId}
+                onChange={(e) => {
+                  setBlackId(e.target.value);
+                  reset(whiteId, e.target.value);
+                }}
+              >
+                {PRESETS.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </>
+        )}
       </div>
 
       <p className={styles.status} role="status">

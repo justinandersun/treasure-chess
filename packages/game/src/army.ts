@@ -59,6 +59,28 @@ export function draftCost(draft: ArmyDraft): number {
   return PIECE_TYPES.reduce((gold, t) => gold + countOf(draft, t) * PIECES[t].cost, 0);
 }
 
+/** Why another piece of `type` cannot be added to the draft, or null if it can. */
+export type AddBlocker = 'budget' | 'king-limit' | 'pawn-row-full' | 'back-rank-full';
+
+export function addBlocker(draft: ArmyDraft, type: PieceType): AddBlocker | null {
+  if (draftCost(draft) + PIECES[type].cost > TREASURY) return 'budget';
+  if (PIECES[type].royal) return countOf(draft, type) >= 1 ? 'king-limit' : null;
+  if (isInfantry(type)) return sumCounts(draft, isInfantry) >= 8 ? 'pawn-row-full' : null;
+  return sumCounts(draft, isOfficer) >= 7 ? 'back-rank-full' : null;
+}
+
+/** Number of drafted infantry (pawn row) and non-King back-rank pieces. */
+export function draftSlots(draft: ArmyDraft): { infantry: number; backRank: number } {
+  return { infantry: sumCounts(draft, isInfantry), backRank: sumCounts(draft, isOfficer) };
+}
+
+/** A copy of `draft` with `delta` more of `type` (never below zero). */
+export function adjustDraft(draft: ArmyDraft, type: PieceType, delta: number): ArmyDraft {
+  const next = { ...draft, [type]: Math.max(0, countOf(draft, type) + delta) };
+  if (next[type] === 0) delete next[type];
+  return next;
+}
+
 /** Every army-construction rule the draft breaks; empty when the draft is valid. */
 export function validateDraft(draft: ArmyDraft): DraftIssue[] {
   const issues: DraftIssue[] = [];

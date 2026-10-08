@@ -1,10 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import {
+  addBlocker,
+  adjustDraft,
   armyPromotionTypes,
   type ArmyDraft,
   createGameFromArmies,
   deploymentDraft,
   draftCost,
+  draftSlots,
   formatDeployment,
   isValidArmy,
   KING_FILES,
@@ -159,5 +162,30 @@ describe('starting a game', () => {
     expect(createGameFromArmies(CLASSIC, CLASSIC).position.turn).toBe('w');
     const tooRich = parseDeployment('QQQQKQQQ', 'PPPPPPPP');
     expect(() => createGameFromArmies(CLASSIC, tooRich)).toThrow(/Black/);
+  });
+});
+
+describe('draft editing helpers', () => {
+  it('addBlocker explains why a piece cannot be added', () => {
+    expect(addBlocker({}, 'queen')).toBeNull();
+    expect(addBlocker(CLASSIC_DRAFT, 'pawn')).toBe('budget');
+    expect(addBlocker({ king: 1 }, 'king')).toBe('king-limit');
+    expect(addBlocker({ pawn: 8 }, 'scout')).toBe('pawn-row-full');
+    expect(addBlocker({ camel: 7 }, 'camel')).toBe('back-rank-full');
+    expect(addBlocker({ camel: 7 }, 'king')).toBeNull();
+    // Exactly reaching the treasury is allowed.
+    expect(addBlocker({ queen: 3, rook: 2, camel: 1 }, 'king')).toBeNull();
+    expect(addBlocker({ queen: 3, rook: 2, camel: 1, king: 1 }, 'pawn')).toBe('budget');
+  });
+
+  it('draftSlots counts the pawn row and back rank separately', () => {
+    expect(draftSlots(CLASSIC_DRAFT)).toEqual({ infantry: 8, backRank: 7 });
+    expect(draftSlots({})).toEqual({ infantry: 0, backRank: 0 });
+  });
+
+  it('adjustDraft adds and removes without going negative', () => {
+    expect(adjustDraft({}, 'knight', 1)).toEqual({ knight: 1 });
+    expect(adjustDraft({ knight: 1 }, 'knight', -1)).toEqual({});
+    expect(adjustDraft({}, 'knight', -1)).toEqual({});
   });
 });

@@ -27,7 +27,11 @@ export interface BoardProps {
   readonly checkSquare?: Square | null;
   readonly onSquareClick?: (sq: Square) => void;
   readonly label?: string;
+  /** Display rows to show (0 = top), e.g. [6, 7] for the player's own two ranks. */
+  readonly rows?: readonly number[];
 }
+
+const ALL_ROWS = [0, 1, 2, 3, 4, 5, 6, 7];
 
 const COLOR_NAME: Record<Color, string> = { w: 'White', b: 'Black' };
 
@@ -50,6 +54,7 @@ export function Board({
   checkSquare = null,
   onSquareClick,
   label = 'Chessboard',
+  rows = ALL_ROWS,
 }: BoardProps) {
   const [focusSquare, setFocusSquare] = useState<Square>(
     () => (orientation === 'w' ? 4 /* e1 */ : 60) /* e8 */,
@@ -60,14 +65,21 @@ export function Board({
     const next = navigate(sq, event.key, orientation);
     if (next === null) return;
     event.preventDefault();
+    if (!rows.includes(displayPosition(next, orientation).row)) return;
     setFocusSquare(next);
     buttons.current.get(next)?.focus();
   }
 
   const squares = displaySquares(orientation);
+  const partial = rows.length < 8;
   return (
-    <div className={styles.board} role="grid" aria-label={label}>
-      {[0, 1, 2, 3, 4, 5, 6, 7].map((row) => (
+    <div
+      className={[styles.board, partial && styles.partial].filter(Boolean).join(' ')}
+      style={partial ? { aspectRatio: `8 / ${rows.length}` } : undefined}
+      role="grid"
+      aria-label={label}
+    >
+      {rows.map((row) => (
         <div key={row} role="row" className={styles.row}>
           {squares.slice(row * 8, row * 8 + 8).map((sq) => {
             const piece = board[sq] ?? null;

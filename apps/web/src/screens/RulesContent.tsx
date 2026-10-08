@@ -1,14 +1,7 @@
 import { type Family, PIECE_DEFINITIONS, TREASURY } from '@treasure-chess/game';
 import { PieceIcon } from '../pieces/PieceIcon';
+import { FAMILY_NAMES } from './labels';
 import styles from './RulesContent.module.css';
-
-const FAMILY_NAMES: Record<Family, string> = {
-  infantry: 'Infantry',
-  rook: 'Rook family',
-  bishop: 'Bishop family',
-  knight: 'Knight family',
-  royalty: 'Royalty',
-};
 
 /** Rules reference. Full rules text and movement diagrams arrive with the Play screen. */
 export function RulesContent() {

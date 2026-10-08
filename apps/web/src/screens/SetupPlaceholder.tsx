@@ -1,21 +1,19 @@
-import type { GameMode } from '../app/appState';
 import { Button } from '../components/Button';
 import styles from './Screens.module.css';
 
 interface SetupPlaceholderProps {
-  readonly mode: GameMode;
   readonly onBack: () => void;
   readonly onPreview: () => void;
 }
 
-/** Stands in for drafting until it is built. */
-export function SetupPlaceholder({ mode, onBack, onPreview }: SetupPlaceholderProps) {
+/** Stands in for the computer opponent until it is built. */
+export function SetupPlaceholder({ onBack, onPreview }: SetupPlaceholderProps) {
   return (
     <section className={styles.centered} aria-labelledby="setup-title">
-      <h1 id="setup-title">{mode === 'local' ? 'Two players' : 'Against the computer'}</h1>
+      <h1 id="setup-title">Against the computer</h1>
       <p className={styles.lede}>
-        Drafting and placement are coming next. Meanwhile, the board preview lets you play preset
-        armies against each other.
+        The computer opponent is coming in a later update. Meanwhile, try a two-player game or the
+        board preview.
       </p>
       <div className={styles.actions}>
         <Button variant="primary" onClick={onPreview}>
