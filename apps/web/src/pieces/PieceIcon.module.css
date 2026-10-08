@@ -1,0 +1,39 @@
+.piece {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.piece * {
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.white {
+  --piece-body: #fbfaf7;
+  --piece-edge: #1f1d1a;
+  --piece-detail: #1f1d1a;
+}
+
+.black {
+  --piece-body: #26231f;
+  --piece-edge: #0d0c0b;
+  --piece-detail: #e9e4da;
+}
+
+.b {
+  fill: var(--piece-body);
+  stroke: var(--piece-edge);
+}
+
+.l {
+  fill: none;
+  stroke: var(--piece-detail);
+}
+
+.d {
+  fill: var(--piece-detail);
+  stroke: none;
+}

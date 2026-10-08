@@ -1,0 +1,48 @@
+.dialog {
+  width: min(100% - 2 * var(--gutter), 720px);
+  max-height: min(100dvh - 2 * var(--gutter), 900px);
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--fg);
+}
+
+.dialog::backdrop {
+  background: rgb(0 0 0 / 0.45);
+}
+
+.content {
+  padding: 4px 20px 20px;
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 0 8px;
+  background: var(--surface);
+  z-index: 1;
+}
+
+.header h2 {
+  margin: 0;
+}
+
+.close {
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.close:hover {
+  background: var(--surface-2);
+}
