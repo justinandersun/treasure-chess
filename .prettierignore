@@ -1,0 +1,4 @@
+pnpm-lock.yaml
+dist/
+coverage/
+treasure-chess-spec.md
