@@ -14,6 +14,13 @@ pnpm dev        # start the web app
 pnpm check      # typecheck, lint, format check, tests
 ```
 
+After changing piece artwork, regenerate the link-preview image and home-screen icon in
+`apps/web/public/` and commit them:
+
+```bash
+pnpm --filter @treasure-chess/web images
+```
+
 ### Layout
 
 - `packages/game` — pure TypeScript rules engine (no DOM). Tested with Vitest.

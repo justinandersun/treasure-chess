@@ -1,3 +1,4 @@
+/* Colors come from pieceArt.ts via the --piece-* custom properties set on each icon. */
 .piece {
   display: block;
   width: 100%;
@@ -9,18 +10,6 @@
   stroke-width: 1.5;
   stroke-linejoin: round;
   stroke-linecap: round;
-}
-
-.white {
-  --piece-body: #fbfaf7;
-  --piece-edge: #1f1d1a;
-  --piece-detail: #1f1d1a;
-}
-
-.black {
-  --piece-body: #26231f;
-  --piece-edge: #0d0c0b;
-  --piece-detail: #e9e4da;
 }
 
 .b {

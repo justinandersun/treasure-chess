@@ -13,7 +13,11 @@ export default tseslint.config(
     languageOptions: { globals: globals['shared-node-browser'] },
   },
   {
-    files: ['apps/web/**/*.{ts,tsx}'],
+    files: ['apps/web/vite.config.ts', 'apps/web/scripts/**/*.ts'],
+    languageOptions: { globals: globals.node },
+  },
+  {
+    files: ['apps/web/src/**/*.{ts,tsx}'],
     languageOptions: { globals: globals.browser },
     plugins: { 'react-hooks': reactHooks, 'react-refresh': reactRefresh },
     rules: {

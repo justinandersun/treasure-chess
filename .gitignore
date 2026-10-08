@@ -5,3 +5,13 @@ coverage/
 *.log
 .DS_Store
 *.tsbuildinfo
+
+# Personal / local tooling
+.claude/
+CLAUDE.md
+CLAUDE.local.md
+.env
+.env.*
+.vscode/
+.idea/
+*.swp

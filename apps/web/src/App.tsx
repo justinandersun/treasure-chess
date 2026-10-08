@@ -90,6 +90,15 @@ export function App() {
         )}
       </main>
 
+      <footer className={styles.footer}>
+        Built by{' '}
+        <a href="https://andersun.com" target="_blank" rel="noopener noreferrer">
+          Justin Andersun
+          <span className="visually-hidden"> (opens in a new tab)</span>
+        </a>{' '}
+        · © 2026
+      </footer>
+
       <Dialog open={rulesOpen} title="Rules" onClose={() => setRulesOpen(false)}>
         <RulesContent />
       </Dialog>
