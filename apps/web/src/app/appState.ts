@@ -10,8 +10,7 @@ export type Screen =
   | { readonly name: 'choose-mode' }
   | { readonly name: 'computer-pending' }
   | { readonly name: 'local-setup'; readonly setup: SetupState }
-  | { readonly name: 'game'; readonly game: GameState }
-  | { readonly name: 'preview' };
+  | { readonly name: 'game'; readonly game: GameState };
 
 export type AppAction =
   | { readonly type: 'go-home' }
@@ -19,7 +18,7 @@ export type AppAction =
   | { readonly type: 'choose-mode'; readonly mode: GameMode }
   | { readonly type: 'setup'; readonly action: SetupAction }
   | { readonly type: 'start-game' }
-  | { readonly type: 'open-preview' };
+  | { readonly type: 'update-game'; readonly game: GameState };
 
 export const initialScreen: Screen = { name: 'home' };
 
@@ -41,7 +40,13 @@ export function appReducer(screen: Screen, action: AppAction): Screen {
       const { w, b } = screen.setup.deployments;
       return { name: 'game', game: createGameFromArmies(w, b) };
     }
-    case 'open-preview':
-      return { name: 'preview' };
+    case 'update-game':
+      return screen.name === 'game' ? { ...screen, game: action.game } : screen;
   }
+}
+
+/** Whether leaving the current screen would discard a setup or an unfinished game. */
+export function hasUnsavedProgress(screen: Screen): boolean {
+  if (screen.name === 'local-setup') return true;
+  return screen.name === 'game' && screen.game.result === null && screen.game.ply > 0;
 }

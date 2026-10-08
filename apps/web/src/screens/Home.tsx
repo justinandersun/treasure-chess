@@ -6,10 +6,9 @@ import styles from './Screens.module.css';
 interface HomeProps {
   readonly onNewGame: () => void;
   readonly onRules: () => void;
-  readonly onPreview: () => void;
 }
 
-export function Home({ onNewGame, onRules, onPreview }: HomeProps) {
+export function Home({ onNewGame, onRules }: HomeProps) {
   return (
     <section className={styles.centered} aria-labelledby="home-title">
       <div className={styles.emblem} aria-hidden="true">
@@ -29,12 +28,6 @@ export function Home({ onNewGame, onRules, onPreview }: HomeProps) {
         </Button>
         <Button onClick={onRules}>Rules</Button>
       </div>
-      <p className={styles.note}>
-        <button type="button" className={styles.link} onClick={onPreview}>
-          Board preview
-        </button>{' '}
-        — a temporary sandbox for trying the pieces until the full game screens arrive.
-      </p>
     </section>
   );
 }

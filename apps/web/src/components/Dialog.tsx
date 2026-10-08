@@ -6,10 +6,13 @@ interface DialogProps {
   readonly title: string;
   readonly onClose: () => void;
   readonly children: ReactNode;
+  /** Buttons shown along the bottom. */
+  readonly actions?: ReactNode;
+  readonly size?: 'small' | 'large';
 }
 
 /** Modal dialog built on the native <dialog> element (focus trapping and Escape are built in). */
-export function Dialog({ open, title, onClose, children }: DialogProps) {
+export function Dialog({ open, title, onClose, children, actions, size = 'large' }: DialogProps) {
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
 
@@ -23,7 +26,7 @@ export function Dialog({ open, title, onClose, children }: DialogProps) {
   return (
     <dialog
       ref={ref}
-      className={styles.dialog}
+      className={[styles.dialog, size === 'small' && styles.small].filter(Boolean).join(' ')}
       aria-labelledby={titleId}
       onClose={onClose}
       onClick={(e) => {
@@ -38,6 +41,7 @@ export function Dialog({ open, title, onClose, children }: DialogProps) {
           </button>
         </header>
         {children}
+        {actions && <div className={styles.actions}>{actions}</div>}
       </div>
     </dialog>
   );

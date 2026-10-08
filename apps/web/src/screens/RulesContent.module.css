@@ -1,38 +1,72 @@
+.rules h3 {
+  margin: 1.4em 0 0.4em;
+  font-size: 1.05rem;
+}
+
+.rules ul {
+  margin: 0;
+  padding-left: 1.2em;
+}
+
+.rules li + li {
+  margin-top: 0.3em;
+}
+
+.lede {
+  font-size: 1.05rem;
+}
+
+.legend {
+  color: var(--muted);
+}
+
 .rules h4 {
-  margin: 1.2em 0 0.4em;
+  margin: 1.2em 0 0.5em;
   color: var(--muted);
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
 
-.list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+.rules .pieces {
   display: grid;
-  gap: 10px;
-}
-
-.item {
-  display: flex;
-  align-items: center;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 12px;
+  padding: 0;
+  list-style: none;
 }
 
-.icons {
+.rules .piece {
+  display: grid;
+  grid-template-columns: 112px 1fr;
+  align-items: start;
+  gap: 12px;
+  margin: 0;
+}
+
+.diagram {
+  width: 112px;
+}
+
+.name {
   display: flex;
-  flex: none;
-  padding: 2px;
-  border-radius: 6px;
-  background: var(--square-light);
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
 }
 
-.icons svg {
-  width: 40px;
-  height: 40px;
+.icon {
+  display: inline-block;
+  width: 28px;
+  height: 28px;
 }
 
 .meta {
   color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.summary {
+  margin: 4px 0 0;
+  font-size: 0.95rem;
 }

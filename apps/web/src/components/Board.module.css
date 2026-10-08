@@ -75,6 +75,13 @@
   box-shadow: inset 0 0 0 3px var(--accent);
 }
 
+.inspect::before {
+  background: transparent;
+  box-shadow: none;
+  outline: 3px dashed var(--accent);
+  outline-offset: -5px;
+}
+
 .check::before {
   background: radial-gradient(circle, var(--check) 0%, rgb(214 40 40 / 0.35) 45%, transparent 72%);
 }
@@ -88,7 +95,8 @@
 
 /* Destination markers sit above the piece so captures stay visible. */
 .move::after,
-.capture::after {
+.capture::after,
+.attack::after {
   content: '';
   position: absolute;
   z-index: 1;
@@ -105,6 +113,12 @@
   inset: 4%;
   border-radius: 50%;
   border: max(3px, 0.5vmin) solid var(--mark);
+}
+
+.attack::after {
+  inset: 39%;
+  border: 2px solid var(--mark);
+  transform: rotate(45deg);
 }
 
 .coord {

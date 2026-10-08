@@ -8,6 +8,18 @@
   color: var(--fg);
 }
 
+.small {
+  width: min(100% - 2 * var(--gutter), 420px);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 20px;
+}
+
 .dialog::backdrop {
   background: rgb(0 0 0 / 0.45);
 }

@@ -13,13 +13,16 @@ import { PieceIcon } from '../pieces/PieceIcon';
 import styles from './Board.module.css';
 import { displayPosition, displaySquares, navigate } from './boardGeometry';
 
-export type TargetKind = 'move' | 'capture';
+/** `attack`: a square the selected piece attacks but cannot move to right now. */
+export type TargetKind = 'move' | 'capture' | 'attack';
 
 export interface BoardProps {
   readonly board: readonly (Piece | null)[];
   /** Whose side is at the bottom. */
   readonly orientation: Color;
   readonly selected?: Square | null;
+  /** `inspect` outlines the selection with a dashed line (looking, not moving). */
+  readonly selectionStyle?: 'select' | 'inspect';
   /** Squares to mark as destinations for the selected piece. */
   readonly targets?: ReadonlyMap<Square, TargetKind>;
   readonly lastMove?: { readonly from: Square; readonly to: Square } | null;
@@ -49,6 +52,7 @@ export function Board({
   board,
   orientation,
   selected = null,
+  selectionStyle = 'select',
   targets,
   lastMove = null,
   checkSquare = null,
@@ -86,9 +90,10 @@ export function Board({
             const target = targets?.get(sq);
             const isLast = lastMove !== null && (lastMove.from === sq || lastMove.to === sq);
             const notes = [
-              sq === selected && 'selected',
-              target === 'move' && 'legal move',
+              sq === selected && (selectionStyle === 'inspect' ? 'inspecting' : 'selected'),
+              target === 'move' && 'can move here',
               target === 'capture' && 'can capture',
+              target === 'attack' && 'attacked',
               isLast && 'last move',
               sq === checkSquare && 'in check',
             ].filter((n): n is string => typeof n === 'string');
@@ -99,6 +104,7 @@ export function Board({
               light ? styles.light : styles.dark,
               isLast && styles.last,
               sq === selected && styles.selected,
+              sq === selected && selectionStyle === 'inspect' && styles.inspect,
               sq === checkSquare && styles.check,
               target && styles[target],
             ];
