@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { parseSquare, squareName } from './board';
 import {
+  claimableDraw,
+  claimDraw,
   createGame,
   type GameState,
   IllegalMoveError,
@@ -10,6 +12,7 @@ import {
   legalMovesFrom,
   moveHistory,
   playMove,
+  repetitionCount,
   resign,
   undo,
 } from './game';
@@ -110,9 +113,9 @@ describe('game endings', () => {
   });
 
   it('stalemate', () => {
-    expect(game('k7/8/1Q6/8/8/8/8/7K b').result).toEqual({ kind: 'stalemate' });
+    expect(game('k7/8/1Q6/8/8/8/8/7K b').result).toEqual({ kind: 'draw', reason: 'stalemate' });
     // Elephant covers g8 and h7, Bastion covers g7.
-    expect(game('7k/8/5E2/6T1/8/8/8/K7 b').result).toEqual({ kind: 'stalemate' });
+    expect(game('7k/8/5E2/6T1/8/8/8/K7 b').result).toEqual({ kind: 'draw', reason: 'stalemate' });
   });
 
   it('no moves can be played after the game ends', () => {
@@ -243,5 +246,65 @@ describe('position validation', () => {
     expect(() => game('k3P3/8/8/8/8/8/8/K7 b')).toThrow(/Infantry/);
     expect(() => game('k7/8/8/8/8/8/8/K3p3 w')).toThrow(/Infantry/);
     expect(() => game('k7/8/8/8/8/8/8/R6K w')).toThrow(/not to move is in check/);
+  });
+});
+
+describe('draws by repetition and move count', () => {
+  const START = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w';
+  const KNIGHT_DANCE = ['g1f3', 'g8f6', 'f3g1', 'f6g8'];
+
+  it('threefold repetition may be claimed, but does not end the game by itself', () => {
+    const twice = play(game(START), ...KNIGHT_DANCE);
+    expect(repetitionCount(twice)).toBe(2);
+    expect(claimableDraw(twice)).toBeNull();
+    expect(() => claimDraw(twice)).toThrow();
+
+    const thrice = play(twice, ...KNIGHT_DANCE);
+    expect(repetitionCount(thrice)).toBe(3);
+    expect(thrice.result).toBeNull();
+    expect(claimableDraw(thrice)).toBe('threefold-repetition');
+
+    const claimed = claimDraw(thrice);
+    expect(claimed.result).toEqual({ kind: 'draw', reason: 'threefold-repetition' });
+    expect(legalMoves(claimed)).toEqual([]);
+    expect(undo(claimed)).toBe(thrice);
+  });
+
+  it('positions only repeat with the same side to move', () => {
+    // After Nf3 Nf6 Ng1, the knights mirror the start but it is Black to move.
+    const s = play(game(START), 'g1f3', 'g8f6', 'f3g1', 'f6g8', 'g1f3');
+    expect(repetitionCount(s)).toBe(2);
+    expect(repetitionCount(undo(s))).toBe(2);
+    expect(repetitionCount(play(s, 'b8c6'))).toBe(1);
+  });
+
+  it('fivefold repetition ends the game automatically', () => {
+    const four = play(game(START), ...KNIGHT_DANCE, ...KNIGHT_DANCE, ...KNIGHT_DANCE);
+    expect(four.result).toBeNull();
+    const five = play(four, ...KNIGHT_DANCE);
+    expect(five.result).toEqual({ kind: 'draw', reason: 'fivefold-repetition' });
+  });
+
+  it('a capture or infantry move resets the repetition window', () => {
+    const s = play(game(START), ...KNIGHT_DANCE, 'e2e3', 'e7e6', ...KNIGHT_DANCE);
+    expect(repetitionCount(s)).toBe(2);
+  });
+
+  it('the 50-move rule may be claimed after 100 half-moves', () => {
+    const s = game('4k3/8/8/8/8/8/8/R6K w');
+    const at99 = { ...s, halfmoveClock: 99 };
+    expect(claimableDraw(at99)).toBeNull();
+    const at100 = play(at99, 'a1b1');
+    expect(at100.halfmoveClock).toBe(100);
+    expect(at100.result).toBeNull();
+    expect(claimableDraw(at100)).toBe('fifty-move-rule');
+    expect(claimDraw(at100).result).toEqual({ kind: 'draw', reason: 'fifty-move-rule' });
+  });
+
+  it('the 75-move rule ends the game automatically, unless the last move mates', () => {
+    const quiet = play({ ...game('4k3/8/8/8/8/8/8/R6K w'), halfmoveClock: 149 }, 'a1b1');
+    expect(quiet.result).toEqual({ kind: 'draw', reason: 'seventy-five-move-rule' });
+    const mate = play({ ...game('7k/6pp/8/8/8/8/8/R5K1 w'), halfmoveClock: 149 }, 'a1a8');
+    expect(mate.result).toEqual({ kind: 'checkmate', winner: 'w' });
   });
 });

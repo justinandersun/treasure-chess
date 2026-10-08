@@ -1,5 +1,6 @@
 /**
- * Immutable game API for the UI: legal moves, playing moves, game results, undo, and resignation.
+ * Immutable game API for the UI: legal moves, playing moves, game results, draws, undo, and
+ * resignation.
  * Every operation returns a new GameState; each state links to the one before it, so undo restores
  * everything (board, clocks, result) exactly.
  */
@@ -7,7 +8,8 @@
 import { type Color, opposite, promotionRank, rankOf, type Square } from './board';
 import { isSquareAttacked, type Move } from './movegen';
 import { PIECES, type PieceType } from './pieces';
-import type { Board, Position } from './position';
+import { isDeadPosition } from './draws';
+import { type Board, formatPosition, type Position } from './position';
 import {
   findKing,
   generateLegalMoves,
@@ -17,16 +19,33 @@ import {
   promotionTypesFromBoard,
 } from './rules';
 
+export type DrawReason =
+  | 'stalemate'
+  | 'dead-position'
+  /** Automatic: the same position for the fifth time. */
+  | 'fivefold-repetition'
+  /** Automatic: 75 moves by each side without a capture or infantry move. */
+  | 'seventy-five-move-rule'
+  /** Claimed: the same position for the third time. */
+  | 'threefold-repetition'
+  /** Claimed: 50 moves by each side without a capture or infantry move. */
+  | 'fifty-move-rule';
+
+/** Draws a player may claim (rather than ones that end the game automatically). */
+export type ClaimableDraw = Extract<DrawReason, 'threefold-repetition' | 'fifty-move-rule'>;
+
 export type GameResult =
   | { readonly kind: 'checkmate'; readonly winner: Color }
-  | { readonly kind: 'stalemate' }
-  | { readonly kind: 'resignation'; readonly winner: Color };
+  | { readonly kind: 'resignation'; readonly winner: Color }
+  | { readonly kind: 'draw'; readonly reason: DrawReason };
 
 export interface GameState {
   readonly position: Position;
+  /** Text of the position including side to move; equal keys mean a repeated position. */
+  readonly positionKey: string;
   /** Fixed for the whole game: what each side's infantry may promote to. */
   readonly promotionTypes: PromotionTypes;
-  /** The move that produced this state, or null for the initial state and resignations. */
+  /** The move that produced this state; null for the initial state, resignations, and claims. */
   readonly lastMove: Move | null;
   readonly previous: GameState | null;
   /** Half-moves played since the start. */
@@ -95,18 +114,43 @@ function movesInPosition(state: GameState): readonly Move[] {
   return moves;
 }
 
+/** True for states created by resigning or claiming a draw, which repeat the previous position. */
+function isEndingAction(state: GameState): boolean {
+  return state.lastMove === null && state.previous !== null;
+}
+
+/**
+ * How many times the current position has occurred, including now. Only positions since the last
+ * capture or infantry move are compared, since those moves can never be reversed.
+ */
+export function repetitionCount(state: GameState): number {
+  let count = 0;
+  const earliestPly = state.ply - state.halfmoveClock;
+  for (let s: GameState | null = state; s && s.ply >= earliestPly; s = s.previous) {
+    if (!isEndingAction(s) && s.positionKey === state.positionKey) count++;
+  }
+  return count;
+}
+
+/** Checkmate and stalemate take precedence over the automatic draw rules. */
 function resultAfterMove(state: GameState): GameResult | null {
-  if (movesInPosition(state).length > 0) return null;
   const { board, turn } = state.position;
-  return isInCheck(board, turn)
-    ? { kind: 'checkmate', winner: opposite(turn) }
-    : { kind: 'stalemate' };
+  if (movesInPosition(state).length === 0) {
+    return isInCheck(board, turn)
+      ? { kind: 'checkmate', winner: opposite(turn) }
+      : { kind: 'draw', reason: 'stalemate' };
+  }
+  if (repetitionCount(state) >= 5) return { kind: 'draw', reason: 'fivefold-repetition' };
+  if (state.halfmoveClock >= 150) return { kind: 'draw', reason: 'seventy-five-move-rule' };
+  if (isDeadPosition(board)) return { kind: 'draw', reason: 'dead-position' };
+  return null;
 }
 
 export function createGame({ position, promotionTypes }: CreateGameOptions): GameState {
   validatePosition(position);
   const initial: GameState = {
     position: { board: [...position.board], turn: position.turn },
+    positionKey: formatPosition(position),
     promotionTypes: promotionTypes ?? promotionTypesFromBoard(position.board),
     lastMove: null,
     previous: null,
@@ -146,8 +190,10 @@ export function playMove(state: GameState, input: MoveInput): GameState {
   const board: Board = [...state.position.board];
   makeMove(board, move);
   const resetsClock = move.captured !== undefined || PIECES[move.piece].family === 'infantry';
+  const nextPosition: Position = { board, turn: opposite(state.position.turn) };
   const next: GameState = {
-    position: { board, turn: opposite(state.position.turn) },
+    position: nextPosition,
+    positionKey: formatPosition(nextPosition),
     promotionTypes: state.promotionTypes,
     lastMove: move,
     previous: state,
@@ -159,18 +205,36 @@ export function playMove(state: GameState, input: MoveInput): GameState {
   return result ? { ...next, result } : next;
 }
 
+/** A new state ending the game without a move; undo returns to `state`. */
+function endWithoutMove(state: GameState, result: GameResult): GameState {
+  return { ...state, lastMove: null, previous: state, result };
+}
+
 /** Ends the game with `color` resigning. Undo restores the game to before the resignation. */
 export function resign(state: GameState, color: Color): GameState {
   if (state.result) return state;
-  return {
-    ...state,
-    lastMove: null,
-    previous: state,
-    result: { kind: 'resignation', winner: opposite(color) },
-  };
+  return endWithoutMove(state, { kind: 'resignation', winner: opposite(color) });
 }
 
-/** The state before the last move or resignation; the initial state is returned unchanged. */
+/**
+ * The draw the side to move may claim now, if any. A claim is available once the current position
+ * has occurred three times, or after 50 moves by each side without a capture or infantry move.
+ */
+export function claimableDraw(state: GameState): ClaimableDraw | null {
+  if (state.result) return null;
+  if (repetitionCount(state) >= 3) return 'threefold-repetition';
+  if (state.halfmoveClock >= 100) return 'fifty-move-rule';
+  return null;
+}
+
+/** Ends the game in a claimed draw. Throws if no claim is available. */
+export function claimDraw(state: GameState): GameState {
+  const reason = claimableDraw(state);
+  if (!reason) throw new Error('No draw can be claimed in this position');
+  return endWithoutMove(state, { kind: 'draw', reason });
+}
+
+/** The state before the last move, resignation, or claim; the initial state is returned unchanged. */
 export function undo(state: GameState): GameState {
   return state.previous ?? state;
 }
