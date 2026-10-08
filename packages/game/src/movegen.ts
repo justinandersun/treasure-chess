@@ -24,6 +24,8 @@ export interface Move {
   readonly piece: PieceType;
   /** Type of the enemy piece on `to`, if this move captures. */
   readonly captured?: PieceType;
+  /** Piece type an infantry piece becomes on reaching the last rank. Set only on legal moves. */
+  readonly promotion?: PieceType;
 }
 
 /** Called for each reachable square; return `true` to stop the scan early. */

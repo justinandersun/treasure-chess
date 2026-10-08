@@ -66,3 +66,8 @@ export function pawnRank(color: Color): number {
 export function backRank(color: Color): number {
   return color === 'w' ? 0 : 7;
 }
+
+/** Rank index (0-based) where a color's infantry promote: the opponent's back rank. */
+export function promotionRank(color: Color): number {
+  return backRank(opposite(color));
+}

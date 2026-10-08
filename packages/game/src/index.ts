@@ -9,3 +9,5 @@ export * from './board';
 export * from './pieces';
 export * from './position';
 export * from './movegen';
+export * from './rules';
+export * from './game';
