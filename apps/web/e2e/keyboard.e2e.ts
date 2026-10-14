@@ -19,7 +19,7 @@ test('a move can be played with the keyboard alone', async ({ page }) => {
 
 test('dialogs trap focus and close with Escape', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: 'Rules' }).first().click();
+  await page.getByRole('button', { name: 'Rules' }).click();
   const rules = page.getByRole('dialog', { name: 'Rules' });
   await expect(rules).toBeVisible();
   await page.keyboard.press('Escape');

@@ -68,7 +68,6 @@ export function App() {
             onNewGame={requestNewGame}
             onContinue={() => dispatch({ type: 'continue' })}
             onDiscard={() => setConfirm('discard')}
-            onRules={() => setOverlay('rules')}
           />
         )}
         {view === 'choose-mode' && (
@@ -104,7 +103,7 @@ export function App() {
       </footer>
 
       <Dialog open={overlay === 'rules'} title="Rules" onClose={() => setOverlay(null)}>
-        <RulesContent />
+        <RulesContent onShowPieces={() => setOverlay('pieces')} />
       </Dialog>
 
       <Dialog open={overlay === 'pieces'} title="Pieces" onClose={() => setOverlay(null)}>

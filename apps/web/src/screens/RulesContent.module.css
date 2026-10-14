@@ -28,5 +28,15 @@
   margin-top: 1.6em;
   padding-top: 1em;
   border-top: 1px solid var(--border);
-  color: var(--muted);
+}
+
+.link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--fg);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  cursor: pointer;
 }

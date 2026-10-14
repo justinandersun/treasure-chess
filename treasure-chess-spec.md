@@ -56,10 +56,10 @@ Notation letters are unique identifiers. Traditional chess notation letters are 
 | Infantry | Pawn | P | 1 | Standard chess pawn |
 | Infantry | Scout | S | 1 | Moves diagonally forward; captures straight forward |
 | Infantry | Sergeant | G | 2 | Moves and captures one square in any forward direction |
-| Castle | Bastion | T | 3 | One or two squares orthogonally; can jump |
+| Castle | Bastion | T | 3 | One or two squares orthogonally |
 | Castle | Rook | R | 5 | Standard chess rook |
 | Castle | Gryphon | Y | 6 | One diagonal step, then outward orthogonal sliding |
-| Cathedral | Priest | I | 2 | One or two squares diagonally; can jump |
+| Cathedral | Priest | I | 2 | One or two squares diagonally |
 | Cathedral | Bishop | B | 3 | Standard chess bishop |
 | Cathedral | Cardinal | C | 5 | One orthogonal step, then outward diagonal sliding |
 | Cavalry | Camel | M | 2 | (1,3) jumper |
@@ -71,7 +71,7 @@ Notation letters are unique identifiers. Traditional chess notation letters are 
 | Court | King | K | 1 | Standard chess king, without castling |
 
 #### Movement Details
-- **Bastion and Priest:** Both may move one square normally or jump directly to a square two spaces away along their permitted directions. Jumping ignores intervening pieces.
+- **Bastion and Priest:** Both move one or two squares along their permitted directions, like a short Rook or Bishop. They cannot jump: a two-square move requires the intervening square to be empty.
 - **Gryphon:** May move or capture one square diagonally. Alternatively, after an unobstructed diagonal step, it may continue outward along a perpendicular orthogonal line for any distance. It cannot jump or turn more than once.
 - **Cardinal:** May move or capture one square orthogonally. Alternatively, after an unobstructed orthogonal step, it may continue outward along a diagonal line for any distance. It cannot jump or turn more than once.
 - **Gryphon/Cardinal:** A capture on the first square ends the move. For longer moves, the turning square and all intermediate squares must be empty.

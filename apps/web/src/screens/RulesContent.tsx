@@ -6,12 +6,11 @@ function listNames(types: Iterable<PieceType>): string {
   return `${names.slice(0, -1).join(', ')}, or ${names.at(-1)}`;
 }
 
-export function RulesContent() {
+export function RulesContent({ onShowPieces }: { readonly onShowPieces: () => void }) {
   return (
     <div className={styles.rules}>
       <p className={styles.lede}>
-        <strong>Draft → Place → Play.</strong> Build an army of chess and fairy pieces, arrange it,
-        and play chess on a standard board.
+        Build an army of chess and fairy pieces, arrange it, and play chess on a standard board.
       </p>
 
       <h3>1. Draft</h3>
@@ -63,8 +62,9 @@ export function RulesContent() {
       </ul>
 
       <p className={styles.legend}>
-        Every piece, with its movement diagram, is listed under <strong>Pieces</strong> in the
-        header.
+        <button type="button" className={styles.link} onClick={onShowPieces}>
+          See all pieces
+        </button>
       </p>
     </div>
   );

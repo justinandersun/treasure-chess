@@ -47,9 +47,11 @@ describe('empty-board destinations', () => {
 
 describe('leapers', () => {
   it('jump over pieces of either color', () => {
-    // Bastion d4 surrounded by blockers on d5/c4/e4/d3 still reaches the two-step squares.
-    const fen = '8/8/8/3p4/2pTP3/3P4/8/8 w';
-    expect(destinations(fen, 'd4')).toEqual(squares('d5 c4 b4 f4 d2 d6'));
+    // Falconer d4 surrounded by blockers on d5/c4/e4/d3 still reaches every two-away square.
+    const fen = '8/8/8/3p4/2pFP3/3P4/8/8 w';
+    expect(destinations(fen, 'd4')).toEqual(
+      squares('b2 b3 b4 b5 b6 c2 c6 d2 d6 e2 e6 f2 f3 f4 f5 f6'),
+    );
   });
 
   it('cannot land on friendly pieces but can capture enemies', () => {
@@ -58,16 +60,31 @@ describe('leapers', () => {
     expect(captures(fen, 'd4')).toEqual(['c6']);
   });
 
-  it('Priest jumps diagonally over a blocker', () => {
-    const fen = '8/8/8/4P3/3I4/8/8/8 w';
-    expect(destinations(fen, 'd4')).toEqual(squares('c3 c5 e3 b2 b6 f2 f6'));
-  });
-
   it('Falconer never moves to adjacent squares', () => {
     const fen = lonePiece('falconer', 'd4');
     for (const sq of squares('c3 c4 c5 d3 d5 e3 e4 e5')) {
       expect(destinations(fen, 'd4')).not.toContain(sq);
     }
+  });
+});
+
+describe('short sliders', () => {
+  it('Bastion is blocked by adjacent pieces and cannot jump', () => {
+    const fen = '8/8/8/3p4/2pTP3/3P4/8/8 w';
+    expect(destinations(fen, 'd4')).toEqual(squares('d5 c4'));
+  });
+
+  it('Priest stops at a blocker and goes no further than two squares', () => {
+    const fen = '8/8/8/4P3/3I4/8/8/8 w';
+    expect(destinations(fen, 'd4')).toEqual(squares('c3 c5 e3 b2 b6 f2'));
+  });
+
+  it('attacks only along an open path, at most two squares away', () => {
+    const attacked = (fen: string) =>
+      isSquareAttacked(parsePosition(fen).board, parseSquare('e4'), 'w');
+    expect(attacked('8/8/8/8/8/8/4T3/8 w')).toBe(true);
+    expect(attacked('8/8/8/8/8/4p3/4T3/8 w')).toBe(false);
+    expect(attacked('8/8/8/8/8/8/8/4T3 w')).toBe(false);
   });
 });
 

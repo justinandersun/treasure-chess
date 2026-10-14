@@ -83,7 +83,7 @@ describe('King safety', () => {
     expect(inCheck(game('8/8/8/3k4/4S3/8/8/K7 b'))).toBe(false);
   });
 
-  it('the King cannot capture a defended piece (Bastion defends by jumping)', () => {
+  it('the King cannot capture a defended piece (Bastion defends from two squares away)', () => {
     const state = game('4k3/4Q3/8/4T3/8/8/8/K7 b');
     expect(state.result).toEqual({ kind: 'checkmate', winner: 'w' });
     const undefended = game('4k3/4Q3/8/8/8/8/8/K7 b');

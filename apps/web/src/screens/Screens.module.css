@@ -9,21 +9,9 @@
 }
 
 .emblem {
-  display: flex;
-  margin-bottom: 28px;
-  border-radius: 2px;
-  overflow: hidden;
-}
-
-.emblem svg {
-  width: 64px;
-  height: 64px;
-  padding: 6px;
-  background: var(--square-light);
-}
-
-.emblem svg:nth-child(even) {
-  background: var(--square-dark);
+  width: 96px;
+  height: 96px;
+  margin-bottom: 16px;
 }
 
 .title {

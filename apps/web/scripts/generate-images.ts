@@ -94,8 +94,8 @@ function ogImage(): string {
     <text x="80" y="250" font-family="${DISPLAY_FONT}" font-size="80" font-weight="400" fill="${PALETTE.fg}">Treasure Chess</text>
     <rect x="82" y="284" width="96" height="2" fill="${PALETTE.accent}"/>
     <text font-family="${FONT}" font-size="34" fill="${PALETTE.muted}">
-      <tspan x="80" y="350">Draft an army of fairy pieces</tspan>
-      <tspan x="80" y="396">with 40 points. Arrange it. Play.</tspan>
+      <tspan x="80" y="350">Chess, with an army</tspan>
+      <tspan x="80" y="396">of your own design.</tspan>
     </text>
     <text x="80" y="480" font-family="${FONT}" font-size="18" letter-spacing="2" fill="${PALETTE.muted}">FREE · NO ACCOUNTS · PLAYS IN YOUR BROWSER</text>
     ${boardSvg(cells, 700, 95, 110)}

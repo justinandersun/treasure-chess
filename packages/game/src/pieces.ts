@@ -11,8 +11,8 @@ export type Vector = readonly [df: number, dr: number];
 export type MoveComponent =
   /** Jumps directly to each offset, ignoring intervening pieces. */
   | { readonly kind: 'leap'; readonly offsets: readonly Vector[] }
-  /** Slides any distance along each direction until blocked. */
-  | { readonly kind: 'slide'; readonly directions: readonly Vector[] }
+  /** Slides along each direction until blocked, at most `range` squares (any distance if omitted). */
+  | { readonly kind: 'slide'; readonly directions: readonly Vector[]; readonly range?: number }
   /**
    * Takes one `step` (moving or capturing there), then — only if that square is empty — may
    * continue sliding along any of `slides` from the turning square.
@@ -58,7 +58,7 @@ export interface PieceDefinition {
   /** Unique uppercase notation letter. */
   readonly symbol: string;
   readonly family: Family;
-  /** Gold cost when drafting. */
+  /** Point cost when drafting. */
   readonly cost: number;
   /** Royal pieces may not be captured or left in check. */
   readonly royal: boolean;
@@ -179,8 +179,8 @@ export const PIECE_DEFINITIONS: readonly PieceDefinition[] = [
     family: 'rook',
     cost: 3,
     royal: false,
-    movement: [{ kind: 'leap', offsets: [...ORTHOGONAL, ...symmetricVectors(2, 0)] }],
-    summary: 'One or two squares orthogonally; can jump.',
+    movement: [{ kind: 'slide', directions: ORTHOGONAL, range: 2 }],
+    summary: 'One or two squares orthogonally.',
   }),
   define({
     type: 'rook',
@@ -209,8 +209,8 @@ export const PIECE_DEFINITIONS: readonly PieceDefinition[] = [
     family: 'bishop',
     cost: 2,
     royal: false,
-    movement: [{ kind: 'leap', offsets: [...DIAGONAL, ...symmetricVectors(2, 2)] }],
-    summary: 'One or two squares diagonally; can jump.',
+    movement: [{ kind: 'slide', directions: DIAGONAL, range: 2 }],
+    summary: 'One or two squares diagonally.',
   }),
   define({
     type: 'bishop',

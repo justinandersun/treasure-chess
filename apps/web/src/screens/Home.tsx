@@ -1,4 +1,3 @@
-import { TREASURY } from '@treasure-chess/game';
 import type { Session } from '../app/appState';
 import { Button } from '../components/Button';
 import { PieceIcon } from '../pieces/PieceIcon';
@@ -10,7 +9,6 @@ interface HomeProps {
   readonly onNewGame: () => void;
   readonly onContinue: () => void;
   readonly onDiscard: () => void;
-  readonly onRules: () => void;
 }
 
 function describeSession(session: Session): { action: string; detail: string } {
@@ -31,21 +29,17 @@ function describeSession(session: Session): { action: string; detail: string } {
   return { action: 'Continue game', detail: `${opponent} · move ${moveNumber} · ${toPlay}` };
 }
 
-export function Home({ session, onNewGame, onContinue, onDiscard, onRules }: HomeProps) {
+export function Home({ session, onNewGame, onContinue, onDiscard }: HomeProps) {
   const saved = session && describeSession(session);
   return (
     <section className={styles.centered} aria-labelledby="home-title">
       <div className={styles.emblem} aria-hidden="true">
         <PieceIcon type="gryphon" color="w" />
-        <PieceIcon type="falconer" color="b" />
-        <PieceIcon type="elephant" color="w" />
       </div>
       <h1 id="home-title" className={styles.title}>
         Treasure Chess
       </h1>
-      <p className={styles.lede}>
-        Spend {TREASURY} points on an army of fairy pieces, arrange it, and play.
-      </p>
+      <p className={styles.lede}>Chess, with an army of your own design.</p>
       <div className={styles.actions}>
         {saved && (
           <Button variant="primary" onClick={onContinue}>
@@ -55,7 +49,6 @@ export function Home({ session, onNewGame, onContinue, onDiscard, onRules }: Hom
         <Button variant={saved ? 'default' : 'primary'} onClick={onNewGame}>
           New game
         </Button>
-        <Button onClick={onRules}>Rules</Button>
       </div>
       {saved && (
         <p className={styles.saved}>

@@ -95,11 +95,11 @@ function mirrorPosition(fen: string): string {
 /**
  * Regression counts for fairy armies. There are no published references for these pieces, so the
  * counts are pinned from this implementation (depth 1 of the first was verified by hand: 26 infantry
- * moves + 12 back-rank moves) and cross-checked by color symmetry.
+ * moves + 9 back-rank moves) and cross-checked by color symmetry.
  */
 describe('perft regression (fairy armies)', () => {
   const CASES: [fen: string, counts: number[]][] = [
-    ['ry1okqn1/gspsgpsp/8/8/8/8/PSGPPGSP/TMICKFYE w', [38, 1102, 41378]],
+    ['ry1okqn1/gspsgpsp/8/8/8/8/PSGPPGSP/TMICKFYE w', [35, 1015, 35404]],
     ['k1r5/1S1Y4/8/3c4/8/2F5/1g3E2/4K3 w', [46, 1437, 55942]],
   ];
 

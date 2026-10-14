@@ -28,7 +28,10 @@ export function Dialog({ open, title, onClose, children, actions, size = 'large'
       ref={ref}
       className={[styles.dialog, size === 'small' && styles.small].filter(Boolean).join(' ')}
       aria-labelledby={titleId}
-      onClose={onClose}
+      // Only report closes the user made; closing because `open` went false is not one.
+      onClose={() => {
+        if (open) onClose();
+      }}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose(); // backdrop click
       }}

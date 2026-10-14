@@ -65,3 +65,11 @@ test('reloading keeps the session and hides private armies', async ({ page }) =>
   await page.getByRole('button', { name: 'Treasure Chess' }).click();
   await expect(page.getByRole('button', { name: 'Continue game' })).toBeVisible();
 });
+
+test('the Rules overlay links to the Pieces overlay', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Rules' }).click();
+  await page.getByRole('button', { name: 'See all pieces' }).click();
+  await expect(page.getByRole('dialog', { name: 'Pieces' })).toBeVisible();
+  await expect(page.getByRole('dialog', { name: 'Rules' })).toBeHidden();
+});

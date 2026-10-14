@@ -9,8 +9,8 @@ const NOTES: Partial<Record<PieceType, string>> = {
   scout:
     'Two squares diagonally forward from the pawn row, in one direction. Captures only the square straight ahead.',
   sergeant: 'From the pawn row it may step two squares straight or diagonally forward.',
-  bastion: 'Moves one square, or jumps exactly two, along a rank or file.',
-  priest: 'Moves one square, or jumps exactly two, diagonally.',
+  bastion: 'Moves one or two squares along a rank or file, like a short Rook. It cannot jump.',
+  priest: 'Moves one or two squares diagonally, like a short Bishop. It cannot jump.',
   gryphon:
     'Steps one square diagonally (moving or capturing there). If that square is empty it may keep going outward in a straight line — either of the two directions leading away from where it started. It cannot jump.',
   cardinal:

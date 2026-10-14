@@ -23,7 +23,7 @@ test('every screen passes automated accessibility checks', async ({ page }) => {
   await page.goto('/');
   await expectAccessible(page, 'Home');
 
-  await page.getByRole('button', { name: 'Rules' }).first().click();
+  await page.getByRole('button', { name: 'Rules' }).click();
   await expectAccessible(page, 'Rules dialog');
   await page.keyboard.press('Escape');
 

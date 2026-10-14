@@ -39,10 +39,17 @@ export interface Move {
 type Visitor = (to: Square, occupant: Piece | null) => boolean | void;
 
 /** Visits squares along a ray up to and including the first occupied square. */
-function scanRay(board: Board, from: Square, df: number, dr: number, visit: Visitor): boolean {
+function scanRay(
+  board: Board,
+  from: Square,
+  df: number,
+  dr: number,
+  visit: Visitor,
+  range = Infinity,
+): boolean {
   let file = fileOf(from) + df;
   let rank = rankOf(from) + dr;
-  while (isOnBoard(file, rank)) {
+  for (let steps = 0; steps < range && isOnBoard(file, rank); steps++) {
     const to = makeSquare(file, rank);
     const occupant = board[to] ?? null;
     if (visit(to, occupant)) return true;
@@ -73,7 +80,7 @@ function scanComponent(
       return false;
     case 'slide':
       for (const [df, dr] of component.directions) {
-        if (scanRay(board, from, df, dr, visit)) return true;
+        if (scanRay(board, from, df, dr, visit, component.range)) return true;
       }
       return false;
     case 'bent':
@@ -197,6 +204,10 @@ interface ReverseVector {
   readonly mask: number;
 }
 
+interface ReverseSlide extends ReverseVector {
+  readonly range: number;
+}
+
 interface ReverseBent {
   readonly step: Vector;
   readonly slide: Vector;
@@ -211,14 +222,21 @@ function addVector(map: Map<string, ReverseVector>, df: number, dr: number, type
 
 function buildReverseTables() {
   const leaps = new Map<string, ReverseVector>();
-  const slides = new Map<string, ReverseVector>();
+  const slides = new Map<string, ReverseSlide>();
   const bentSteps = new Map<string, ReverseVector>();
   const bents = new Map<string, ReverseBent>();
   const infantry: Record<Color, Map<string, ReverseVector>> = { w: new Map(), b: new Map() };
   for (const type of PIECE_TYPES) {
     for (const c of PIECES[type].movement) {
       if (c.kind === 'leap') for (const [df, dr] of c.offsets) addVector(leaps, df, dr, type);
-      if (c.kind === 'slide') for (const [df, dr] of c.directions) addVector(slides, df, dr, type);
+      if (c.kind === 'slide') {
+        const range = c.range ?? Infinity;
+        for (const [df, dr] of c.directions) {
+          const key = `${df},${dr},${range}`;
+          const mask = (slides.get(key)?.mask ?? 0) | TYPE_BIT[type];
+          slides.set(key, { df, dr, range, mask });
+        }
+      }
       if (c.kind === 'bent') {
         for (const { step, slides: dirs } of c.paths) {
           addVector(bentSteps, step[0], step[1], type);
@@ -277,10 +295,10 @@ export function isSquareAttacked(board: Board, target: Square, by: Color): boole
   // A bent rider attacks the square of its first step directly.
   if (leapAttacked(board, tf, tr, by, REVERSE.bentSteps)) return true;
 
-  for (const { df, dr, mask } of REVERSE.slides) {
+  for (const { df, dr, range, mask } of REVERSE.slides) {
     let f = tf - df;
     let r = tr - dr;
-    while (isOnBoard(f, r)) {
+    for (let steps = 0; steps < range && isOnBoard(f, r); steps++) {
       if (board[r * 8 + f]) {
         if (attackerAt(board, f, r, by, mask)) return true;
         break;
