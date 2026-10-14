@@ -44,7 +44,7 @@ pnpm install
 pnpm dev        # start the web app at http://localhost:5173
 pnpm check      # typecheck, lint, format check, unit tests
 pnpm build      # production build in apps/web/dist
-pnpm e2e        # end-to-end tests (first run: pnpm --filter @treasure-chess/web exec playwright install chromium)
+pnpm e2e        # end-to-end tests (first run: pnpm --filter @treasure-chess/web exec playwright install chromium webkit)
 ```
 
 ### Project layout
@@ -55,7 +55,7 @@ pnpm e2e        # end-to-end tests (first run: pnpm --filter @treasure-chess/web
 ### Testing
 
 - **Unit tests** (Vitest) cover the rules — including perft counts that match published orthodox-chess results — plus the web app's state machines and persistence.
-- **End-to-end tests** (Playwright) run against the production build on desktop and phone viewports: full two-player and computer games, reloads, keyboard play, and automated accessibility checks (axe) in light and dark mode.
+- **End-to-end tests** (Playwright) run against the production build in Chromium and WebKit (Safari's engine), at desktop and phone sizes: full two-player and computer games, reloads, keyboard play, and automated accessibility checks (axe) in light and dark mode.
 - CI runs both on every push to `main`.
 
 ### Images
@@ -70,6 +70,9 @@ pnpm --filter @treasure-chess/web images
 
 The app is a static site deployed to Vercel from GitHub: every push to `main` deploys to production, and pull requests get preview deployments. Link-preview tags use the production domain automatically (`VERCEL_PROJECT_PRODUCTION_URL`).
 
-## Credits
+## License
 
-Built by [Justin Andersun](https://andersun.com). Piece artwork is original to this project.
+Built by [Justin Andersun](https://andersun.com).
+
+- **Code:** [MIT License](LICENSE).
+- **Piece artwork and generated images:** [CC BY 4.0](LICENSE-ART.md) — free to reuse with credit.

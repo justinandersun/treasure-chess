@@ -6,6 +6,8 @@
  *   d — dot detail: filled with the contrasting color
  * Family shape language: infantry are small figures, the Rook family are towers, the Bishop family
  * wear clerical hats, the Knight family are animals, and Royalty wear crowns.
+ *
+ * Artwork © 2026 Justin Andersun, licensed under CC BY 4.0 (not MIT); see LICENSE-ART.md.
  */
 
 import type { Color, PieceType } from '@treasure-chess/game';
