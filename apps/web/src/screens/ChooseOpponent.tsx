@@ -18,8 +18,8 @@ export function ChooseOpponent({ onChoose }: ChooseOpponentProps) {
             <button type="button" className={styles.option} onClick={() => onChoose(preset.id)}>
               <span className={styles.name}>
                 <strong>{preset.name}</strong>
-                <span className={styles.gold}>
-                  {draftCost(deploymentDraft(preset.deployment))} gold
+                <span className={styles.points}>
+                  {draftCost(deploymentDraft(preset.deployment))} points
                 </span>
               </span>
               <span className={styles.rank} aria-hidden="true">

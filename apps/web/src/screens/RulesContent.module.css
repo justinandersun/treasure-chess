@@ -1,6 +1,10 @@
+.rules {
+  max-width: 62ch;
+}
+
 .rules h3 {
-  margin: 1.4em 0 0.4em;
-  font-size: 1.05rem;
+  margin: 1.6em 0 0.4em;
+  font-size: 1.15rem;
 }
 
 .rules ul {
@@ -9,7 +13,11 @@
 }
 
 .rules li + li {
-  margin-top: 0.3em;
+  margin-top: 0.35em;
+}
+
+.rules li::marker {
+  color: var(--muted);
 }
 
 .lede {
@@ -17,56 +25,8 @@
 }
 
 .legend {
+  margin-top: 1.6em;
+  padding-top: 1em;
+  border-top: 1px solid var(--border);
   color: var(--muted);
-}
-
-.rules h4 {
-  margin: 1.2em 0 0.5em;
-  color: var(--muted);
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-.rules .pieces {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 12px;
-  padding: 0;
-  list-style: none;
-}
-
-.rules .piece {
-  display: grid;
-  grid-template-columns: 112px 1fr;
-  align-items: start;
-  gap: 12px;
-  margin: 0;
-}
-
-.diagram {
-  width: 112px;
-}
-
-.name {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 4px 8px;
-}
-
-.icon {
-  display: inline-block;
-  width: 28px;
-  height: 28px;
-}
-
-.meta {
-  color: var(--muted);
-  font-size: 0.9rem;
-}
-
-.summary {
-  margin: 4px 0 0;
-  font-size: 0.95rem;
 }

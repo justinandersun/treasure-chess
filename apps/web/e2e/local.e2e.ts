@@ -37,7 +37,7 @@ test('custom drafting enforces the treasury and placement rules', async ({ page 
   for (let i = 0; i < 8; i++) await add('Sergeant').click();
   await add('Queen').click();
   await add('Queen').click();
-  // 1 + 16 + 18 = 35 gold; a third Queen would cost 44.
+  // 1 + 16 + 18 = 35 points; a third Queen would cost 44.
   await expect(add('Queen')).toBeDisabled();
   await expect(add('Pawn')).toBeDisabled(); // pawn row full
   await page.getByRole('button', { name: 'Place pieces' }).click();

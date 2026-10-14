@@ -10,16 +10,15 @@
 
 .emblem {
   display: flex;
-  margin-bottom: 16px;
-  border-radius: 6px;
+  margin-bottom: 28px;
+  border-radius: 2px;
   overflow: hidden;
-  box-shadow: 0 1px 4px rgb(0 0 0 / 0.18);
 }
 
 .emblem svg {
-  width: 60px;
-  height: 60px;
-  padding: 4px;
+  width: 64px;
+  height: 64px;
+  padding: 6px;
   background: var(--square-light);
 }
 
@@ -28,11 +27,14 @@
 }
 
 .title {
-  font-size: clamp(2rem, 7vw, 3rem);
+  font-size: clamp(2.25rem, 8vw, 3.5rem);
+  font-weight: 400;
   letter-spacing: 0.01em;
 }
 
 .lede {
+  max-width: 30ch;
+  margin-bottom: 2em;
   color: var(--muted);
   font-size: 1.1rem;
 }
@@ -65,7 +67,13 @@
 }
 
 .choice:hover {
-  border-color: var(--accent);
+  border-color: var(--fg);
+}
+
+.choice strong {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 500;
 }
 
 .choice span {

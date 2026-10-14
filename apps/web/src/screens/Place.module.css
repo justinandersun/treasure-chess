@@ -8,7 +8,7 @@
 
 .place h1 {
   margin: 0;
-  font-size: 1.5rem;
+  font-size: 1.75rem;
 }
 
 .instruction {
@@ -39,7 +39,7 @@
   height: 52px;
   padding: 3px;
   border: 2px solid transparent;
-  border-radius: 8px;
+  border-radius: var(--radius);
   background: var(--square-light);
   cursor: pointer;
 }
@@ -50,9 +50,9 @@
 }
 
 .active {
-  border-color: var(--accent);
+  border-color: var(--highlight);
   background: var(--selected);
-  box-shadow: 0 0 0 2px var(--accent);
+  box-shadow: 0 0 0 2px var(--highlight);
 }
 
 .badge {

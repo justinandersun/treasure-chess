@@ -7,7 +7,7 @@ import { emptyBoard, type Position } from './position';
 import { promotionTypesFor, type PromotionTypes } from './rules';
 import { shuffled } from './rng';
 
-/** Starting treasury for each player, in gold. */
+/** Starting treasury for each player, in points. */
 export const TREASURY = 40;
 
 /** Files (0-based) the King may start on: d and e. */
@@ -56,7 +56,7 @@ function sumCounts(draft: ArmyDraft, predicate: (type: PieceType) => boolean): n
 }
 
 export function draftCost(draft: ArmyDraft): number {
-  return PIECE_TYPES.reduce((gold, t) => gold + countOf(draft, t) * PIECES[t].cost, 0);
+  return PIECE_TYPES.reduce((points, t) => points + countOf(draft, t) * PIECES[t].cost, 0);
 }
 
 /** Why another piece of `type` cannot be added to the draft, or null if it can. */
@@ -88,7 +88,7 @@ export function validateDraft(draft: ArmyDraft): DraftIssue[] {
   if (cost > TREASURY) {
     issues.push({
       code: 'over-budget',
-      message: `Costs ${cost} gold; the treasury is ${TREASURY}.`,
+      message: `Costs ${cost} points; the treasury is ${TREASURY}.`,
     });
   }
   const kings = countOf(draft, 'king');

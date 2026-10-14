@@ -9,6 +9,7 @@ import {
   squareName,
 } from '@treasure-chess/game';
 import { type KeyboardEvent, useRef, useState } from 'react';
+import { COLOR_NAME } from '../labels';
 import { PieceIcon } from '../pieces/PieceIcon';
 import styles from './Board.module.css';
 import { displayPosition, displaySquares, navigate } from './boardGeometry';
@@ -35,8 +36,6 @@ export interface BoardProps {
 }
 
 const ALL_ROWS = [0, 1, 2, 3, 4, 5, 6, 7];
-
-const COLOR_NAME: Record<Color, string> = { w: 'White', b: 'Black' };
 
 function describeSquare(sq: Square, piece: Piece | null, notes: string[]): string {
   const occupant = piece ? `${COLOR_NAME[piece.color]} ${PIECES[piece.type].name}` : 'empty';

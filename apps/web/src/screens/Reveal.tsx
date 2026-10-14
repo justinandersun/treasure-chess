@@ -19,14 +19,14 @@ interface RevealProps {
 
 export function Reveal({ white, black, mode, onStart }: RevealProps) {
   const position = setupPosition(white, black);
-  const gold = (d: Deployment) => draftCost(deploymentDraft(d));
+  const points = (d: Deployment) => draftCost(deploymentDraft(d));
   return (
     <section className={styles.place} aria-labelledby="reveal-title">
       <h1 id="reveal-title">The armies</h1>
       <p className={styles.instruction}>
         {mode === 'computer'
-          ? `You (White) spent ${gold(white)} gold; the computer spent ${gold(black)}. You move first.`
-          : `White spent ${gold(white)} gold; Black spent ${gold(black)} gold. White moves first.`}
+          ? `You (White) spent ${points(white)} points; the computer spent ${points(black)}. You move first.`
+          : `White spent ${points(white)} points; Black spent ${points(black)} points. White moves first.`}
       </p>
       <Board
         board={position.board}

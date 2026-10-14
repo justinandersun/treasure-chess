@@ -1,33 +1,5 @@
-import {
-  CANNOT_MATE_ALONE,
-  type Family,
-  PIECE_DEFINITIONS,
-  PIECES,
-  type PieceType,
-  TREASURY,
-} from '@treasure-chess/game';
-import { MoveDiagram } from '../components/MoveDiagram';
-import { PieceIcon } from '../pieces/PieceIcon';
-import { FAMILY_NAMES } from './labels';
+import { CANNOT_MATE_ALONE, PIECES, type PieceType, TREASURY } from '@treasure-chess/game';
 import styles from './RulesContent.module.css';
-
-/** Extra detail for pieces whose movement needs more than the one-line summary. */
-const NOTES: Partial<Record<PieceType, string>> = {
-  pawn: 'Like a chess pawn: one square straight ahead, or two from the pawn row.',
-  scout:
-    'Two squares diagonally forward from the pawn row, in one direction. Captures only the square straight ahead.',
-  sergeant: 'From the pawn row it may step two squares straight or diagonally forward.',
-  bastion: 'Moves one square, or jumps exactly two, along a rank or file.',
-  priest: 'Moves one square, or jumps exactly two, diagonally.',
-  gryphon:
-    'Steps one square diagonally (moving or capturing there). If that square is empty it may keep going outward in a straight line — either of the two directions leading away from where it started. It cannot jump.',
-  cardinal:
-    'Steps one square orthogonally (moving or capturing there). If that square is empty it may keep going outward along a diagonal — either of the two leading away from where it started. It cannot jump.',
-  elephant: 'Combines the Knight and Camel jumps.',
-  falconer:
-    'Jumps to any square exactly two away — straight, diagonal, or a knight’s move — but never to an adjacent square.',
-  king: 'As in chess, but there is no castling.',
-};
 
 function listNames(types: Iterable<PieceType>): string {
   const names = [...types].map((t) => PIECES[t].name);
@@ -35,7 +7,6 @@ function listNames(types: Iterable<PieceType>): string {
 }
 
 export function RulesContent() {
-  const families = Object.keys(FAMILY_NAMES) as Family[];
   return (
     <div className={styles.rules}>
       <p className={styles.lede}>
@@ -45,8 +16,8 @@ export function RulesContent() {
 
       <h3>1. Draft</h3>
       <ul>
-        <li>Each player has {TREASURY} gold. Unspent gold does nothing.</li>
-        <li>Buy exactly one King (1 gold) and exactly eight infantry to fill the pawn row.</li>
+        <li>Each player has {TREASURY} points to spend. Unspent points do nothing.</li>
+        <li>Buy exactly one King (1 point) and exactly eight infantry to fill the pawn row.</li>
         <li>Buy between one and seven other pieces for the back rank. Copies are allowed.</li>
       </ul>
 
@@ -91,36 +62,10 @@ export function RulesContent() {
         </li>
       </ul>
 
-      <h3>Pieces</h3>
       <p className={styles.legend}>
-        Diagrams show a White piece on an empty board: <span aria-hidden="true">●</span> moves or
-        captures, <span aria-hidden="true">○</span> moves only, <span aria-hidden="true">×</span>{' '}
-        captures only.
+        Every piece, with its movement diagram, is listed under <strong>Pieces</strong> in the
+        header.
       </p>
-      {families.map((family) => (
-        <section key={family}>
-          <h4>{FAMILY_NAMES[family]}</h4>
-          <ul className={styles.pieces}>
-            {PIECE_DEFINITIONS.filter((d) => d.family === family).map((d) => (
-              <li key={d.type} className={styles.piece}>
-                <MoveDiagram type={d.type} className={styles.diagram} />
-                <div>
-                  <div className={styles.name}>
-                    <span className={styles.icon} aria-hidden="true">
-                      <PieceIcon type={d.type} color="w" />
-                    </span>
-                    <strong>{d.name}</strong>
-                    <span className={styles.meta}>
-                      {d.symbol} · {d.cost} gold
-                    </span>
-                  </div>
-                  <p className={styles.summary}>{NOTES[d.type] ?? d.summary}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ))}
     </div>
   );
 }

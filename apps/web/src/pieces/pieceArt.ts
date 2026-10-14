@@ -4,8 +4,10 @@
  *   b — body: filled with the piece color, outlined
  *   l — line detail: stroke only, contrasting with the body
  *   d — dot detail: filled with the contrasting color
- * Family shape language: infantry are small figures, the Rook family are towers, the Bishop family
- * wear clerical hats, the Knight family are animals, and Royalty wear crowns.
+ * Each piece is a flat emblem of its name rather than a chess piece with extras. Infantry are
+ * figures whose heads count their rank (one, two, or three), the Castle family are siege works and
+ * a gryphon, the Cathedral family are holy symbols and mitres, the Cavalry are animal heads, and
+ * the Court are crowns and courtiers.
  *
  * Artwork © 2026 Justin Andersun, licensed under CC BY 4.0 (not MIT); see LICENSE-ART.md.
  */
@@ -21,275 +23,150 @@ export interface Shape {
 /** Colors for each side: body fill, outline, and contrasting detail. */
 export const PIECE_COLORS: Record<Color, { body: string; edge: string; detail: string }> = {
   w: { body: '#fbfaf7', edge: '#1f1d1a', detail: '#1f1d1a' },
-  b: { body: '#26231f', edge: '#0d0c0b', detail: '#e9e4da' },
+  b: { body: '#2a2724', edge: '#0d0c0b', detail: '#e9e4da' },
 };
 
 export const STROKE_WIDTH = 1.5;
 
-const BASE: Shape = {
-  el: 'rect',
+const body = (d: string): Shape => ({ el: 'path', kind: 'b', attrs: { d } });
+const line = (d: string): Shape => ({ el: 'path', kind: 'l', attrs: { d } });
+const dot = (d: string): Shape => ({ el: 'path', kind: 'd', attrs: { d } });
+const ball = (cx: number, cy: number, r: number): Shape => ({
+  el: 'circle',
   kind: 'b',
-  attrs: { x: 10, y: 35.5, width: 25, height: 4.5, rx: 1.5 },
-};
+  attrs: { cx, cy, r },
+});
+const eye = (cx: number, cy: number, r = 1.4): Shape => ({
+  el: 'circle',
+  kind: 'd',
+  attrs: { cx, cy, r },
+});
+
+/** Infantry: a flared figure under a collar; the heads go on top. */
+const FIGURE = body(
+  'M10.5,39.5 C10.5,35.5 13.5,34 15.5,32 C18,29.5 18.5,26 19,23.5 L26,23.5 C26.5,26 27,29.5 29.5,32 C31.5,34 34.5,35.5 34.5,39.5 Z',
+);
+const COLLAR = body('M13,24 C16.5,20.5 19.5,19.5 22.5,19.5 C25.5,19.5 28.5,20.5 32,24 Z');
+
+/** A band with a diamond, worn by crowns and the Cardinal. */
+const band = (y: number, left: number, right: number): Shape[] => [
+  line(`M${left},${y} C${left + 6},${y - 2.5} ${right - 6},${y - 2.5} ${right},${y}`),
+  dot(`M22.5,${y + 1} L25,${y + 2.75} L22.5,${y + 4.5} L20,${y + 2.75} Z`),
+];
 
 export const PIECE_ART: Record<PieceType, readonly Shape[]> = {
-  pawn: [
-    {
-      el: 'path',
-      kind: 'b',
-      attrs: { d: 'M15,35.5 C15,28 18,24 20,22 L25,22 C27,24 30,28 30,35.5 Z' },
-    },
-    { el: 'rect', kind: 'b', attrs: { x: 17, y: 19.5, width: 11, height: 3, rx: 1.5 } },
-    { el: 'circle', kind: 'b', attrs: { cx: 22.5, cy: 13.5, r: 5.5 } },
-    BASE,
-  ],
-  scout: [
-    {
-      el: 'path',
-      kind: 'b',
-      attrs: { d: 'M16.5,35.5 C16.5,28 19,24 20.5,22 L24.5,22 C26,24 28.5,28 28.5,35.5 Z' },
-    },
-    { el: 'rect', kind: 'b', attrs: { x: 17.5, y: 19.5, width: 10, height: 3, rx: 1.5 } },
-    {
-      el: 'path',
-      kind: 'b',
-      attrs: {
-        d: 'M22.5,5.5 C25,9 28.5,13 28,16.5 C27.5,19 17.5,19 17,16.5 C16.5,13 20,9 22.5,5.5 Z',
-      },
-    },
-    { el: 'path', kind: 'l', attrs: { d: 'M20,30 L22.5,26.5 L25,30' } },
-    BASE,
-  ],
-  sergeant: [
-    {
-      el: 'path',
-      kind: 'b',
-      attrs: { d: 'M14,35.5 C14,28 17.5,24 19.5,22 L25.5,22 C27.5,24 31,28 31,35.5 Z' },
-    },
-    { el: 'rect', kind: 'b', attrs: { x: 16.5, y: 19.5, width: 12, height: 3, rx: 1.5 } },
-    { el: 'circle', kind: 'b', attrs: { cx: 22.5, cy: 14.5, r: 5.5 } },
-    {
-      el: 'path',
-      kind: 'b',
-      attrs: {
-        d: 'M16.5,13.5 C16.5,6.5 28.5,6.5 28.5,13.5 L30.5,13.5 L30.5,15.5 L14.5,15.5 L14.5,13.5 Z',
-      },
-    },
-    {
-      el: 'path',
-      kind: 'l',
-      attrs: { d: 'M18.5,29 L22.5,26 L26.5,29 M18.5,32.5 L22.5,29.5 L26.5,32.5' },
-    },
-    BASE,
-  ],
+  pawn: [ball(22.5, 13.5, 6.5), FIGURE, COLLAR],
+  scout: [ball(18.5, 14.5, 5.2), ball(26.5, 14.5, 5.2), FIGURE, COLLAR],
+  sergeant: [ball(22.5, 8, 4.6), ball(18, 15, 4.6), ball(27, 15, 4.6), FIGURE, COLLAR],
+
   bastion: [
-    { el: 'path', kind: 'b', attrs: { d: 'M12.5,25 L12.5,35.5 L32.5,35.5 L32.5,25 Z' } },
-    {
-      el: 'path',
-      kind: 'b',
-      attrs: {
-        d: 'M11,25 L11,17 L15.5,17 L15.5,19.5 L20,19.5 L20,17 L25,17 L25,19.5 L29.5,19.5 L29.5,17 L34,17 L34,25 Z',
-      },
-    },
-    {
-      el: 'path',
-      kind: 'd',
-      attrs: { d: 'M19.5,35.5 L19.5,31 C19.5,27 25.5,27 25.5,31 L25.5,35.5 Z' },
-    },
-    BASE,
+    body('M17.5,8 L27.5,8 L32,32 L13,32 Z'),
+    body('M12,30.5 L33,30.5 L33,34 L12,34 Z'),
+    ball(12, 35, 4),
+    ball(33, 35, 4),
+    dot('M21,15 L24,15 L24,22 C24,23.5 21,23.5 21,22 Z'),
   ],
   rook: [
-    { el: 'path', kind: 'b', attrs: { d: 'M12.5,35.5 L14,31 L31,31 L32.5,35.5 Z' } },
-    { el: 'path', kind: 'b', attrs: { d: 'M15,31 L15.5,17 L29.5,17 L30,31 Z' } },
-    {
-      el: 'path',
-      kind: 'b',
-      attrs: {
-        d: 'M12,17 L12,9 L16,9 L16,11.5 L20.5,11.5 L20.5,9 L24.5,9 L24.5,11.5 L29,11.5 L29,9 L33,9 L33,17 Z',
-      },
-    },
-    { el: 'path', kind: 'l', attrs: { d: 'M15.5,17 L29.5,17 M15,31 L30,31' } },
-    BASE,
+    body('M14.5,16.5 L30.5,16.5 L31.5,32 L13.5,32 Z'),
+    body(
+      'M11,6 L15.5,6 L15.5,9.5 L19.5,9.5 L19.5,6 L25.5,6 L25.5,9.5 L29.5,9.5 L29.5,6 L34,6 L34,13.5 L30.5,16.5 L14.5,16.5 L11,13.5 Z',
+    ),
+    body('M13.5,32 L31.5,32 L35,35 L35.5,39.5 L9.5,39.5 L10,35 Z'),
   ],
   gryphon: [
-    {
-      el: 'path',
-      kind: 'b',
-      attrs: {
-        d: 'M17,21 C12,16 7,15 3.5,17 C6.5,19 7.5,21 6.5,23.5 C9.5,22.5 11.5,23.5 10.5,26.5 C13,25.5 15,26 17,28 Z',
-      },
-    },
-    {
-      el: 'path',
-      kind: 'b',
-      attrs: {
-        d: 'M28,21 C33,16 38,15 41.5,17 C38.5,19 37.5,21 38.5,23.5 C35.5,22.5 33.5,23.5 34.5,26.5 C32,25.5 30,26 28,28 Z',
-      },
-    },
-    {
-      el: 'path',
-      kind: 'l',
-      attrs: { d: 'M8,19 C11,19.5 13.5,21 15.5,23.5 M10,23.5 C12.5,23.5 14.5,24.5 16,26' },
-    },
-    {
-      el: 'path',
-      kind: 'l',
-      attrs: { d: 'M37,19 C34,19.5 31.5,21 29.5,23.5 M35,23.5 C32.5,23.5 30.5,24.5 29,26' },
-    },
-    { el: 'path', kind: 'b', attrs: { d: 'M16.5,35.5 L17,16 L28,16 L28.5,35.5 Z' } },
-    {
-      el: 'path',
-      kind: 'b',
-      attrs: {
-        d: 'M15.5,16 L15.5,10 L18.75,10 L18.75,12.5 L21.25,12.5 L21.25,10 L23.75,10 L23.75,12.5 L26.25,12.5 L26.25,10 L29.5,10 L29.5,16 Z',
-      },
-    },
-    { el: 'path', kind: 'l', attrs: { d: 'M17,16 L28,16' } },
-    BASE,
+    body(
+      'M22,5 C27,9 33,12.5 35.5,16.5 C36.5,18 38.5,18 39.5,22 L39.5,38 L36.5,40.5 L20.5,40.5 C21,37 23.5,35.5 27,34.5 C28.5,31 27,29.8 22.5,30.8 C19.5,30.6 17.5,32.3 15.5,32.2 C13,32.6 11.3,31.5 10,30 C14.5,30.5 17.5,27.5 20.6,25.3 C18,24.2 16.5,23.7 14.8,23.9 C10.5,25 8.2,27.3 6.8,30 C4.5,27 4.5,22.5 7.7,19.4 C10,17 12.5,16.8 14,16.4 L17.2,13.7 C19.5,12.8 23.5,13 25.8,12.2 C24.5,9 22.2,8 22,5 Z',
+    ),
+    line('M25.8,12.2 C27.8,15 29.5,18 30.2,20.8'),
+    line('M20.6,25.3 C22.5,25.2 24,25 24.8,24.7'),
+    eye(19.5, 18.5),
   ],
+
   priest: [
-    {
-      el: 'path',
-      kind: 'b',
-      attrs: { d: 'M15,35.5 C15,28 17,22.5 22.5,22.5 C28,22.5 30,28 30,35.5 Z' },
-    },
-    { el: 'circle', kind: 'b', attrs: { cx: 22.5, cy: 16.5, r: 5 } },
-    { el: 'path', kind: 'b', attrs: { d: 'M17.8,15 C18,10.5 27,10.5 27.2,15 Z' } },
-    { el: 'path', kind: 'l', attrs: { d: 'M22.5,26.5 L22.5,33 M20,28.5 L25,28.5' } },
-    BASE,
+    body('M22.5,5 L37.5,38.5 L7.5,38.5 Z'),
+    dot('M21.32,22.12 A6,6 0 1 0 28.38,29.18 A5,5 0 0 1 21.32,22.12 Z'),
   ],
   bishop: [
-    {
-      el: 'path',
-      kind: 'b',
-      attrs: { d: 'M14,35.5 C16,32 18,30 19,29 L26,29 C27,30 29,32 31,35.5 Z' },
-    },
-    { el: 'rect', kind: 'b', attrs: { x: 15.5, y: 26, width: 14, height: 3, rx: 1 } },
-    {
-      el: 'path',
-      kind: 'b',
-      attrs: { d: 'M22.5,8.5 C16,13 14,20 16,26 L29,26 C31,20 29,13 22.5,8.5 Z' },
-    },
-    { el: 'circle', kind: 'b', attrs: { cx: 22.5, cy: 6.5, r: 2 } },
-    { el: 'path', kind: 'l', attrs: { d: 'M25.5,13.5 L20,19.5' } },
-    BASE,
+    ball(22.5, 7, 2.5),
+    body(
+      'M22.5,9.5 C27,12.5 31,16 30.5,20.5 C30,23.5 28.5,25 27.5,26.5 L17.5,26.5 C16.5,25 15,23.5 14.5,20.5 C14,16 18,12.5 22.5,9.5 Z',
+    ),
+    body('M17.5,26.5 L27.5,26.5 L28,30 L17,30 Z'),
+    body(
+      'M22.5,30 C21.5,33.5 18.5,35.5 14,35.5 L10,35.5 C8,35.5 7,37 7,39 L15.5,39 C19,39 21.5,37 22.5,34.5 C23.5,37 26,39 29.5,39 L38,39 C38,37 37,35.5 35,35.5 L31,35.5 C26.5,35.5 23.5,33.5 22.5,30 Z',
+    ),
+    line('M22.5,14 L22.5,22.5 M19.5,17.5 L25.5,17.5'),
   ],
   cardinal: [
-    { el: 'path', kind: 'b', attrs: { d: 'M14,35.5 C14,28 17,23 22.5,23 C28,23 31,28 31,35.5 Z' } },
-    { el: 'circle', kind: 'b', attrs: { cx: 22.5, cy: 18.5, r: 4.5 } },
-    { el: 'path', kind: 'l', attrs: { d: 'M11,15 L9.5,23 M34,15 L35.5,23' } },
-    { el: 'circle', kind: 'b', attrs: { cx: 9.5, cy: 24.5, r: 1.6 } },
-    { el: 'circle', kind: 'b', attrs: { cx: 35.5, cy: 24.5, r: 1.6 } },
-    { el: 'ellipse', kind: 'b', attrs: { cx: 22.5, cy: 14, rx: 12.5, ry: 3 } },
-    { el: 'path', kind: 'b', attrs: { d: 'M17,13.5 C17,7.5 28,7.5 28,13.5 Z' } },
-    BASE,
+    ball(22.5, 5, 2.5),
+    body(
+      'M9,39.5 L10.5,30 L10,21 C10,14.5 15,10.5 22.5,7 C30,10.5 35,14.5 35,21 L34.5,30 L36,39.5 Z',
+    ),
+    line('M22.5,12.5 L22.5,24.5 M18.5,17 L26.5,17'),
+    ...band(30, 10.5, 34.5),
   ],
+
   camel: [
-    {
-      el: 'path',
-      kind: 'b',
-      attrs: {
-        d: 'M12.5,35.5 L13.5,28 C11.5,27 10.5,25 11,22 C12,20 14,19.5 15,19 C16,15 18,13 20,13 C22,13 24,16 25,19 C27,19.5 28.5,19 29.5,17 L32,11 C33,9.5 35,9 36.5,10 L39,12 C39.5,13 39,14 38,14 L35.5,14 L32.5,22 C32,24 31.5,26 31,28 L32,35.5 L28,35.5 L27.5,29.5 L17.5,29.5 L17,35.5 Z',
-      },
-    },
-    { el: 'circle', kind: 'd', attrs: { cx: 35.2, cy: 11.3, r: 0.9 } },
-    BASE,
+    body(
+      'M35,39.5 C34.5,34 32.5,29 28.5,23.5 C26.5,20.5 25.5,17.5 26.5,14 L28,10.5 L25.5,11.5 C24,11 22.5,11 21,11.5 C17,12 13,12.5 10.5,13.5 C8.5,14.5 8,16.5 9,18 C10,19 11.5,19 13,18.5 C15.5,18.5 18,18.5 19.5,19.5 C19.5,23.5 20,27 21,30 C22,33 21.5,36 20,39.5 Z',
+    ),
+    eye(21.5, 14.5),
+    line('M9.5,16.5 L12.5,16.5'),
   ],
   knight: [
-    {
-      el: 'path',
-      kind: 'b',
-      attrs: {
-        d: 'M14,35.5 L31,35.5 C31,29 29,25 28,21.5 C30.5,19.5 32,16 31,12.5 C30,8.5 26,6.5 22,6.5 L20,3.5 L18,7.5 C14.5,9.5 12,13.5 10.5,18 C10,20.5 11.5,22 13.5,21.5 C15.5,21 17.5,19.5 19.5,19 C19.5,25 15.5,29 14,35.5 Z',
-      },
-    },
-    { el: 'circle', kind: 'd', attrs: { cx: 22, cy: 12, r: 1.2 } },
-    { el: 'path', kind: 'l', attrs: { d: 'M12.8,18.5 L13.8,17.8' } },
-    BASE,
+    body(
+      'M14,39.5 C14,33.5 16.5,30.5 20,28 C18,27 15.5,27.5 13.5,29 L9.5,26 C9.5,24.5 8.5,24 8.5,22.5 L8.5,19.5 C12.5,16.5 17,14 21,11.5 L23.5,6 L25.5,10 C31.5,12.5 34.5,17.5 34.5,25.5 C34.5,31.5 33.5,35.5 35,39.5 Z',
+    ),
+    dot('M20,16.5 L23,14.5 L24.5,17 Z'),
+    line('M11.5,23 L13,24.5'),
+    line('M28.5,15.5 C30,19.5 28.5,23 24.5,25.5'),
   ],
   elephant: [
-    {
-      el: 'path',
-      kind: 'b',
-      attrs: {
-        d: 'M11.5,35.5 L11.5,24 C11.5,17 16,12 23,12 C30,12 34,16 34.5,21 C35,24 36,27 37.5,30 C38,32 37,33.5 35.5,33 C34.3,32.5 34.3,31 35,30 L33,27 C32,28 31,28.5 30,28.5 L30,35.5 L25.5,35.5 L25.5,29.5 L16.5,29.5 L16.5,35.5 Z',
-      },
-    },
-    {
-      el: 'path',
-      kind: 'b',
-      attrs: { d: 'M21.5,15.5 C17,16.5 15.5,22 18,25.5 C21,26.5 24.5,24 25,19.5 Z' },
-    },
-    { el: 'circle', kind: 'd', attrs: { cx: 29.5, cy: 18, r: 1 } },
-    { el: 'path', kind: 'l', attrs: { d: 'M31.5,25 L35,26.5' } },
-    BASE,
+    body(
+      'M15.5,21 C13.5,26 13,30.5 13.5,34.5 C14,37 12,39 9.5,38.5 C7.5,38 7.5,36 9,35.5 C10,36 10.5,35 10.5,33.5 C10,29 10.5,24.5 12,20.5 Z',
+    ),
+    body(
+      'M19.5,39.5 L19.5,33 C16.5,31 14.5,28 14.5,24 C14.5,16.5 19.5,11 26,11 C31,11 35,14 36.5,18.5 L37,30 L35,39.5 Z',
+    ),
+    body(
+      'M26.5,15.5 C31,13 37,14 38.5,19.5 C39.5,24.5 37,29.5 32,31 C29.5,31.5 27.5,30 27.5,27.5 Z',
+    ),
+    eye(21, 19),
   ],
+
   consort: [
-    {
-      el: 'path',
-      kind: 'b',
-      attrs: { d: 'M14.5,35.5 C14.5,28 17.5,23 22.5,23 C27.5,23 30.5,28 30.5,35.5 Z' },
-    },
-    { el: 'circle', kind: 'b', attrs: { cx: 22.5, cy: 16, r: 5.5 } },
-    {
-      el: 'path',
-      kind: 'b',
-      attrs: { d: 'M16,13 L16,8.5 L19,10.5 L22.5,5 L26,10.5 L29,8.5 L29,13 Z' },
-    },
-    BASE,
+    body(
+      'M13.5,39.5 L13.5,36 L11,34.5 L11.5,32.5 L10,31.5 L11,29.5 L9,28 C8.5,27.5 8.5,27 9,26.5 L11.5,22 C11.5,13.5 16.5,8 24,8 C31.5,8 37,13.5 37,21 L37,39.5 Z',
+    ),
+    line('M17.5,19.5 C18.5,18.5 20,18.5 21,19.5'),
+    line('M11,32 L13.5,31.5'),
   ],
   falconer: [
-    {
-      el: 'path',
-      kind: 'b',
-      attrs: {
-        d: 'M15,35.5 L30.5,35.5 C30.5,30 29.5,26 28.5,23 C30.5,21 31.5,18 31,15 C30.5,11 27.5,8.5 24,8.5 C20.5,8.5 18,11 17.5,14 L13,16 C12.5,16.5 13,17.5 14,17.3 L17.5,17 C16,21.5 15,26 15,35.5 Z',
-      },
-    },
-    {
-      el: 'path',
-      kind: 'b',
-      attrs: { d: 'M19.5,9.5 L19,4 L22,6.5 L24.5,3 L27,6.5 L30,4 L29.5,9.5 Z' },
-    },
-    { el: 'circle', kind: 'd', attrs: { cx: 21, cy: 13.3, r: 1.1 } },
-    { el: 'path', kind: 'l', attrs: { d: 'M27.5,20 C24.5,24.5 22.5,28.5 22.5,33' } },
-    BASE,
+    body(
+      'M15.5,39.5 L15.5,32 C15.5,29 13,27 12.5,24.5 L11,23 C9,23 8,24 7.5,25.5 C7,21.5 9.5,17.5 13,16.5 C16,13.5 20,12.5 24,13 C29,13.5 32,15.5 33.5,18.5 C35.5,23 37.5,30 38.5,39.5 Z',
+    ),
+    line('M12.5,24.5 C13,22 13.5,20.5 15,19.5'),
+    eye(20, 18.5, 1.8),
   ],
   queen: [
-    { el: 'path', kind: 'b', attrs: { d: 'M12,35.5 L13,30 L32,30 L33,35.5 Z' } },
-    { el: 'rect', kind: 'b', attrs: { x: 11.5, y: 27, width: 22, height: 3, rx: 1 } },
-    {
-      el: 'path',
-      kind: 'b',
-      attrs: {
-        d: 'M11.5,27 L10,12.5 L15,21 L16.75,10.5 L20,20.5 L22.5,9.5 L25,20.5 L28.25,10.5 L30,21 L35,12.5 L33.5,27 Z',
-      },
-    },
-    { el: 'circle', kind: 'b', attrs: { cx: 10, cy: 11, r: 1.9 } },
-    { el: 'circle', kind: 'b', attrs: { cx: 16.75, cy: 8.8, r: 1.9 } },
-    { el: 'circle', kind: 'b', attrs: { cx: 22.5, cy: 7.6, r: 1.9 } },
-    { el: 'circle', kind: 'b', attrs: { cx: 28.25, cy: 8.8, r: 1.9 } },
-    { el: 'circle', kind: 'b', attrs: { cx: 35, cy: 11, r: 1.9 } },
-    BASE,
+    body(
+      'M11.5,39 L13,33 C12,27.5 9.5,23.5 7,21 L14,25.5 L16,14.5 L22.5,23.5 L29,14.5 L31,25.5 L38,21 C35.5,23.5 33,27.5 32,33 L33.5,39 Z',
+    ),
+    ball(7, 20.5, 2.2),
+    ball(16, 14, 2.2),
+    ball(29, 14, 2.2),
+    ball(38, 20.5, 2.2),
+    ...band(33, 13, 32),
   ],
   king: [
-    { el: 'path', kind: 'b', attrs: { d: 'M12,35.5 L13,30 L32,30 L33,35.5 Z' } },
-    { el: 'rect', kind: 'b', attrs: { x: 11.5, y: 27, width: 22, height: 3, rx: 1 } },
-    {
-      el: 'path',
-      kind: 'b',
-      attrs: {
-        d: 'M12,27 C8.5,22.5 8.5,16.5 13,15.5 C16.5,14.8 19.5,16.5 22.5,20 C25.5,16.5 28.5,14.8 32,15.5 C36.5,16.5 36.5,22.5 33,27 Z',
-      },
-    },
-    { el: 'path', kind: 'b', attrs: { d: 'M19.5,19 C19.5,14 25.5,14 25.5,19 L22.5,21 Z' } },
-    {
-      el: 'path',
-      kind: 'b',
-      attrs: {
-        d: 'M21.3,4 L23.7,4 L23.7,6.8 L26.3,6.8 L26.3,9.2 L23.7,9.2 L23.7,14.2 L21.3,14.2 L21.3,9.2 L18.7,9.2 L18.7,6.8 L21.3,6.8 Z',
-      },
-    },
-    BASE,
+    body(
+      'M21.25,4 L23.75,4 L23.75,7 L26.5,7 L26.5,9.5 L23.75,9.5 L23.75,13.5 L21.25,13.5 L21.25,9.5 L18.5,9.5 L18.5,7 L21.25,7 Z',
+    ),
+    ball(22.5, 16, 3),
+    body(
+      'M12,39 L13,32 C9,28.5 7.5,25 8,21.5 C8.5,17 12,14.5 15.5,14.5 C18.5,14.5 21,16.5 22.5,19 C24,16.5 26.5,14.5 29.5,14.5 C33,14.5 36.5,17 37,21.5 C37.5,25 36,28.5 32,32 L33,39 Z',
+    ),
+    line('M22.5,19 C21,23 21,27 21.5,30.5'),
+    ...band(32, 13, 32),
   ],
 };

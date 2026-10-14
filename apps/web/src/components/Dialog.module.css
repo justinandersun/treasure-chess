@@ -1,11 +1,12 @@
 .dialog {
-  width: min(100% - 2 * var(--gutter), 720px);
+  width: min(100% - 2 * var(--gutter), 840px);
   max-height: min(100dvh - 2 * var(--gutter), 900px);
   padding: 0;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface);
   color: var(--fg);
+  box-shadow: 0 24px 64px rgb(0 0 0 / 0.18);
 }
 
 .small {
@@ -21,11 +22,12 @@
 }
 
 .dialog::backdrop {
-  background: rgb(0 0 0 / 0.45);
+  background: rgb(20 19 18 / 0.5);
+  backdrop-filter: blur(2px);
 }
 
 .content {
-  padding: 4px 20px 20px;
+  padding: 0 clamp(16px, 4vw, 32px) clamp(20px, 4vw, 32px);
 }
 
 .header {
@@ -35,13 +37,16 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 16px 0 8px;
+  padding: 20px 0 12px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--border);
   background: var(--surface);
   z-index: 1;
 }
 
 .header h2 {
   margin: 0;
+  font-size: 1.5rem;
 }
 
 .close {
@@ -50,11 +55,14 @@
   border: 0;
   border-radius: 50%;
   background: transparent;
-  font-size: 28px;
+  color: var(--muted);
+  font-size: 26px;
+  font-weight: 300;
   line-height: 1;
   cursor: pointer;
 }
 
 .close:hover {
   background: var(--surface-2);
+  color: var(--fg);
 }

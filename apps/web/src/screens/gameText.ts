@@ -1,5 +1,5 @@
 import type { Color, DrawReason, GameResult } from '@treasure-chess/game';
-import { COLOR_NAME } from './labels';
+import { COLOR_NAME } from '../labels';
 
 const DRAW_TEXT: Record<DrawReason, string> = {
   stalemate: 'Stalemate: the player to move has no legal moves but is not in check.',

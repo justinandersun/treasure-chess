@@ -3,7 +3,7 @@
 ## 1. Overview
 Treasure Chess is a free, browser-based chess variant in which players draft and arrange custom armies of fairy pieces before playing on a standard 8×8 chessboard.
 
-Each player receives a treasury of 40 gold to purchase pieces from an expanded roster. Players must fill their pawn row, select a King, and purchase at least one additional back-rank piece. The remaining army composition and placement are customizable.
+Each player receives a treasury of 40 points to purchase pieces from an expanded roster. Players must fill their pawn row, select a King, and purchase at least one additional back-rank piece. The remaining army composition and placement are customizable.
 
 The core experience is **Draft → Place → Play**.
 
@@ -28,14 +28,14 @@ The application supports two local players on one device or one player against a
 - No game clock is used.
 
 ### 2.2 Army Construction
-Each player receives a treasury of **40 gold**.
-- Every army must contain exactly one King, costing 1 gold.
+Each player receives a treasury of **40 points**.
+- Every army must contain exactly one King, costing 1 point.
 - All eight squares of the pawn row must be filled.
 - Players may freely mix the three available pawn types.
 - Each army must contain at least one non-King, non-pawn piece on its back rank.
 - Players may purchase multiple copies of any piece, subject to treasury and placement constraints.
 - Players may leave back-rank squares empty.
-- Unspent gold is permitted but provides no benefit.
+- Unspent points is permitted but provides no benefit.
 - Purchased pieces must fit within their designated starting ranks.
 
 White's starting ranks are 1 and 2; Black's are 8 and 7.
@@ -51,24 +51,24 @@ White's starting ranks are 1 and 2; Black's are 8 and 7.
 
 ### 2.4 Piece Catalog
 Notation letters are unique identifiers. Traditional chess notation letters are preserved.
-| Family | Piece | Symbol | Gold | Movement and capture |
+| Family | Piece | Symbol | Points | Movement and capture |
 |---|---|---|---:|---|
 | Infantry | Pawn | P | 1 | Standard chess pawn |
 | Infantry | Scout | S | 1 | Moves diagonally forward; captures straight forward |
 | Infantry | Sergeant | G | 2 | Moves and captures one square in any forward direction |
-| Rook | Bastion | T | 3 | One or two squares orthogonally; can jump |
-| Rook | Rook | R | 5 | Standard chess rook |
-| Rook | Gryphon | Y | 6 | One diagonal step, then outward orthogonal sliding |
-| Bishop | Priest | I | 2 | One or two squares diagonally; can jump |
-| Bishop | Bishop | B | 3 | Standard chess bishop |
-| Bishop | Cardinal | C | 5 | One orthogonal step, then outward diagonal sliding |
-| Knight | Camel | M | 2 | (1,3) jumper |
-| Knight | Knight | N | 3 | Standard chess knight |
-| Knight | Elephant | E | 6 | Knight + Camel movements |
-| Royalty | Consort | O | 3 | One square in any direction |
-| Royalty | Falconer | F | 8 | Jumps exactly two squares away: orthogonal, diagonal, or knightwise |
-| Royalty | Queen | Q | 9 | Standard chess queen |
-| Royalty | King | K | 1 | Standard chess king, without castling |
+| Castle | Bastion | T | 3 | One or two squares orthogonally; can jump |
+| Castle | Rook | R | 5 | Standard chess rook |
+| Castle | Gryphon | Y | 6 | One diagonal step, then outward orthogonal sliding |
+| Cathedral | Priest | I | 2 | One or two squares diagonally; can jump |
+| Cathedral | Bishop | B | 3 | Standard chess bishop |
+| Cathedral | Cardinal | C | 5 | One orthogonal step, then outward diagonal sliding |
+| Cavalry | Camel | M | 2 | (1,3) jumper |
+| Cavalry | Knight | N | 3 | Standard chess knight |
+| Cavalry | Elephant | E | 6 | Knight + Camel movements |
+| Court | Consort | O | 3 | One square in any direction |
+| Court | Falconer | F | 8 | Jumps exactly two squares away: orthogonal, diagonal, or knightwise |
+| Court | Queen | Q | 9 | Standard chess queen |
+| Court | King | K | 1 | Standard chess king, without castling |
 
 #### Movement Details
 - **Bastion and Priest:** Both may move one square normally or jump directly to a square two spaces away along their permitted directions. Jumping ignores intervening pieces.
@@ -93,7 +93,7 @@ Notation letters are unique identifiers. Traditional chess notation letters are 
 - A pawn may promote to any non-King, non-pawn piece type in its player's original starting army.
 - A piece type remains eligible even if all original pieces of that type have been captured.
 - Multiple pawns may promote to the same piece type.
-- Promotion does not consume gold.
+- Promotion does not consume points.
 
 ### 2.7 Check, Victory, and Draws
 - Standard chess rules for check and legal King movement apply.
@@ -136,7 +136,7 @@ The following pieces are excluded from v1 but may be introduced later:
 - Display all pieces, grouped by family.
 - Show each piece's name, symbol, cost, and movement reference.
 - Allow players to add and remove pieces.
-- Display treasury expenditure and remaining gold.
+- Display treasury expenditure and remaining points.
 - Validate all army construction constraints.
 - Offer preset armies for quick starting.
 
@@ -244,7 +244,7 @@ The following are explicitly excluded from v1:
 
 ## 7. Release Criteria
 Treasure Chess v1 is ready when:
-1. Players can draft valid armies within 40 gold.
+1. Players can draft valid armies within 40 points.
 2. Players can deploy their armies according to the placement rules.
 3. All 16 included piece types move and capture correctly.
 4. Pawn movement and promotion behave as specified.

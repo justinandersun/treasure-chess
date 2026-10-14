@@ -2,9 +2,10 @@
  * Generates the static PNG images in public/ from the piece artwork:
  *   og-image.png          1200×630 link-preview image
  *   apple-touch-icon.png  180×180 home-screen icon
+ *   favicon.svg           browser-tab icon
  *
  * Run with `pnpm --filter @treasure-chess/web images` (Node 24+, which runs TypeScript directly).
- * Re-run after changing the piece art, then commit the PNGs.
+ * Re-run after changing the piece art, then commit the images.
  */
 
 import { writeFileSync } from 'node:fs';
@@ -17,15 +18,16 @@ import { PIECE_ART, PIECE_COLORS, STROKE_WIDTH } from '../src/pieces/pieceArt.ts
 const PUBLIC_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', 'public');
 
 const PALETTE = {
-  bg: '#f6f3ec',
-  fg: '#26231f',
-  muted: '#6b655b',
-  accent: '#835f10',
-  light: '#f0dcb4',
-  dark: '#b88a5c',
-  border: '#d9d1c1',
+  bg: '#f7f5f0',
+  fg: '#232220',
+  muted: '#69655e',
+  accent: '#2b2a27',
+  light: '#ebe6dc',
+  dark: '#b1a999',
+  border: '#e3dfd6',
 };
 const FONT = 'Helvetica Neue, Helvetica, Arial, sans-serif';
+const DISPLAY_FONT = 'Iowan Old Style, Palatino, Georgia, serif';
 
 /** A piece drawn at (x, y) with the given width and height. */
 function pieceSvg(type: PieceType, color: Color, x: number, y: number, size: number): string {
@@ -65,9 +67,9 @@ function boardSvg(cells: Cell[][], x: number, y: number, square: number): string
   );
   const w = cells[0]!.length * square;
   const h = cells.length * square;
-  return `<clipPath id="board"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="12"/></clipPath>
+  return `<clipPath id="board"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4"/></clipPath>
     <g clip-path="url(#board)">${parts.join('')}</g>
-    <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="12" fill="none" stroke="${PALETTE.border}" stroke-width="2"/>`;
+    <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="none" stroke="${PALETTE.border}" stroke-width="2"/>`;
 }
 
 function ogImage(): string {
@@ -89,13 +91,13 @@ function ogImage(): string {
   ];
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
     <rect width="1200" height="630" fill="${PALETTE.bg}"/>
-    <text x="80" y="250" font-family="${FONT}" font-size="72" font-weight="700" fill="${PALETTE.fg}">Treasure Chess</text>
-    <rect x="82" y="282" width="96" height="6" rx="3" fill="${PALETTE.accent}"/>
+    <text x="80" y="250" font-family="${DISPLAY_FONT}" font-size="80" font-weight="400" fill="${PALETTE.fg}">Treasure Chess</text>
+    <rect x="82" y="284" width="96" height="2" fill="${PALETTE.accent}"/>
     <text font-family="${FONT}" font-size="34" fill="${PALETTE.muted}">
       <tspan x="80" y="350">Draft an army of fairy pieces</tspan>
-      <tspan x="80" y="396">with 40 gold. Arrange it. Play.</tspan>
+      <tspan x="80" y="396">with 40 points. Arrange it. Play.</tspan>
     </text>
-    <text x="80" y="480" font-family="${FONT}" font-size="24" font-weight="600" fill="${PALETTE.accent}">Free · No accounts · Plays in your browser</text>
+    <text x="80" y="480" font-family="${FONT}" font-size="18" letter-spacing="2" fill="${PALETTE.muted}">FREE · NO ACCOUNTS · PLAYS IN YOUR BROWSER</text>
     ${boardSvg(cells, 700, 95, 110)}
   </svg>`;
 }
@@ -105,6 +107,13 @@ function touchIcon(): string {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 180 180">
     <rect width="180" height="180" fill="${PALETTE.dark}"/>
     ${pieceSvg('gryphon', 'w', 12, 10, 156)}
+  </svg>`;
+}
+
+function favicon(): string {
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+    <rect width="32" height="32" rx="6" fill="${PALETTE.dark}"/>
+    ${pieceSvg('gryphon', 'w', 2, 2, 28)}
   </svg>`;
 }
 
@@ -118,3 +127,5 @@ function render(svg: string, file: string): void {
 
 render(ogImage(), 'og-image.png');
 render(touchIcon(), 'apple-touch-icon.png');
+writeFileSync(join(PUBLIC_DIR, 'favicon.svg'), `${favicon().replace(/\s*\n\s*/g, '')}\n`);
+console.log('Wrote public/favicon.svg');

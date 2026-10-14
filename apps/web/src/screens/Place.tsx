@@ -29,7 +29,7 @@ import type { GameMode } from '../app/setup';
 import { Board, type TargetKind } from '../components/Board';
 import { Button } from '../components/Button';
 import { PieceIcon } from '../pieces/PieceIcon';
-import { COLOR_NAME } from './labels';
+import { COLOR_NAME } from '../labels';
 import styles from './Place.module.css';
 
 type Selection = { kind: 'tray'; type: PieceType } | { kind: 'slot'; slot: Slot } | null;

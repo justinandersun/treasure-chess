@@ -7,6 +7,7 @@ import { browserStorage, loadSession, saveSession } from './persistence/session'
 import { ChooseMode } from './screens/ChooseMode';
 import { Home } from './screens/Home';
 import { Play } from './screens/Play';
+import { PiecesContent } from './screens/PiecesContent';
 import { RulesContent } from './screens/RulesContent';
 import { Setup } from './screens/Setup';
 
@@ -26,7 +27,7 @@ export function App() {
   const [boot] = useState(initialize);
   const [state, dispatch] = useReducer(appReducer, boot.state);
   const [notice, setNotice] = useState(boot.notice);
-  const [rulesOpen, setRulesOpen] = useState(false);
+  const [overlay, setOverlay] = useState<'rules' | 'pieces' | null>(null);
   const [confirm, setConfirm] = useState<'replace' | 'discard' | null>(null);
   const { view, session } = state;
 
@@ -42,9 +43,14 @@ export function App() {
         <button type="button" className={styles.brand} onClick={goHome}>
           Treasure Chess
         </button>
-        <Button variant="quiet" onClick={() => setRulesOpen(true)}>
-          Rules
-        </Button>
+        <nav className={styles.nav} aria-label="Reference">
+          <button type="button" className={styles.navLink} onClick={() => setOverlay('rules')}>
+            Rules
+          </button>
+          <button type="button" className={styles.navLink} onClick={() => setOverlay('pieces')}>
+            Pieces
+          </button>
+        </nav>
       </header>
 
       <main className={styles.main}>
@@ -62,7 +68,7 @@ export function App() {
             onNewGame={requestNewGame}
             onContinue={() => dispatch({ type: 'continue' })}
             onDiscard={() => setConfirm('discard')}
-            onRules={() => setRulesOpen(true)}
+            onRules={() => setOverlay('rules')}
           />
         )}
         {view === 'choose-mode' && (
@@ -90,16 +96,19 @@ export function App() {
       </main>
 
       <footer className={styles.footer}>
-        Built by{' '}
+        © 2026{' '}
         <a href="https://andersun.com" target="_blank" rel="noopener noreferrer">
           Justin Andersun
           <span className="visually-hidden"> (opens in a new tab)</span>
-        </a>{' '}
-        · © 2026
+        </a>
       </footer>
 
-      <Dialog open={rulesOpen} title="Rules" onClose={() => setRulesOpen(false)}>
+      <Dialog open={overlay === 'rules'} title="Rules" onClose={() => setOverlay(null)}>
         <RulesContent />
+      </Dialog>
+
+      <Dialog open={overlay === 'pieces'} title="Pieces" onClose={() => setOverlay(null)}>
+        <PiecesContent />
       </Dialog>
 
       <Dialog

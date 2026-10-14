@@ -3,7 +3,7 @@ import type { SetupAction, SetupState } from '../app/setup';
 import { ChooseOpponent } from './ChooseOpponent';
 import { Draft } from './Draft';
 import { Handoff } from './Handoff';
-import { COLOR_NAME } from './labels';
+import { COLOR_NAME } from '../labels';
 import { Place } from './Place';
 import { Reveal } from './Reveal';
 

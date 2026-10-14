@@ -14,14 +14,13 @@ import {
 } from '@treasure-chess/game';
 import { useState } from 'react';
 import { Button } from '../components/Button';
-import { MoveDiagram } from '../components/MoveDiagram';
-import { PieceIcon } from '../pieces/PieceIcon';
+import { PieceGrid, PieceTile } from '../components/PieceTile';
 import styles from './Draft.module.css';
 import type { GameMode } from '../app/setup';
-import { COLOR_NAME, FAMILY_NAMES } from './labels';
+import { COLOR_NAME, FAMILY_NAMES } from '../labels';
 
 const BLOCKER_TEXT: Record<AddBlocker, string> = {
-  budget: 'Not enough gold',
+  budget: 'Not enough points',
   'king-limit': 'Only one King',
   'pawn-row-full': 'Pawn row is full',
   'back-rank-full': 'Back rank is full',
@@ -85,25 +84,12 @@ export function Draft({
           <h2 id={`family-${family}`} className={styles.familyName}>
             {FAMILY_NAMES[family]}
           </h2>
-          <ul className={styles.list}>
+          <PieceGrid>
             {PIECE_DEFINITIONS.filter((d) => d.family === family).map((d) => {
               const count = draft[d.type] ?? 0;
               const blocker = addBlocker(draft, d.type);
               return (
-                <li key={d.type} className={styles.row}>
-                  <MoveDiagram type={d.type} className={styles.diagram} />
-                  <div className={styles.info}>
-                    <div className={styles.name}>
-                      <span className={styles.icon} aria-hidden="true">
-                        <PieceIcon type={d.type} color={color} />
-                      </span>
-                      <strong>{d.name}</strong>
-                      <span className={styles.meta}>
-                        {d.symbol} · {d.cost} gold
-                      </span>
-                    </div>
-                    <p className={styles.summary}>{d.summary}</p>
-                  </div>
+                <PieceTile key={d.type} type={d.type} color={color} description={d.summary}>
                   <div className={styles.stepper} role="group" aria-label={`${d.name} count`}>
                     <button
                       type="button"
@@ -128,10 +114,10 @@ export function Draft({
                       +
                     </button>
                   </div>
-                </li>
+                </PieceTile>
               );
             })}
-          </ul>
+          </PieceGrid>
         </section>
       ))}
 
@@ -139,12 +125,12 @@ export function Draft({
         <div className={styles.status}>
           <div className={styles.treasury}>
             <span>
-              <strong>{spent}</strong> / {TREASURY} gold · {TREASURY - spent} left
+              <strong>{spent}</strong> / {TREASURY} points · {TREASURY - spent} left
             </span>
             <span
               className={styles.meter}
               role="meter"
-              aria-label="Gold spent"
+              aria-label="Points spent"
               aria-valuemin={0}
               aria-valuemax={TREASURY}
               aria-valuenow={spent}

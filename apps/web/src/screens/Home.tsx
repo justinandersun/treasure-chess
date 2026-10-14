@@ -2,7 +2,7 @@ import { TREASURY } from '@treasure-chess/game';
 import type { Session } from '../app/appState';
 import { Button } from '../components/Button';
 import { PieceIcon } from '../pieces/PieceIcon';
-import { COLOR_NAME } from './labels';
+import { COLOR_NAME } from '../labels';
 import styles from './Screens.module.css';
 
 interface HomeProps {
@@ -44,7 +44,7 @@ export function Home({ session, onNewGame, onContinue, onDiscard, onRules }: Hom
         Treasure Chess
       </h1>
       <p className={styles.lede}>
-        Spend {TREASURY} gold on an army of fairy pieces, arrange it, and play.
+        Spend {TREASURY} points on an army of fairy pieces, arrange it, and play.
       </p>
       <div className={styles.actions}>
         {saved && (

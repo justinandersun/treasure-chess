@@ -29,8 +29,9 @@ import { Board } from '../components/Board';
 import { Button } from '../components/Button';
 import { Dialog } from '../components/Dialog';
 import { PieceIcon } from '../pieces/PieceIcon';
+import { PIECE_COLORS } from '../pieces/pieceArt';
 import { resultDetail, resultHeadline, sideName } from './gameText';
-import { COLOR_NAME } from './labels';
+import { COLOR_NAME } from '../labels';
 import { MoveHistory } from './MoveHistory';
 import styles from './Play.module.css';
 
@@ -103,6 +104,11 @@ export function Play({ game, mode, onChange, onNewGame }: PlayProps) {
           <span
             className={[styles.turnDot, thinking && styles.thinking].filter(Boolean).join(' ')}
             data-color={game.result ? undefined : turn}
+            style={
+              game.result
+                ? undefined
+                : { background: PIECE_COLORS[turn].body, borderColor: PIECE_COLORS[turn].edge }
+            }
           />
           {status}
         </p>

@@ -4,20 +4,24 @@
   justify-content: center;
   gap: 0.5em;
   min-height: 44px;
-  padding: 0.5em 1.1em;
+  padding: 0.5em 1.25em;
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface);
+  border-radius: 999px;
+  background: transparent;
+  letter-spacing: 0.01em;
   cursor: pointer;
   text-align: center;
+  transition:
+    border-color 0.15s,
+    background-color 0.15s;
 }
 
 .button:hover:not(:disabled) {
-  background: var(--surface-2);
+  border-color: var(--fg);
 }
 
 .button:disabled {
-  opacity: 0.55;
+  opacity: 0.45;
   cursor: not-allowed;
 }
 
@@ -25,15 +29,20 @@
   background: var(--accent);
   border-color: var(--accent);
   color: var(--accent-fg);
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .primary:hover:not(:disabled) {
+  border-color: var(--accent);
   background: var(--accent);
-  filter: brightness(1.08);
+  filter: brightness(1.15);
 }
 
 .quiet {
   border-color: transparent;
-  background: transparent;
+}
+
+.quiet:hover:not(:disabled) {
+  border-color: transparent;
+  background: var(--surface-2);
 }

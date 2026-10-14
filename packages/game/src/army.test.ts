@@ -26,7 +26,7 @@ const CLASSIC_DRAFT: ArmyDraft = { rook: 2, knight: 2, bishop: 2, queen: 1, king
 const codes = (issues: { code: string }[]) => issues.map((i) => i.code);
 
 describe('drafting', () => {
-  it('prices the classic army at exactly 40 gold', () => {
+  it('prices the classic army at exactly 40 points', () => {
     expect(draftCost(CLASSIC_DRAFT)).toBe(40);
     expect(validateDraft(CLASSIC_DRAFT)).toEqual([]);
   });
@@ -54,7 +54,7 @@ describe('drafting', () => {
     expect(validateDraft({ pawn: 8, king: 1, priest: 7 })).toEqual([]);
   });
 
-  it('allows unspent gold', () => {
+  it('allows unspent points', () => {
     expect(draftCost({ pawn: 8, king: 1, camel: 1 })).toBe(11);
     expect(validateDraft({ pawn: 8, king: 1, camel: 1 })).toEqual([]);
   });

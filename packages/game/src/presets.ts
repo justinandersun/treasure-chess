@@ -18,7 +18,7 @@ export const PRESETS: readonly Preset[] = [
   preset(
     'classic',
     'Classic',
-    'The orthodox chess army. Spends exactly 40 gold.',
+    'The orthodox chess army. Spends exactly 40 points.',
     'RNBQKBNR',
     'PPPPPPPP',
   ),

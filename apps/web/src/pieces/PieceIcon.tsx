@@ -1,10 +1,9 @@
 import type { Color, PieceType } from '@treasure-chess/game';
 import { PIECES } from '@treasure-chess/game';
 import { createElement, type CSSProperties } from 'react';
+import { COLOR_NAME } from '../labels';
 import styles from './PieceIcon.module.css';
 import { PIECE_ART, PIECE_COLORS } from './pieceArt';
-
-const COLOR_NAME: Record<Color, string> = { w: 'White', b: 'Black' };
 
 const COLOR_VARS = Object.fromEntries(
   (['w', 'b'] as const).map((c) => [

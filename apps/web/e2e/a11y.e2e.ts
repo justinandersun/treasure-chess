@@ -27,6 +27,10 @@ test('every screen passes automated accessibility checks', async ({ page }) => {
   await expectAccessible(page, 'Rules dialog');
   await page.keyboard.press('Escape');
 
+  await page.getByRole('button', { name: 'Pieces' }).click();
+  await expectAccessible(page, 'Pieces dialog');
+  await page.keyboard.press('Escape');
+
   await startNewGame(page, 'Two players');
   await expectAccessible(page, 'Draft');
   await usePreset(page, 'royal-court');
@@ -49,6 +53,9 @@ test('dark mode passes the contrast checks too', async ({ page }) => {
   await page.emulateMedia({ colorScheme: 'dark' });
   await page.goto('/');
   await expectAccessible(page, 'Home (dark)');
+  await page.getByRole('button', { name: 'Pieces' }).click();
+  await expectAccessible(page, 'Pieces dialog (dark)');
+  await page.keyboard.press('Escape');
   await startLocalGame(page, 'menagerie', 'cathedral');
   await expectAccessible(page, 'Play (dark)');
 });
