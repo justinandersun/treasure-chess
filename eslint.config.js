@@ -5,7 +5,7 @@ import reactRefresh from 'eslint-plugin-react-refresh';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-  { ignores: ['**/dist/**', '**/coverage/**'] },
+  { ignores: ['**/dist/**', '**/coverage/**', '**/test-results/**', '**/playwright-report/**'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
@@ -13,7 +13,7 @@ export default tseslint.config(
     languageOptions: { globals: globals['shared-node-browser'] },
   },
   {
-    files: ['apps/web/vite.config.ts', 'apps/web/scripts/**/*.ts'],
+    files: ['apps/web/*.config.ts', 'apps/web/scripts/**/*.ts', 'apps/web/e2e/**/*.ts'],
     languageOptions: { globals: globals.node },
   },
   {

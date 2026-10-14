@@ -15,3 +15,7 @@ CLAUDE.local.md
 .vscode/
 .idea/
 *.swp
+
+# Playwright
+test-results/
+playwright-report/

@@ -12,6 +12,17 @@
   }
 }
 
+/* Landscape phones: board and controls side by side. */
+@media (orientation: landscape) and (max-height: 560px) {
+  .play {
+    grid-template-columns: max(200px, 100dvh - 130px) minmax(200px, 300px);
+  }
+
+  .history {
+    max-height: 30dvh;
+  }
+}
+
 .boardArea {
   display: flex;
   flex-direction: column;

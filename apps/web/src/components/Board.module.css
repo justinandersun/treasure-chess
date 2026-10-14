@@ -43,12 +43,10 @@
 
 .light {
   background: var(--square-light);
-  --label: var(--square-label-light);
 }
 
 .dark {
   background: var(--square-dark);
-  --label: var(--square-label-dark);
 }
 
 .square:focus-visible {
@@ -127,7 +125,7 @@
   font-size: clamp(8px, 1.6vmin, 12px);
   font-weight: 600;
   line-height: 1;
-  color: var(--label);
+  color: var(--square-label);
   pointer-events: none;
 }
 
@@ -139,4 +137,11 @@
 .file {
   bottom: 4%;
   right: 6%;
+}
+
+/* Landscape phones: size the board from the short screen height so it stays fully in view. */
+@media (orientation: landscape) and (max-height: 560px) {
+  .board:not(.partial) {
+    width: min(100%, max(200px, 100dvh - 130px), 640px);
+  }
 }

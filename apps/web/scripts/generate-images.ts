@@ -20,7 +20,7 @@ const PALETTE = {
   bg: '#f6f3ec',
   fg: '#26231f',
   muted: '#6b655b',
-  accent: '#9a7414',
+  accent: '#835f10',
   light: '#f0dcb4',
   dark: '#b88a5c',
   border: '#d9d1c1',

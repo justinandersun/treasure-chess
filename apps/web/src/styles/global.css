@@ -6,15 +6,15 @@
   --fg: #26231f;
   --muted: #6b655b;
   --border: #d9d1c1;
-  --accent: #9a7414;
+  --accent: #835f10;
   --accent-fg: #ffffff;
   --focus: #2f6fd6;
   --danger: #b3261e;
 
   --square-light: #f0dcb4;
   --square-dark: #b88a5c;
-  --square-label-light: #8a6440;
-  --square-label-dark: #f6e8cf;
+  /* One label color passes AA contrast on both square colors (11.9:1 and 5.2:1). */
+  --square-label: #2e1e0e;
   --mark: rgb(28 24 18 / 0.32);
   --last-move: rgb(214 172 46 / 0.45);
   --selected: rgb(214 172 46 / 0.6);
@@ -38,10 +38,6 @@
     --accent-fg: #1b1813;
     --focus: #7fb0ff;
     --danger: #ff8a80;
-    --square-light: #d9c39b;
-    --square-dark: #9c7450;
-    --square-label-light: #6e5133;
-    --square-label-dark: #f1e1c4;
     color-scheme: dark;
   }
 }
@@ -57,10 +53,6 @@
   --accent-fg: #1b1813;
   --focus: #7fb0ff;
   --danger: #ff8a80;
-  --square-light: #d9c39b;
-  --square-dark: #9c7450;
-  --square-label-light: #6e5133;
-  --square-label-dark: #f1e1c4;
   color-scheme: dark;
 }
 
@@ -122,6 +114,7 @@ select {
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
 }
