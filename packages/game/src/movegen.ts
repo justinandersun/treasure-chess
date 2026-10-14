@@ -15,7 +15,14 @@ import {
   rankOf,
   type Square,
 } from './board';
-import { type MoveComponent, type Piece, PIECES, type PieceType } from './pieces';
+import {
+  type MoveComponent,
+  type Piece,
+  PIECE_TYPES,
+  PIECES,
+  type PieceType,
+  type Vector,
+} from './pieces';
 import type { Board, Position } from './position';
 
 export interface Move {
@@ -173,11 +180,128 @@ export function attackedSquares(board: Board, from: Square): Square[] {
   return [...squares];
 }
 
+// ---- Reverse attack lookup ------------------------------------------------------------------
+//
+// isSquareAttacked looks outward from the target square instead of generating every enemy
+// piece's moves. The tables below are built once from the catalog: for each offset, ray, or bent
+// path, a bitmask of the piece types that could attack along it.
+
+const TYPE_BIT = Object.fromEntries(PIECE_TYPES.map((t, i) => [t, 1 << i])) as Record<
+  PieceType,
+  number
+>;
+
+interface ReverseVector {
+  readonly df: number;
+  readonly dr: number;
+  readonly mask: number;
+}
+
+interface ReverseBent {
+  readonly step: Vector;
+  readonly slide: Vector;
+  readonly mask: number;
+}
+
+function addVector(map: Map<string, ReverseVector>, df: number, dr: number, type: PieceType) {
+  const key = `${df},${dr}`;
+  const mask = (map.get(key)?.mask ?? 0) | TYPE_BIT[type];
+  map.set(key, { df, dr, mask });
+}
+
+function buildReverseTables() {
+  const leaps = new Map<string, ReverseVector>();
+  const slides = new Map<string, ReverseVector>();
+  const bentSteps = new Map<string, ReverseVector>();
+  const bents = new Map<string, ReverseBent>();
+  const infantry: Record<Color, Map<string, ReverseVector>> = { w: new Map(), b: new Map() };
+  for (const type of PIECE_TYPES) {
+    for (const c of PIECES[type].movement) {
+      if (c.kind === 'leap') for (const [df, dr] of c.offsets) addVector(leaps, df, dr, type);
+      if (c.kind === 'slide') for (const [df, dr] of c.directions) addVector(slides, df, dr, type);
+      if (c.kind === 'bent') {
+        for (const { step, slides: dirs } of c.paths) {
+          addVector(bentSteps, step[0], step[1], type);
+          for (const slide of dirs) {
+            const key = `${step},${slide}`;
+            const mask = (bents.get(key)?.mask ?? 0) | TYPE_BIT[type];
+            bents.set(key, { step, slide, mask });
+          }
+        }
+      }
+      if (c.kind === 'infantry') {
+        for (const color of ['w', 'b'] as const) {
+          for (const [df, dr] of c.captures)
+            addVector(infantry[color], df, dr * forward(color), type);
+        }
+      }
+    }
+  }
+  return {
+    leaps: [...leaps.values()],
+    slides: [...slides.values()],
+    bentSteps: [...bentSteps.values()],
+    bents: [...bents.values()],
+    infantry: { w: [...infantry.w.values()], b: [...infantry.b.values()] },
+  };
+}
+
+const REVERSE = buildReverseTables();
+
+function attackerAt(board: Board, file: number, rank: number, by: Color, mask: number): boolean {
+  const p = board[rank * 8 + file];
+  return !!p && p.color === by && (mask & TYPE_BIT[p.type]) !== 0;
+}
+
+function leapAttacked(
+  board: Board,
+  tf: number,
+  tr: number,
+  by: Color,
+  vectors: readonly ReverseVector[],
+) {
+  for (const { df, dr, mask } of vectors) {
+    const f = tf - df;
+    const r = tr - dr;
+    if (isOnBoard(f, r) && attackerAt(board, f, r, by, mask)) return true;
+  }
+  return false;
+}
+
 /** Whether any piece of color `by` attacks `target`. */
 export function isSquareAttacked(board: Board, target: Square, by: Color): boolean {
-  for (let sq = 0; sq < 64; sq++) {
-    const p = board[sq];
-    if (p?.color === by && scanAttacks(board, sq, p, (to) => to === target)) return true;
+  const tf = fileOf(target);
+  const tr = rankOf(target);
+  if (leapAttacked(board, tf, tr, by, REVERSE.leaps)) return true;
+  if (leapAttacked(board, tf, tr, by, REVERSE.infantry[by])) return true;
+  // A bent rider attacks the square of its first step directly.
+  if (leapAttacked(board, tf, tr, by, REVERSE.bentSteps)) return true;
+
+  for (const { df, dr, mask } of REVERSE.slides) {
+    let f = tf - df;
+    let r = tr - dr;
+    while (isOnBoard(f, r)) {
+      if (board[r * 8 + f]) {
+        if (attackerAt(board, f, r, by, mask)) return true;
+        break;
+      }
+      f -= df;
+      r -= dr;
+    }
+  }
+
+  // Longer bent moves: walk back along the slide through empty squares; each could be the turning
+  // square, with the attacker one step before it.
+  for (const { step, slide, mask } of REVERSE.bents) {
+    let f = tf - slide[0];
+    let r = tr - slide[1];
+    while (isOnBoard(f, r) && !board[r * 8 + f]) {
+      const af = f - step[0];
+      const ar = r - step[1];
+      if (isOnBoard(af, ar) && attackerAt(board, af, ar, by, mask)) return true;
+      f -= slide[0];
+      r -= slide[1];
+    }
   }
   return false;
 }

@@ -14,16 +14,21 @@ interface HomeProps {
 }
 
 function describeSession(session: Session): { action: string; detail: string } {
+  const mode = session.kind === 'setup' ? session.setup.mode : session.mode;
+  const opponent = mode === 'computer' ? 'Against the computer' : 'Two players';
   if (session.kind === 'setup') {
-    return { action: 'Continue setup', detail: 'Two players · choosing armies' };
+    return { action: 'Continue setup', detail: `${opponent} · choosing armies` };
   }
   const { game } = session;
-  if (game.result) return { action: 'View last game', detail: 'Two players · finished' };
+  if (game.result) return { action: 'View last game', detail: `${opponent} · finished` };
   const moveNumber = Math.floor(game.ply / 2) + 1;
-  return {
-    action: 'Continue game',
-    detail: `Two players · move ${moveNumber} · ${COLOR_NAME[game.position.turn]} to play`,
-  };
+  const toPlay =
+    mode === 'computer'
+      ? game.position.turn === 'w'
+        ? 'your move'
+        : 'computer to play'
+      : `${COLOR_NAME[game.position.turn]} to play`;
+  return { action: 'Continue game', detail: `${opponent} · move ${moveNumber} · ${toPlay}` };
 }
 
 export function Home({ session, onNewGame, onContinue, onDiscard, onRules }: HomeProps) {

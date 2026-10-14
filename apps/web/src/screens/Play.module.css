@@ -140,3 +140,14 @@
   width: 56px;
   height: 56px;
 }
+
+/* A gentle pulse on the turn marker while the computer thinks (static if motion is reduced). */
+.thinking {
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.35;
+  }
+}

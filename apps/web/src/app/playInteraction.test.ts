@@ -6,9 +6,10 @@ import {
   playMove,
   resign,
   squareName,
+  undo,
 } from '@treasure-chess/game';
 import { describe, expect, it } from 'vitest';
-import { handleTap, type Selection, selectionMarks } from './playInteraction';
+import { handleTap, type Selection, selectionMarks, undoToPlayerTurn } from './playInteraction';
 
 const sq = parseSquare;
 const game = (fen: string): GameState => createGame({ position: parsePosition(fen) });
@@ -104,5 +105,34 @@ describe('selection marks', () => {
       d6: 'capture',
       f6: 'attack',
     });
+  });
+});
+
+describe('playing against the computer', () => {
+  it("only lets the player move their own color; the computer's pieces are inspected", () => {
+    const g = playMove(game(START), { from: sq('e2'), to: sq('e4') });
+    // Black to move, but the player is White: Black's pieces can only be inspected.
+    expect(handleTap(g, null, sq('g8'), 'w')).toEqual({
+      kind: 'select',
+      selection: { square: sq('g8'), mode: 'inspect' },
+    });
+  });
+
+  it('undo takes back the computer reply together with the player move', () => {
+    const s0 = game(START);
+    const s1 = playMove(s0, { from: sq('e2'), to: sq('e4') }); // player
+    const s2 = playMove(s1, { from: sq('e7'), to: sq('e5') }); // computer
+    expect(undoToPlayerTurn(s2, 'w')).toBe(s0);
+    // While the computer is thinking, undo takes back just the player's move.
+    expect(undoToPlayerTurn(s1, 'w')).toBe(s0);
+    expect(undoToPlayerTurn(s0, 'w')).toBe(s0);
+  });
+
+  it('undo after the computer claims a draw or the player resigns returns to the player', () => {
+    const s0 = game(START);
+    const s1 = playMove(s0, { from: sq('e2'), to: sq('e4') });
+    const s2 = playMove(s1, { from: sq('e7'), to: sq('e5') });
+    expect(undoToPlayerTurn(resign(s2, 'w'), 'w')).toBe(s2);
+    expect(undo(resign(s2, 'w'))).toBe(s2);
   });
 });

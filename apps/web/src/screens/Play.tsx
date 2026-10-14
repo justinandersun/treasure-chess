@@ -16,18 +16,27 @@ import {
   undo,
 } from '@treasure-chess/game';
 import { useMemo, useState } from 'react';
-import { handleTap, type Selection, selectionMarks } from '../app/playInteraction';
+import type { GameMode } from '../app/appState';
+import {
+  handleTap,
+  type Selection,
+  selectionMarks,
+  undoToPlayerTurn,
+} from '../app/playInteraction';
+import { COMPUTER_COLOR } from '../app/setup';
+import { useComputerPlayer } from '../ai/useComputerPlayer';
 import { Board } from '../components/Board';
 import { Button } from '../components/Button';
 import { Dialog } from '../components/Dialog';
 import { PieceIcon } from '../pieces/PieceIcon';
-import { resultDetail, resultHeadline } from './gameText';
+import { resultDetail, resultHeadline, sideName } from './gameText';
 import { COLOR_NAME } from './labels';
 import { MoveHistory } from './MoveHistory';
 import styles from './Play.module.css';
 
 interface PlayProps {
   readonly game: GameState;
+  readonly mode: GameMode;
   readonly onChange: (game: GameState) => void;
   readonly onNewGame: () => void;
 }
@@ -39,7 +48,11 @@ interface PendingPromotion {
   readonly choices: readonly PieceType[];
 }
 
-export function Play({ game, onChange, onNewGame }: PlayProps) {
+export function Play({ game, mode, onChange, onNewGame }: PlayProps) {
+  // Against the computer the person plays White; in a two-player game they play both sides.
+  const computer = mode === 'computer' ? COMPUTER_COLOR : null;
+  const player = computer ? opposite(computer) : undefined;
+  useComputerPlayer(game, computer, onChange);
   const [selection, setSelection] = useState<Selection | null>(null);
   const [orientation, setOrientation] = useState<Color>('w');
   const [promotion, setPromotion] = useState<PendingPromotion | null>(null);
@@ -50,11 +63,14 @@ export function Play({ game, onChange, onNewGame }: PlayProps) {
   const { board, turn } = game.position;
   const marks = useMemo(() => selectionMarks(game, selection), [game, selection]);
   const check = inCheck(game) ? findKing(board, turn) : null;
-  const claim = claimableDraw(game);
+  const thinking = computer !== null && turn === computer && !game.result;
+  // Only the player whose turn it is may claim; the computer decides its own claims.
+  const claim = thinking ? null : claimableDraw(game);
+  const undone = computer ? undoToPlayerTurn(game, opposite(computer)) : undo(game);
   const lastMoveText = useMemo(() => {
     const history = algebraicHistory(game);
-    return history.length ? `${COLOR_NAME[opposite(turn)]} played ${history.at(-1)}. ` : '';
-  }, [game, turn]);
+    return history.length ? `${sideName(opposite(turn), player)} played ${history.at(-1)}. ` : '';
+  }, [game, turn, player]);
 
   function update(next: GameState) {
     setSelection(null);
@@ -63,14 +79,16 @@ export function Play({ game, onChange, onNewGame }: PlayProps) {
   }
 
   function handleSquare(sq: Square) {
-    const result = handleTap(game, selection, sq);
+    const result = handleTap(game, selection, sq, player);
     if (result.kind === 'select') setSelection(result.selection);
     else if (result.kind === 'move') update(playMove(game, result.move));
     else setPromotion(result);
   }
 
   let status: string;
-  if (game.result) status = resultHeadline(game.result);
+  if (game.result) status = resultHeadline(game.result, player);
+  else if (thinking) status = `The computer is thinking…${check !== null ? ' (in check)' : ''}`;
+  else if (player) status = `Your move${check !== null ? ' — check!' : ''}`;
   else status = `${COLOR_NAME[turn]} to move${check !== null ? ' — check!' : ''}`;
   if (!game.result && selection?.mode === 'inspect') {
     const p = board[selection.square]!;
@@ -82,7 +100,10 @@ export function Play({ game, onChange, onNewGame }: PlayProps) {
       <div className={styles.boardArea}>
         <p className={styles.status} role="status" aria-live="polite">
           <span className="visually-hidden">{lastMoveText}</span>
-          <span className={styles.turnDot} data-color={game.result ? undefined : turn} />
+          <span
+            className={[styles.turnDot, thinking && styles.thinking].filter(Boolean).join(' ')}
+            data-color={game.result ? undefined : turn}
+          />
           {status}
         </p>
         <Board
@@ -99,7 +120,7 @@ export function Play({ game, onChange, onNewGame }: PlayProps) {
 
       <aside className={styles.panel} aria-label="Game controls">
         <div className={styles.controls}>
-          <Button onClick={() => update(undo(game))} disabled={!game.previous}>
+          <Button onClick={() => update(undone)} disabled={undone === game}>
             Undo
           </Button>
           <Button onClick={() => setOrientation(opposite(orientation))}>Flip board</Button>
@@ -123,7 +144,8 @@ export function Play({ game, onChange, onNewGame }: PlayProps) {
         <MoveHistory game={game} />
         {game.result && (
           <p className={styles.resultNote}>
-            <strong>{resultHeadline(game.result)}.</strong> {resultDetail(game.result)}
+            <strong>{resultHeadline(game.result, player)}.</strong>{' '}
+            {resultDetail(game.result, player)}
           </p>
         )}
       </aside>
@@ -161,7 +183,7 @@ export function Play({ game, onChange, onNewGame }: PlayProps) {
             <Button variant="quiet" onClick={() => setDialog(null)}>
               Cancel
             </Button>
-            {(['w', 'b'] as const).map((color) => (
+            {(player ? [player] : (['w', 'b'] as const)).map((color) => (
               <Button
                 key={color}
                 onClick={() => {
@@ -169,13 +191,17 @@ export function Play({ game, onChange, onNewGame }: PlayProps) {
                   update(resign(game, color));
                 }}
               >
-                {COLOR_NAME[color]} resigns
+                {player ? 'Resign' : `${COLOR_NAME[color]} resigns`}
               </Button>
             ))}
           </>
         }
       >
-        <p>Either player may resign. The other player wins. You can undo a resignation.</p>
+        <p>
+          {player
+            ? 'The computer wins if you resign. You can undo a resignation.'
+            : 'Either player may resign. The other player wins. You can undo a resignation.'}
+        </p>
       </Dialog>
 
       <Dialog
@@ -199,12 +225,12 @@ export function Play({ game, onChange, onNewGame }: PlayProps) {
 
       <Dialog
         open={game.result !== null && reviewing !== game}
-        title={game.result ? resultHeadline(game.result) : ''}
+        title={game.result ? resultHeadline(game.result, player) : ''}
         size="small"
         onClose={() => setReviewing(game)}
         actions={
           <>
-            <Button variant="quiet" onClick={() => update(undo(game))}>
+            <Button variant="quiet" onClick={() => update(undone)} disabled={undone === game}>
               Undo move
             </Button>
             <Button onClick={() => setReviewing(game)}>Review board</Button>
@@ -214,7 +240,7 @@ export function Play({ game, onChange, onNewGame }: PlayProps) {
           </>
         }
       >
-        <p>{game.result && resultDetail(game.result)}</p>
+        <p>{game.result && resultDetail(game.result, player)}</p>
       </Dialog>
     </section>
   );

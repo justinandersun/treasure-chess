@@ -18,21 +18,20 @@ import {
   serializeGame,
 } from '@treasure-chess/game';
 import type { AppState, Session, View } from '../app/appState';
-import { gateAfterReload, type SetupState, type SetupStep } from '../app/setup';
+import { type GameMode, gateAfterReload, type SetupState, type SetupStep } from '../app/setup';
 
 export const STORAGE_KEY = 'treasure-chess/session';
-export const SESSION_SCHEMA_VERSION = 1;
+export const SESSION_SCHEMA_VERSION = 2;
 
 type SavedSession =
   | { readonly kind: 'setup'; readonly setup: SetupState }
-  | { readonly kind: 'game'; readonly game: SavedGame };
+  | { readonly kind: 'game'; readonly game: SavedGame; readonly mode: GameMode };
 
 interface SavedDocument {
   readonly schemaVersion: typeof SESSION_SCHEMA_VERSION;
   readonly savedAt: string;
   /** Whether the session was on screen (as opposed to the player being on the Home screen). */
   readonly showing: boolean;
-  readonly mode: 'local';
   readonly session: SavedSession;
 }
 
@@ -52,12 +51,11 @@ export function encodeSession(state: AppState, now = new Date()): string | null 
   const saved: SavedSession =
     session.kind === 'setup'
       ? { kind: 'setup', setup: session.setup }
-      : { kind: 'game', game: serializeGame(session.game) };
+      : { kind: 'game', game: serializeGame(session.game), mode: session.mode };
   const doc: SavedDocument = {
     schemaVersion: SESSION_SCHEMA_VERSION,
     savedAt: now.toISOString(),
     showing: state.view === 'session',
-    mode: 'local',
     session: saved,
   };
   return JSON.stringify(doc);
@@ -65,7 +63,8 @@ export function encodeSession(state: AppState, now = new Date()): string | null 
 
 // ---- Validation -----------------------------------------------------------------------------
 
-const STEPS: readonly SetupStep[] = ['draft', 'place', 'handoff', 'ready', 'reveal'];
+const STEPS: readonly SetupStep[] = ['draft', 'place', 'handoff', 'ready', 'opponent', 'reveal'];
+const isMode = (v: unknown): v is GameMode => v === 'local' || v === 'computer';
 const isObject = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null;
 const isColor = (v: unknown): v is Color => v === 'w' || v === 'b';
 const isPieceType = (v: unknown): v is PieceType => PIECE_TYPES.includes(v as PieceType);
@@ -88,7 +87,8 @@ function isDeployment(v: unknown): v is Deployment {
 }
 
 function isSetup(v: unknown): v is SetupState {
-  if (!isObject(v) || !STEPS.includes(v.step as SetupStep) || !isColor(v.color)) return false;
+  if (!isObject(v) || !isMode(v.mode) || !STEPS.includes(v.step as SetupStep)) return false;
+  if (!isColor(v.color)) return false;
   if (v.resume !== undefined && v.resume !== 'draft' && v.resume !== 'place') return false;
   const { drafts, deployments } = v;
   return (
@@ -101,9 +101,24 @@ function isSetup(v: unknown): v is SetupState {
   );
 }
 
-/** Upgrades older saved documents to the current schema. None exist yet. */
-function migrate(doc: Record<string, unknown>): Record<string, unknown> | null {
-  return doc.schemaVersion === SESSION_SCHEMA_VERSION ? doc : null;
+/**
+ * Upgrades older saved documents to the current schema, one version at a time. Returns null for
+ * versions this build does not understand (including newer ones).
+ */
+export function migrate(doc: Record<string, unknown>): Record<string, unknown> | null {
+  let current = doc;
+  if (current.schemaVersion === 1) {
+    // v1 had only two-player games, with the mode stored once at the top level.
+    const rest = { ...current };
+    delete rest.mode;
+    const session = isObject(rest.session) ? rest.session : {};
+    const migrated =
+      session.kind === 'setup' && isObject(session.setup)
+        ? { ...session, setup: { ...session.setup, mode: 'local' } }
+        : { ...session, mode: 'local' };
+    current = { ...rest, schemaVersion: 2, session: migrated };
+  }
+  return current.schemaVersion === SESSION_SCHEMA_VERSION ? current : null;
 }
 
 // ---- Decoding -------------------------------------------------------------------------------
@@ -123,9 +138,9 @@ export function decodeSession(text: string): LoadResult {
   let session: Session;
   if (isObject(saved) && saved.kind === 'setup' && isSetup(saved.setup)) {
     session = { kind: 'setup', setup: gateAfterReload(saved.setup) };
-  } else if (isObject(saved) && saved.kind === 'game') {
+  } else if (isObject(saved) && saved.kind === 'game' && isMode(saved.mode)) {
     try {
-      session = { kind: 'game', game: deserializeGame(saved.game) };
+      session = { kind: 'game', game: deserializeGame(saved.game), mode: saved.mode };
     } catch {
       return { status: 'discarded', reason: 'The saved game could not be replayed.' };
     }

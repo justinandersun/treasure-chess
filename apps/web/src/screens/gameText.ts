@@ -1,4 +1,4 @@
-import type { DrawReason, GameResult } from '@treasure-chess/game';
+import type { Color, DrawReason, GameResult } from '@treasure-chess/game';
 import { COLOR_NAME } from './labels';
 
 const DRAW_TEXT: Record<DrawReason, string> = {
@@ -10,23 +10,47 @@ const DRAW_TEXT: Record<DrawReason, string> = {
   'fifty-move-rule': 'Claimed after 50 moves each without a capture or infantry move.',
 };
 
-export function resultHeadline(result: GameResult): string {
+/**
+ * Names for each side: colors in a two-player game, or "you" and "the computer" when `player` is
+ * the human's color.
+ */
+export function sideName(color: Color, player?: Color): string {
+  if (player === undefined) return COLOR_NAME[color];
+  return color === player ? 'You' : 'The computer';
+}
+
+export function resultHeadline(result: GameResult, player?: Color): string {
   switch (result.kind) {
     case 'checkmate':
+      if (player !== undefined) {
+        return result.winner === player ? 'Checkmate — you win' : 'Checkmate — the computer wins';
+      }
       return `Checkmate — ${COLOR_NAME[result.winner]} wins`;
     case 'resignation':
+      if (player !== undefined) {
+        return result.winner === player ? 'The computer resigned' : 'You resigned';
+      }
       return `${COLOR_NAME[result.winner]} wins by resignation`;
     case 'draw':
       return 'Draw';
   }
 }
 
-export function resultDetail(result: GameResult): string {
+export function resultDetail(result: GameResult, player?: Color): string {
+  const loser = (winner: Color): Color => (winner === 'w' ? 'b' : 'w');
   switch (result.kind) {
-    case 'checkmate':
-      return `${COLOR_NAME[result.winner === 'w' ? 'b' : 'w']}'s King is in check and cannot escape.`;
+    case 'checkmate': {
+      const losing = loser(result.winner);
+      if (player === undefined)
+        return `${COLOR_NAME[losing]}'s King is in check and cannot escape.`;
+      return losing === player
+        ? 'Your King is in check and cannot escape.'
+        : "The computer's King is in check and cannot escape.";
+    }
     case 'resignation':
-      return `${COLOR_NAME[result.winner === 'w' ? 'b' : 'w']} resigned.`;
+      return player !== undefined
+        ? 'Start a new game or undo to keep playing.'
+        : `${COLOR_NAME[loser(result.winner)]} resigned.`;
     case 'draw':
       return DRAW_TEXT[result.reason];
   }

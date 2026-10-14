@@ -17,6 +17,7 @@ import { Button } from '../components/Button';
 import { MoveDiagram } from '../components/MoveDiagram';
 import { PieceIcon } from '../pieces/PieceIcon';
 import styles from './Draft.module.css';
+import type { GameMode } from '../app/setup';
 import { COLOR_NAME, FAMILY_NAMES } from './labels';
 
 const BLOCKER_TEXT: Record<AddBlocker, string> = {
@@ -28,6 +29,7 @@ const BLOCKER_TEXT: Record<AddBlocker, string> = {
 
 interface DraftProps {
   readonly color: Color;
+  readonly mode: GameMode;
   readonly draft: ArmyDraft;
   readonly onAdjust: (piece: PieceType, delta: 1 | -1) => void;
   readonly onUsePreset: (presetId: string) => void;
@@ -35,7 +37,15 @@ interface DraftProps {
   readonly onBack?: () => void;
 }
 
-export function Draft({ color, draft, onAdjust, onUsePreset, onContinue, onBack }: DraftProps) {
+export function Draft({
+  color,
+  mode,
+  draft,
+  onAdjust,
+  onUsePreset,
+  onContinue,
+  onBack,
+}: DraftProps) {
   const [presetId, setPresetId] = useState(PRESETS[0]!.id);
   const spent = draftCost(draft);
   const slots = draftSlots(draft);
@@ -45,10 +55,14 @@ export function Draft({ color, draft, onAdjust, onUsePreset, onContinue, onBack 
   return (
     <section className={styles.draft} aria-labelledby="draft-title">
       <header className={styles.intro}>
-        <h1 id="draft-title">{COLOR_NAME[color]}: draft your army</h1>
+        <h1 id="draft-title">
+          {mode === 'computer' ? 'Draft your army' : `${COLOR_NAME[color]}: draft your army`}
+        </h1>
         <p className={styles.hint}>
-          Choose one King, eight infantry for the pawn row, and up to seven more pieces. Your
-          opponent will not see your army until both are ready.
+          Choose one King, eight infantry for the pawn row, and up to seven more pieces.{' '}
+          {mode === 'computer'
+            ? 'You play White; you will choose the computer’s army next.'
+            : 'Your opponent will not see your army until both are ready.'}
         </p>
         <div className={styles.quickStart}>
           <label htmlFor="preset-select">Quick start</label>

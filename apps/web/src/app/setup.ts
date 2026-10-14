@@ -1,8 +1,14 @@
 /**
- * Army setup for a local two-player game: each player drafts and places privately, the device is
- * handed over between them, and both armies are revealed together.
+ * Army setup before a game.
+ *
+ * Two players: each drafts and places privately, the device is handed over between them, and both
+ * armies are revealed together.
  *
  *   White draft ⇄ White place → handoff → Black draft ⇄ Black place → ready → reveal
+ *
+ * Against the computer: the player (White) builds an army, then picks the computer's preset.
+ *
+ *   White draft ⇄ White place → opponent → reveal
  */
 
 import {
@@ -28,10 +34,18 @@ export type SetupStep =
   | 'handoff'
   /** Both armies are locked; waiting to reveal. */
   | 'ready'
+  /** Against the computer: choosing the computer's preset army. */
+  | 'opponent'
   /** Both armies are shown; the game can start. */
   | 'reveal';
 
+export type GameMode = 'local' | 'computer';
+
+/** The computer always plays Black. */
+export const COMPUTER_COLOR: Color = 'b';
+
 export interface SetupState {
+  readonly mode: GameMode;
   readonly step: SetupStep;
   readonly color: Color;
   /** For a handoff: the private step `color` returns to (defaults to drafting). */
@@ -49,10 +63,12 @@ export type SetupAction =
   | { readonly type: 'back-to-draft' }
   | { readonly type: 'set-deployment'; readonly deployment: Deployment }
   | { readonly type: 'lock' }
-  | { readonly type: 'continue' };
+  | { readonly type: 'continue' }
+  | { readonly type: 'choose-opponent'; readonly presetId: string };
 
-export function initialSetup(): SetupState {
+export function initialSetup(mode: GameMode = 'local'): SetupState {
   return {
+    mode,
     step: 'draft',
     color: 'w',
     drafts: { w: {}, b: {} },
@@ -103,9 +119,21 @@ export function setupReducer(state: SetupState, action: SetupAction): SetupState
 
     case 'lock':
       if (state.step !== 'place' || validateDeployment(deployment, draft).length > 0) return state;
+      if (state.mode === 'computer') return { ...state, step: 'opponent' };
       return state.color === 'w'
         ? { ...state, step: 'handoff', color: 'b' }
         : { ...state, step: 'ready' };
+
+    case 'choose-opponent': {
+      const preset = findPreset(action.presetId);
+      if (state.step !== 'opponent' || !preset) return state;
+      return {
+        ...state,
+        step: 'reveal',
+        drafts: { ...state.drafts, b: deploymentDraft(preset.deployment) },
+        deployments: { ...state.deployments, b: preset.deployment },
+      };
+    }
 
     case 'continue':
       if (state.step === 'handoff') {
@@ -122,6 +150,6 @@ export function setupReducer(state: SetupState, action: SetupAction): SetupState
  * handoff screen, so whoever holds the device cannot see that army until the player continues.
  */
 export function gateAfterReload(state: SetupState): SetupState {
-  if (state.step !== 'draft' && state.step !== 'place') return state;
+  if (state.mode === 'computer' || (state.step !== 'draft' && state.step !== 'place')) return state;
   return { ...state, step: 'handoff', resume: state.step };
 }

@@ -9,12 +9,14 @@
 
 import {
   attackedSquares,
+  type Color,
   type GameState,
   legalMovesFrom,
   type MoveInput,
   type PieceType,
   pseudoLegalMovesFrom,
   type Square,
+  undo,
 } from '@treasure-chess/game';
 
 export interface Selection {
@@ -32,7 +34,16 @@ export type TapResult =
       readonly choices: readonly PieceType[];
     };
 
-export function handleTap(game: GameState, selection: Selection | null, sq: Square): TapResult {
+/**
+ * @param player The only color the person tapping may move (against the computer); omit when both
+ *   sides are played on this device.
+ */
+export function handleTap(
+  game: GameState,
+  selection: Selection | null,
+  sq: Square,
+  player?: Color,
+): TapResult {
   if (selection?.mode === 'move') {
     const moves = legalMovesFrom(game, selection.square).filter((m) => m.to === sq);
     const choices = moves.flatMap((m) => (m.promotion ? [m.promotion] : []));
@@ -42,7 +53,10 @@ export function handleTap(game: GameState, selection: Selection | null, sq: Squa
 
   const piece = game.position.board[sq];
   if (!piece || sq === selection?.square) return { kind: 'select', selection: null };
-  const canMove = !game.result && piece.color === game.position.turn;
+  const canMove =
+    !game.result &&
+    piece.color === game.position.turn &&
+    (player === undefined || piece.color === player);
   return { kind: 'select', selection: { square: sq, mode: canMove ? 'move' : 'inspect' } };
 }
 
@@ -69,4 +83,15 @@ export function selectionMarks(
     if (!marks.has(sq)) marks.set(sq, 'attack');
   }
   return marks;
+}
+
+/**
+ * Undo against the computer: step back to the most recent position where it is `player`'s turn,
+ * taking back the computer's reply (if any) along with the player's own move. Returns `game`
+ * unchanged when there is nothing to undo.
+ */
+export function undoToPlayerTurn(game: GameState, player: Color): GameState {
+  let s = undo(game);
+  while (s.previous && s.position.turn !== player) s = undo(s);
+  return s.position.turn === player ? s : game;
 }

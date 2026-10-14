@@ -71,10 +71,13 @@ function isPromotionMove(move: Move, color: Color): boolean {
  */
 export function generateLegalMoves(position: Position, promotionTypes: PromotionTypes): Move[] {
   const { board, turn } = position;
+  const king = findKing(board, turn);
+  const enemy = opposite(turn);
   const legal: Move[] = [];
   for (const move of pseudoLegalMoves(position)) {
+    const kingSquare = PIECES[move.piece].royal ? move.to : king;
     makeMove(board, move);
-    const safe = !isInCheck(board, turn);
+    const safe = kingSquare === null || !isSquareAttacked(board, kingSquare, enemy);
     unmakeMove(board, move);
     if (!safe) continue;
     if (isPromotionMove(move, turn)) {

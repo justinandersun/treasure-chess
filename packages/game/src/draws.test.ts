@@ -34,10 +34,15 @@ function checkmateExists(type: PieceType): boolean {
 }
 
 describe('CANNOT_MATE_ALONE', () => {
-  it('is exactly the set of pieces with no King + piece vs King checkmate (exhaustive)', () => {
-    const cannotMate = OFFICERS.filter((t) => !checkmateExists(t));
-    expect(new Set(cannotMate)).toEqual(CANNOT_MATE_ALONE);
-  });
+  // Exhaustive enumeration takes a few seconds, so it gets a longer timeout.
+  it(
+    'is exactly the set of pieces with no King + piece vs King checkmate (exhaustive)',
+    { timeout: 30_000 },
+    () => {
+      const cannotMate = OFFICERS.filter((t) => !checkmateExists(t));
+      expect(new Set(cannotMate)).toEqual(CANNOT_MATE_ALONE);
+    },
+  );
 });
 
 describe('isColorBound', () => {

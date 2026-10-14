@@ -1,27 +1,29 @@
 import { opposite } from '@treasure-chess/game';
 import type { SetupAction, SetupState } from '../app/setup';
+import { ChooseOpponent } from './ChooseOpponent';
 import { Draft } from './Draft';
 import { Handoff } from './Handoff';
 import { COLOR_NAME } from './labels';
 import { Place } from './Place';
 import { Reveal } from './Reveal';
 
-interface LocalSetupProps {
+interface SetupProps {
   readonly setup: SetupState;
   readonly dispatch: (action: SetupAction) => void;
   readonly onStart: () => void;
   readonly onCancel: () => void;
 }
 
-/** Renders the current step of a local two-player setup. */
-export function LocalSetup({ setup, dispatch, onStart, onCancel }: LocalSetupProps) {
-  const { step, color } = setup;
+/** Renders the current step of army setup, for either game mode. */
+export function Setup({ setup, dispatch, onStart, onCancel }: SetupProps) {
+  const { step, color, mode } = setup;
   switch (step) {
     case 'draft':
       return (
         <Draft
           key={color}
           color={color}
+          mode={mode}
           draft={setup.drafts[color]}
           onAdjust={(piece, delta) => dispatch({ type: 'adjust-draft', piece, delta })}
           onUsePreset={(presetId) => dispatch({ type: 'use-preset', presetId })}
@@ -34,6 +36,7 @@ export function LocalSetup({ setup, dispatch, onStart, onCancel }: LocalSetupPro
         <Place
           key={color}
           color={color}
+          mode={mode}
           draft={setup.drafts[color]}
           deployment={setup.deployments[color]}
           onChange={(deployment) => dispatch({ type: 'set-deployment', deployment })}
@@ -63,7 +66,18 @@ export function LocalSetup({ setup, dispatch, onStart, onCancel }: LocalSetupPro
           onContinue={() => dispatch({ type: 'continue' })}
         />
       );
+    case 'opponent':
+      return (
+        <ChooseOpponent onChoose={(presetId) => dispatch({ type: 'choose-opponent', presetId })} />
+      );
     case 'reveal':
-      return <Reveal white={setup.deployments.w} black={setup.deployments.b} onStart={onStart} />;
+      return (
+        <Reveal
+          white={setup.deployments.w}
+          black={setup.deployments.b}
+          mode={mode}
+          onStart={onStart}
+        />
+      );
   }
 }

@@ -5,15 +5,21 @@
  */
 
 import { createGameFromArmies, type GameState } from '@treasure-chess/game';
-import { initialSetup, type SetupAction, setupReducer, type SetupState } from './setup';
+import {
+  type GameMode,
+  initialSetup,
+  type SetupAction,
+  setupReducer,
+  type SetupState,
+} from './setup';
 
-export type GameMode = 'local' | 'computer';
+export type { GameMode } from './setup';
 
 export type Session =
   | { readonly kind: 'setup'; readonly setup: SetupState }
-  | { readonly kind: 'game'; readonly game: GameState };
+  | { readonly kind: 'game'; readonly game: GameState; readonly mode: GameMode };
 
-export type View = 'home' | 'choose-mode' | 'computer-pending' | 'session';
+export type View = 'home' | 'choose-mode' | 'session';
 
 export interface AppState {
   readonly view: View;
@@ -40,9 +46,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     case 'new-game':
       return { ...state, view: 'choose-mode' };
     case 'choose-mode':
-      return action.mode === 'local'
-        ? { view: 'session', session: { kind: 'setup', setup: initialSetup() } }
-        : { ...state, view: 'computer-pending' };
+      return { view: 'session', session: { kind: 'setup', setup: initialSetup(action.mode) } };
     case 'continue':
       return session ? { ...state, view: 'session' } : state;
     case 'discard-session':
@@ -55,12 +59,13 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       };
     case 'start-game': {
       if (session?.kind !== 'setup' || session.setup.step !== 'reveal') return state;
-      const { w, b } = session.setup.deployments;
-      return { ...state, session: { kind: 'game', game: createGameFromArmies(w, b) } };
+      const { mode, deployments } = session.setup;
+      const game = createGameFromArmies(deployments.w, deployments.b);
+      return { ...state, session: { kind: 'game', game, mode } };
     }
     case 'update-game':
       return session?.kind === 'game'
-        ? { ...state, session: { kind: 'game', game: action.game } }
+        ? { ...state, session: { ...session, game: action.game } }
         : state;
   }
 }

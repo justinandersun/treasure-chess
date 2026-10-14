@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { fileOf, makeSquare, opposite, rankOf, type Square } from './board';
-import { attackedSquares, type Move, pseudoLegalMovesFrom } from './movegen';
+import { attackedSquares, isSquareAttacked, type Move, pseudoLegalMovesFrom } from './movegen';
 import { PIECES, PIECE_TYPES, piece } from './pieces';
 import { type Board, emptyBoard } from './position';
 import { seededRandom } from './testing';
@@ -107,6 +107,23 @@ describe('move generation properties (random boards)', () => {
         const attacked = new Set(attackedSquares(board, sq));
         for (const m of pseudoLegalMovesFrom(board, sq)) {
           if (m.captured) expect(attacked.has(m.to)).toBe(true);
+        }
+      }
+    }
+  });
+
+  it('isSquareAttacked agrees with scanning every piece’s attacks', () => {
+    for (const seed of SEEDS) {
+      const board = randomBoard(seededRandom(seed * 7), 0.3);
+      const attacked = { w: new Set<Square>(), b: new Set<Square>() };
+      board.forEach((p, sq) => {
+        if (p) for (const to of attackedSquares(board, sq)) attacked[p.color].add(to);
+      });
+      for (let sq = 0; sq < 64; sq++) {
+        for (const by of ['w', 'b'] as const) {
+          expect(isSquareAttacked(board, sq, by), `seed ${seed} square ${sq} by ${by}`).toBe(
+            attacked[by].has(sq),
+          );
         }
       }
     }

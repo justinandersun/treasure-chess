@@ -6,10 +6,9 @@ import { Dialog } from './components/Dialog';
 import { browserStorage, loadSession, saveSession } from './persistence/session';
 import { ChooseMode } from './screens/ChooseMode';
 import { Home } from './screens/Home';
-import { LocalSetup } from './screens/LocalSetup';
 import { Play } from './screens/Play';
 import { RulesContent } from './screens/RulesContent';
-import { SetupPlaceholder } from './screens/SetupPlaceholder';
+import { Setup } from './screens/Setup';
 
 const storage = browserStorage();
 
@@ -72,9 +71,8 @@ export function App() {
             onBack={goHome}
           />
         )}
-        {view === 'computer-pending' && <SetupPlaceholder onBack={goHome} />}
         {view === 'session' && session?.kind === 'setup' && (
-          <LocalSetup
+          <Setup
             setup={session.setup}
             dispatch={(action) => dispatch({ type: 'setup', action })}
             onStart={() => dispatch({ type: 'start-game' })}
@@ -84,6 +82,7 @@ export function App() {
         {view === 'session' && session?.kind === 'game' && (
           <Play
             game={session.game}
+            mode={session.mode}
             onChange={(game) => dispatch({ type: 'update-game', game })}
             onNewGame={() => dispatch({ type: 'new-game' })}
           />

@@ -25,6 +25,7 @@ import {
   squareSlot,
   trayCounts,
 } from '../app/placement';
+import type { GameMode } from '../app/setup';
 import { Board, type TargetKind } from '../components/Board';
 import { Button } from '../components/Button';
 import { PieceIcon } from '../pieces/PieceIcon';
@@ -39,6 +40,7 @@ const ALL_SLOTS: Slot[] = (['back', 'pawn'] as const).flatMap((row) =>
 
 interface PlaceProps {
   readonly color: Color;
+  readonly mode: GameMode;
   readonly draft: ArmyDraft;
   readonly deployment: Deployment;
   readonly onChange: (deployment: Deployment) => void;
@@ -46,7 +48,7 @@ interface PlaceProps {
   readonly onLock: () => void;
 }
 
-export function Place({ color, draft, deployment, onChange, onBack, onLock }: PlaceProps) {
+export function Place({ color, mode, draft, deployment, onChange, onBack, onLock }: PlaceProps) {
   const [selection, setSelection] = useState<Selection>(null);
   const tray = trayCounts(draft, deployment);
   const remaining = Object.values(tray).reduce((n, c) => n + (c ?? 0), 0);
@@ -103,7 +105,9 @@ export function Place({ color, draft, deployment, onChange, onBack, onLock }: Pl
 
   return (
     <section className={styles.place} aria-labelledby="place-title">
-      <h1 id="place-title">{COLOR_NAME[color]}: place your army</h1>
+      <h1 id="place-title">
+        {mode === 'computer' ? 'Place your army' : `${COLOR_NAME[color]}: place your army`}
+      </h1>
       <p className={styles.instruction} role="status">
         {instruction}
       </p>

@@ -109,3 +109,22 @@ describe('reloading during setup', () => {
     expect(gateAfterReload(ready)).toBe(ready);
   });
 });
+
+describe('setup against the computer', () => {
+  it('runs draft → place → opponent → reveal with no handoffs', () => {
+    let s = run(initialSetup('computer'), { type: 'use-preset', presetId: 'classic' });
+    expect(s.step).toBe('place');
+    s = run(s, { type: 'lock' });
+    expect([s.step, s.color]).toEqual(['opponent', 'w']);
+    expect(run(s, { type: 'choose-opponent', presetId: 'nope' })).toBe(s);
+    s = run(s, { type: 'choose-opponent', presetId: 'cavalry' });
+    expect(s.step).toBe('reveal');
+    expect(s.deployments.b).toEqual(PRESETS[1]!.deployment);
+    expect(s.deployments.w).toEqual(CLASSIC.deployment);
+  });
+
+  it('does not hide the only player’s army after a reload', () => {
+    const placing = run(initialSetup('computer'), { type: 'use-preset', presetId: 'classic' });
+    expect(gateAfterReload(placing)).toBe(placing);
+  });
+});

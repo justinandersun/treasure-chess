@@ -14,3 +14,6 @@ export * from './rng';
 export * from './notation';
 export * from './serialize';
 export * from './presets';
+export * from './zobrist';
+export { findBestMove, MATE_SCORE, MATE_THRESHOLD } from './ai/search';
+export type { SearchOptions, SearchResult } from './ai/search';

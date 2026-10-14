@@ -5,6 +5,7 @@ import {
   decodeSession,
   encodeSession,
   loadSession,
+  migrate,
   saveSession,
   type SessionStorage,
   STORAGE_KEY,
@@ -178,5 +179,48 @@ describe('storage access', () => {
     expect(() => saveSession(throwing, startedGame())).not.toThrow();
     expect(loadSession(null).status).toBe('empty');
     expect(() => saveSession(null, startedGame())).not.toThrow();
+  });
+});
+
+describe('schema migration', () => {
+  /** What version 1 wrote: no per-session mode, and `mode: 'local'` at the top level. */
+  function asVersion1(state: AppState): string {
+    const doc = JSON.parse(encodeSession(state)!);
+    const session = doc.session;
+    if (session.kind === 'setup') delete session.setup.mode;
+    else delete session.mode;
+    return JSON.stringify({ ...doc, schemaVersion: 1, mode: 'local' });
+  }
+
+  it('restores version 1 games and setups as two-player sessions', () => {
+    const game = decodeSession(asVersion1(startedGame()));
+    expect(game.status === 'restored' && game.state.session).toMatchObject({
+      kind: 'game',
+      mode: 'local',
+    });
+    const setup = decodeSession(
+      asVersion1(run(initialAppState, { type: 'choose-mode', mode: 'local' })),
+    );
+    expect(setup.status === 'restored' && setup.state.session).toMatchObject({
+      kind: 'setup',
+      setup: { mode: 'local' },
+    });
+  });
+
+  it('rejects versions newer than this build understands', () => {
+    expect(migrate({ schemaVersion: 3 })).toBeNull();
+  });
+
+  it('round-trips games against the computer', () => {
+    const state = run(
+      initialAppState,
+      { type: 'choose-mode', mode: 'computer' },
+      setupAction({ type: 'use-preset', presetId: 'classic' }),
+      setupAction({ type: 'lock' }),
+      setupAction({ type: 'choose-opponent', presetId: 'fortress' }),
+      { type: 'start-game' },
+    );
+    expect(state.session).toMatchObject({ kind: 'game', mode: 'computer' });
+    expect(reload(state).session).toMatchObject({ kind: 'game', mode: 'computer' });
   });
 });
