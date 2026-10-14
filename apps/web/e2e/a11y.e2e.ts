@@ -31,11 +31,11 @@ test('every screen passes automated accessibility checks', async ({ page }) => {
   await expectAccessible(page, 'Pieces dialog');
   await page.keyboard.press('Escape');
 
-  await startNewGame(page, 'Two players');
+  await startNewGame(page, 'Human vs. Human');
   await expectAccessible(page, 'Draft');
   await usePreset(page, 'royal-court');
   await expectAccessible(page, 'Place');
-  await page.getByRole('button', { name: 'Lock in army' }).click();
+  await page.getByRole('button', { name: 'Done', exact: true }).click();
   await expectAccessible(page, 'Handoff');
 
   await startLocalGame(page, 'classic', 'classic', true);

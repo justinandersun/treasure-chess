@@ -63,7 +63,7 @@ export interface PieceDefinition {
   /** Royal pieces may not be captured or left in check. */
   readonly royal: boolean;
   readonly movement: readonly MoveComponent[];
-  /** Short human-readable movement description. */
+  /** How the piece moves and captures, in plain words. */
   readonly summary: string;
 }
 
@@ -141,7 +141,8 @@ export const PIECE_DEFINITIONS: readonly PieceDefinition[] = [
     movement: [
       { kind: 'infantry', moves: [FORWARD], captures: FORWARD_DIAGONALS, doubleMoves: [FORWARD] },
     ],
-    summary: 'Moves straight forward; captures diagonally forward.',
+    summary:
+      'Moves one square straight ahead. Captures one square diagonally forward. On its first move from the pawn row, can move two squares straight ahead.',
   }),
   define({
     type: 'scout',
@@ -158,7 +159,8 @@ export const PIECE_DEFINITIONS: readonly PieceDefinition[] = [
         doubleMoves: FORWARD_DIAGONALS,
       },
     ],
-    summary: 'Moves diagonally forward; captures straight forward.',
+    summary:
+      'Moves one square diagonally forward. Captures one square straight ahead. On its first move from the pawn row, can move two squares diagonally forward.',
   }),
   define({
     type: 'sergeant',
@@ -170,7 +172,8 @@ export const PIECE_DEFINITIONS: readonly PieceDefinition[] = [
     movement: [
       { kind: 'infantry', moves: ALL_FORWARD, captures: ALL_FORWARD, doubleMoves: ALL_FORWARD },
     ],
-    summary: 'Moves and captures one square in any forward direction.',
+    summary:
+      'Moves and captures one square straight or diagonally forward. On its first move from the pawn row, can move two squares in one of those directions.',
   }),
   define({
     type: 'bastion',
@@ -180,7 +183,7 @@ export const PIECE_DEFINITIONS: readonly PieceDefinition[] = [
     cost: 3,
     royal: false,
     movement: [{ kind: 'slide', directions: ORTHOGONAL, range: 2 }],
-    summary: 'One or two squares orthogonally.',
+    summary: 'Moves and captures one or two squares along a rank or file. Cannot jump.',
   }),
   define({
     type: 'rook',
@@ -190,7 +193,7 @@ export const PIECE_DEFINITIONS: readonly PieceDefinition[] = [
     cost: 5,
     royal: false,
     movement: [{ kind: 'slide', directions: ORTHOGONAL }],
-    summary: 'Any distance orthogonally.',
+    summary: 'Moves and captures any distance along a rank or file.',
   }),
   define({
     type: 'gryphon',
@@ -200,7 +203,8 @@ export const PIECE_DEFINITIONS: readonly PieceDefinition[] = [
     cost: 6,
     royal: false,
     movement: [{ kind: 'bent', paths: GRYPHON_PATHS }],
-    summary: 'One diagonal step, then may continue outward orthogonally any distance.',
+    summary:
+      'Moves and captures one square diagonally. If that square is empty, can continue any distance straight outward from it.',
   }),
   define({
     type: 'priest',
@@ -210,7 +214,7 @@ export const PIECE_DEFINITIONS: readonly PieceDefinition[] = [
     cost: 2,
     royal: false,
     movement: [{ kind: 'slide', directions: DIAGONAL, range: 2 }],
-    summary: 'One or two squares diagonally.',
+    summary: 'Moves and captures one or two squares diagonally. Cannot jump.',
   }),
   define({
     type: 'bishop',
@@ -220,7 +224,7 @@ export const PIECE_DEFINITIONS: readonly PieceDefinition[] = [
     cost: 3,
     royal: false,
     movement: [{ kind: 'slide', directions: DIAGONAL }],
-    summary: 'Any distance diagonally.',
+    summary: 'Moves and captures any distance diagonally.',
   }),
   define({
     type: 'cardinal',
@@ -230,7 +234,8 @@ export const PIECE_DEFINITIONS: readonly PieceDefinition[] = [
     cost: 5,
     royal: false,
     movement: [{ kind: 'bent', paths: CARDINAL_PATHS }],
-    summary: 'One orthogonal step, then may continue outward diagonally any distance.',
+    summary:
+      'Moves and captures one square along a rank or file. If that square is empty, can continue any distance diagonally outward from it.',
   }),
   define({
     type: 'camel',
@@ -240,7 +245,8 @@ export const PIECE_DEFINITIONS: readonly PieceDefinition[] = [
     cost: 2,
     royal: false,
     movement: [{ kind: 'leap', offsets: CAMEL }],
-    summary: 'Jumps one square one way and three the other.',
+    summary:
+      'Moves and captures by jumping one square one way and three the other. Jumps over pieces.',
   }),
   define({
     type: 'knight',
@@ -250,7 +256,8 @@ export const PIECE_DEFINITIONS: readonly PieceDefinition[] = [
     cost: 3,
     royal: false,
     movement: [{ kind: 'leap', offsets: KNIGHT }],
-    summary: 'Jumps one square one way and two the other.',
+    summary:
+      'Moves and captures by jumping one square one way and two the other. Jumps over pieces.',
   }),
   define({
     type: 'elephant',
@@ -260,7 +267,7 @@ export const PIECE_DEFINITIONS: readonly PieceDefinition[] = [
     cost: 6,
     royal: false,
     movement: [{ kind: 'leap', offsets: [...KNIGHT, ...CAMEL] }],
-    summary: 'Jumps like a Knight or a Camel.',
+    summary: 'Moves and captures by jumping like a Knight or a Camel. Jumps over pieces.',
   }),
   define({
     type: 'consort',
@@ -270,7 +277,7 @@ export const PIECE_DEFINITIONS: readonly PieceDefinition[] = [
     cost: 3,
     royal: false,
     movement: [{ kind: 'leap', offsets: ADJACENT }],
-    summary: 'One square in any direction.',
+    summary: 'Moves and captures one square in any direction.',
   }),
   define({
     type: 'falconer',
@@ -285,7 +292,8 @@ export const PIECE_DEFINITIONS: readonly PieceDefinition[] = [
         offsets: [...symmetricVectors(2, 0), ...KNIGHT, ...symmetricVectors(2, 2)],
       },
     ],
-    summary: 'Jumps to any square exactly two away: orthogonally, diagonally, or knightwise.',
+    summary:
+      'Moves and captures by jumping exactly two squares: straight, diagonally, or a knight’s move. Never to an adjacent square. Jumps over pieces.',
   }),
   define({
     type: 'queen',
@@ -295,7 +303,7 @@ export const PIECE_DEFINITIONS: readonly PieceDefinition[] = [
     cost: 9,
     royal: false,
     movement: [{ kind: 'slide', directions: ADJACENT }],
-    summary: 'Any distance orthogonally or diagonally.',
+    summary: 'Moves and captures any distance along a rank, file, or diagonal.',
   }),
   define({
     type: 'king',
@@ -305,7 +313,7 @@ export const PIECE_DEFINITIONS: readonly PieceDefinition[] = [
     cost: 1,
     royal: true,
     movement: [{ kind: 'leap', offsets: ADJACENT }],
-    summary: 'One square in any direction. Cannot castle.',
+    summary: 'Moves and captures one square in any direction. Cannot castle.',
   }),
 ];
 

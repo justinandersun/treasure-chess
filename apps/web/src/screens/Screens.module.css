@@ -8,20 +8,14 @@
   padding-block: clamp(16px, 6vh, 64px);
 }
 
-.emblem {
-  width: 96px;
-  height: 96px;
-  margin-bottom: 16px;
-}
-
 .title {
-  font-size: clamp(2.25rem, 8vw, 3.5rem);
-  font-weight: 400;
-  letter-spacing: 0.01em;
+  font-size: clamp(2.75rem, 11vw, 4.5rem);
+  letter-spacing: -0.035em;
+  line-height: 1;
 }
 
 .lede {
-  max-width: 30ch;
+  max-width: 44ch;
   margin-bottom: 2em;
   color: var(--muted);
   font-size: 1.1rem;
@@ -38,34 +32,8 @@
 .choices {
   display: grid;
   gap: 12px;
-  width: 100%;
+  width: min(100%, 320px);
   margin-bottom: 16px;
-}
-
-.choice {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 16px 20px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface);
-  text-align: left;
-  cursor: pointer;
-}
-
-.choice:hover {
-  border-color: var(--fg);
-}
-
-.choice strong {
-  font-family: var(--font-display);
-  font-size: 1.15rem;
-  font-weight: 500;
-}
-
-.choice span {
-  color: var(--muted);
 }
 
 .saved {

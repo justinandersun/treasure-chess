@@ -3,7 +3,7 @@ import { COLOR_NAME } from '../labels';
 
 const DRAW_TEXT: Record<DrawReason, string> = {
   stalemate: 'Stalemate: the player to move has no legal moves but is not in check.',
-  'dead-position': 'Neither side has enough material left to checkmate.',
+  'dead-position': 'Neither side has enough pieces left to checkmate.',
   'fivefold-repetition': 'The same position occurred five times.',
   'seventy-five-move-rule': '75 moves each without a capture or infantry move.',
   'threefold-repetition': 'Claimed after the same position occurred three times.',
@@ -23,14 +23,14 @@ export function resultHeadline(result: GameResult, player?: Color): string {
   switch (result.kind) {
     case 'checkmate':
       if (player !== undefined) {
-        return result.winner === player ? 'Checkmate — you win' : 'Checkmate — the computer wins';
+        return result.winner === player ? 'Checkmate — You Win' : 'Checkmate — the Computer Wins';
       }
-      return `Checkmate — ${COLOR_NAME[result.winner]} wins`;
+      return `Checkmate — ${COLOR_NAME[result.winner]} Wins`;
     case 'resignation':
       if (player !== undefined) {
-        return result.winner === player ? 'The computer resigned' : 'You resigned';
+        return result.winner === player ? 'The Computer Resigned' : 'You Resigned';
       }
-      return `${COLOR_NAME[result.winner]} wins by resignation`;
+      return `${COLOR_NAME[result.winner]} Wins by Resignation`;
     case 'draw':
       return 'Draw';
   }

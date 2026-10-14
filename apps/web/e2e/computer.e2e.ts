@@ -17,7 +17,7 @@ test('the computer replies, and undo takes back both moves', async ({ page }) =>
 test("the computer's pieces can be inspected but not moved", async ({ page }) => {
   await startComputerGame(page, 'classic', 'Cavalry');
   await page.getByRole('button', { name: /^g8,/ }).click();
-  await expect(page.getByRole('status')).toContainText('Inspecting Black Knight on g8');
+  await expect(page.getByRole('status')).toContainText('Black Knight on g8');
   await page.getByRole('button', { name: /^f6, empty, can move here/ }).click();
   await expect(page.getByText('No moves yet.')).toBeVisible();
 });

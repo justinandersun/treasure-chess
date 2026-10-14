@@ -6,12 +6,12 @@ interface ChooseOpponentProps {
   readonly onChoose: (presetId: string) => void;
 }
 
-/** Picks the preset army (and formation) the computer will play. */
+/** Picks the starter army (and formation) the computer will play. */
 export function ChooseOpponent({ onChoose }: ChooseOpponentProps) {
   return (
     <section className={styles.choose} aria-labelledby="opponent-title">
-      <h1 id="opponent-title">Choose the computer’s army</h1>
-      <p className={styles.hint}>The computer plays Black with one of the preset armies.</p>
+      <h1 id="opponent-title">Choose the Computer’s Army</h1>
+      <p className={styles.hint}>The computer plays Black with one of the starter armies.</p>
       <ul className={styles.list}>
         {PRESETS.map((preset) => (
           <li key={preset.id}>

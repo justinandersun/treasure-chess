@@ -12,19 +12,18 @@ export function PieceGrid({ children }: { readonly children: ReactNode }) {
 interface PieceTileProps {
   readonly type: PieceType;
   readonly color: Color;
-  readonly description: string;
   /** Heading level for the piece name, to fit the surrounding outline. */
   readonly level?: 3 | 4;
-  /** Extra controls along the bottom, e.g. the draft stepper. */
-  readonly children?: ReactNode;
+  /** `li` inside a PieceGrid; `div` when shown on its own. */
+  readonly as?: 'li' | 'div';
 }
 
 /** A piece's name, icon, notation, and cost, over its movement diagram and description. */
-export function PieceTile({ type, color, description, level = 3, children }: PieceTileProps) {
-  const { name, symbol, cost } = PIECES[type];
+export function PieceTile({ type, color, level = 3, as: Element = 'li' }: PieceTileProps) {
+  const { name, symbol, cost, summary } = PIECES[type];
   const Heading = level === 3 ? 'h3' : 'h4';
   return (
-    <li className={styles.tile}>
+    <Element className={styles.tile}>
       <div className={styles.head}>
         <Heading className={styles.name}>{name}</Heading>
         <span className={styles.meta}>
@@ -43,8 +42,7 @@ export function PieceTile({ type, color, description, level = 3, children }: Pie
         </span>
       </div>
       <MoveDiagram type={type} className={styles.diagram} />
-      <p className={styles.description}>{description}</p>
-      {children && <div className={styles.extra}>{children}</div>}
-    </li>
+      <p className={styles.description}>{summary}</p>
+    </Element>
   );
 }

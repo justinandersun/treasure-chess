@@ -22,17 +22,14 @@
 }
 
 .quickStart label {
-  color: var(--muted);
-  font-size: 0.8rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-weight: 500;
 }
 
 .quickStart select {
   min-height: 44px;
   padding: 4px 8px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border: 3px solid var(--fg);
+  font-weight: 700;
   background: var(--surface);
 }
 
@@ -43,29 +40,90 @@
   font-size: 0.9rem;
 }
 
-.familyName {
-  margin: 2em 0 0.75em;
+.table {
+  width: 100%;
+  margin-top: 24px;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.table th,
+.table td {
+  padding: 8px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.table .columnName {
+  padding-top: 28px;
   color: var(--muted);
-  font-family: var(--font);
-  font-size: 0.8rem;
-  font-weight: 500;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+}
+
+.table .center {
+  text-align: center;
+}
+
+.table .familyName {
+  padding-top: 28px;
+}
+
+.chosen {
+  background: var(--surface-2);
+}
+
+.table .pieceCell {
+  font-weight: 400;
+}
+
+.piece {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.icon {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  padding: 3px;
+  /* A light square behind every icon keeps Black pieces visible in dark mode. */
+  background: var(--square-light);
+}
+
+.pieceText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.name {
+  font-weight: 700;
+}
+
+.summary {
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1.4;
 }
 
 .stepper {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
+  gap: 2px;
 }
 
 .step {
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   border: 1px solid var(--border);
-  border-radius: 50%;
-  background: transparent;
-  font-size: 1.2rem;
+  background: var(--surface);
+  font-size: 1.1rem;
   line-height: 1;
   cursor: pointer;
 }
@@ -79,12 +137,58 @@
   cursor: not-allowed;
 }
 
+.narrowMeta {
+  display: none;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.blocked {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1.2;
+  text-align: right;
+}
+
+.met {
+  color: var(--fg);
+  font-weight: 700;
+}
+
+.stepSpacer {
+  width: 40px;
+}
+
 .count {
-  min-width: 1.6em;
-  font-size: 1.1rem;
-  font-weight: 600;
+  min-width: 2em;
+  font-weight: 800;
   text-align: center;
-  font-variant-numeric: tabular-nums;
+}
+
+/* Phones: fold notation and points into the piece cell so descriptions have room. */
+@media (max-width: 480px) {
+  .table th,
+  .table td {
+    padding: 8px 4px;
+  }
+
+  .table .wide {
+    display: none;
+  }
+
+  .narrowMeta {
+    display: inline;
+  }
+
+  .icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .summary {
+    font-size: 0.8rem;
+  }
 }
 
 .footer {
@@ -116,7 +220,6 @@
 .meter {
   flex: 1;
   height: 4px;
-  border-radius: 2px;
   background: var(--border);
   overflow: hidden;
 }
@@ -130,12 +233,6 @@
 .slots {
   margin: 4px 0 0;
   color: var(--muted);
-  font-size: 0.85rem;
-}
-
-.issue {
-  margin: 4px 0 0;
-  color: var(--danger);
   font-size: 0.85rem;
 }
 

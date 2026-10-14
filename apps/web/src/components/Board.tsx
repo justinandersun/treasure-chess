@@ -8,7 +8,7 @@ import {
   type Square,
   squareName,
 } from '@treasure-chess/game';
-import { type KeyboardEvent, useRef, useState } from 'react';
+import { type KeyboardEvent, type ReactNode, useRef, useState } from 'react';
 import { COLOR_NAME } from '../labels';
 import { PieceIcon } from '../pieces/PieceIcon';
 import styles from './Board.module.css';
@@ -33,6 +33,9 @@ export interface BoardProps {
   readonly label?: string;
   /** Display rows to show (0 = top), e.g. [6, 7] for the player's own two ranks. */
   readonly rows?: readonly number[];
+  /** Shown above and below the board, at the board's width. */
+  readonly above?: ReactNode;
+  readonly below?: ReactNode;
 }
 
 const ALL_ROWS = [0, 1, 2, 3, 4, 5, 6, 7];
@@ -58,6 +61,8 @@ export function Board({
   onSquareClick,
   label = 'Chessboard',
   rows = ALL_ROWS,
+  above,
+  below,
 }: BoardProps) {
   const [focusSquare, setFocusSquare] = useState<Square>(
     () => (orientation === 'w' ? 4 /* e1 */ : 60) /* e8 */,
@@ -75,7 +80,7 @@ export function Board({
 
   const squares = displaySquares(orientation);
   const partial = rows.length < 8;
-  return (
+  const grid = (
     <div
       className={[styles.board, partial && styles.partial].filter(Boolean).join(' ')}
       style={partial ? { aspectRatio: `8 / ${rows.length}` } : undefined}
@@ -145,6 +150,14 @@ export function Board({
           })}
         </div>
       ))}
+    </div>
+  );
+  if (!above && !below) return grid;
+  return (
+    <div className={styles.frame}>
+      {above}
+      {grid}
+      {below}
     </div>
   );
 }

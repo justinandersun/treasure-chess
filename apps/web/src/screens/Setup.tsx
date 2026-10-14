@@ -1,5 +1,5 @@
 import { opposite } from '@treasure-chess/game';
-import type { SetupAction, SetupState } from '../app/setup';
+import { type SetupAction, type SetupState, withKing } from '../app/setup';
 import { ChooseOpponent } from './ChooseOpponent';
 import { Draft } from './Draft';
 import { Handoff } from './Handoff';
@@ -24,7 +24,7 @@ export function Setup({ setup, dispatch, onStart, onCancel }: SetupProps) {
           key={color}
           color={color}
           mode={mode}
-          draft={setup.drafts[color]}
+          draft={withKing(setup.drafts[color])}
           onAdjust={(piece, delta) => dispatch({ type: 'adjust-draft', piece, delta })}
           onUsePreset={(presetId) => dispatch({ type: 'use-preset', presetId })}
           onContinue={() => dispatch({ type: 'to-place' })}
@@ -37,7 +37,7 @@ export function Setup({ setup, dispatch, onStart, onCancel }: SetupProps) {
           key={color}
           color={color}
           mode={mode}
-          draft={setup.drafts[color]}
+          draft={withKing(setup.drafts[color])}
           deployment={setup.deployments[color]}
           onChange={(deployment) => dispatch({ type: 'set-deployment', deployment })}
           onBack={() => dispatch({ type: 'back-to-draft' })}
@@ -47,22 +47,22 @@ export function Setup({ setup, dispatch, onStart, onCancel }: SetupProps) {
     case 'handoff':
       return (
         <Handoff
-          title={`Pass the device to ${COLOR_NAME[color]}`}
+          title={`Pass the Device to ${COLOR_NAME[color]}`}
           message={
             setup.resume
               ? `Setup was restored. ${COLOR_NAME[color]}, continue when you are ready to keep building your army in private.`
-              : `${COLOR_NAME[opposite(color)]}'s army is locked in and hidden. ${COLOR_NAME[color]}, continue when you are ready to draft in private.`
+              : `${COLOR_NAME[opposite(color)]}'s army is placed and hidden. ${COLOR_NAME[color]}, continue when you are ready to draft in private.`
           }
-          action={`I'm ${COLOR_NAME[color]} — continue`}
+          action="Continue"
           onContinue={() => dispatch({ type: 'continue' })}
         />
       );
     case 'ready':
       return (
         <Handoff
-          title="Both armies are ready"
+          title="Both Armies Are Ready"
           message="Put the device where both players can see it, then reveal the armies together."
-          action="Reveal armies"
+          action="Reveal"
           onContinue={() => dispatch({ type: 'continue' })}
         />
       );

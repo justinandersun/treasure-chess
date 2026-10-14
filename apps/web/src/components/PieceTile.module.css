@@ -1,7 +1,7 @@
 .grid {
   display: grid;
-  /* Two columns where they fit at a comfortable size; one on narrow phones. */
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, max(240px, (100% - 16px) / 2)), 1fr));
+  /* Three columns where they fit at a comfortable size; fewer on narrow screens. */
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, max(180px, (100% - 32px) / 3)), 1fr));
   gap: 16px;
   margin: 0;
   padding: 0;
@@ -15,7 +15,6 @@
   min-width: 0;
   padding: 16px;
   border: 1px solid var(--border);
-  border-radius: var(--radius);
   background: var(--surface);
 }
 
@@ -30,9 +29,8 @@
 
 .name {
   margin: 0;
-  font-family: var(--font-display);
-  font-size: 1.15rem;
-  font-weight: 500;
+  font-size: 1rem;
+  font-weight: 700;
 }
 
 .meta {
@@ -43,8 +41,10 @@
 
 .icon {
   flex: none;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
+  padding: 2px;
+  background: var(--square-light);
 }
 
 .symbol,
@@ -74,9 +74,4 @@
   color: var(--muted);
   font-size: 0.9rem;
   line-height: 1.5;
-}
-
-.extra {
-  padding-top: 10px;
-  border-top: 1px solid var(--border);
 }

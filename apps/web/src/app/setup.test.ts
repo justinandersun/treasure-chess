@@ -21,7 +21,7 @@ describe('local setup flow', () => {
     expect([s.step, s.color]).toEqual(['handoff', 'b']);
     s = run(s, { type: 'continue' });
     expect([s.step, s.color]).toEqual(['draft', 'b']);
-    expect(s.drafts.b).toEqual({});
+    expect(s.drafts.b).toEqual({ king: 1 });
 
     s = run(s, { type: 'use-preset', presetId: 'cavalry' }, { type: 'lock' });
     expect(s.step).toBe('ready');
@@ -66,13 +66,13 @@ describe('local setup flow', () => {
     let s = initialSetup();
     for (let i = 0; i < 10; i++)
       s = setupReducer(s, { type: 'adjust-draft', piece: 'pawn', delta: 1 });
-    expect(s.drafts.w).toEqual({ pawn: 8 });
+    expect(s.drafts.w).toEqual({ king: 1, pawn: 8 });
     s = run(
       s,
       { type: 'adjust-draft', piece: 'king', delta: 1 },
-      { type: 'adjust-draft', piece: 'king', delta: 1 },
+      { type: 'adjust-draft', piece: 'king', delta: -1 },
     );
-    expect(s.drafts.w.king).toBe(1);
+    expect(s.drafts.w.king).toBe(1); // the King is fixed
     s = run(s, { type: 'adjust-draft', piece: 'pawn', delta: -1 });
     expect(s.drafts.w.pawn).toBe(7);
   });

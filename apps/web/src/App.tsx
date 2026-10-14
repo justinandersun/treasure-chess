@@ -3,6 +3,7 @@ import styles from './App.module.css';
 import { appReducer, type AppState, initialAppState, isUnfinished } from './app/appState';
 import { Button } from './components/Button';
 import { Dialog } from './components/Dialog';
+import { ThemeToggle } from './components/ThemeToggle';
 import { browserStorage, loadSession, saveSession } from './persistence/session';
 import { ChooseMode } from './screens/ChooseMode';
 import { Home } from './screens/Home';
@@ -43,13 +44,14 @@ export function App() {
         <button type="button" className={styles.brand} onClick={goHome}>
           Treasure Chess
         </button>
-        <nav className={styles.nav} aria-label="Reference">
+        <nav className={styles.nav} aria-label="Menu">
           <button type="button" className={styles.navLink} onClick={() => setOverlay('rules')}>
             Rules
           </button>
           <button type="button" className={styles.navLink} onClick={() => setOverlay('pieces')}>
             Pieces
           </button>
+          <ThemeToggle className={styles.navLink} />
         </nav>
       </header>
 
@@ -112,7 +114,7 @@ export function App() {
 
       <Dialog
         open={confirm !== null}
-        title={confirm === 'discard' ? 'Discard saved game?' : 'Start a new game?'}
+        title={confirm === 'discard' ? 'Discard Saved Game?' : 'Start a New Game?'}
         size="small"
         onClose={() => setConfirm(null)}
         actions={
@@ -127,7 +129,7 @@ export function App() {
                 setConfirm(null);
               }}
             >
-              {confirm === 'discard' ? 'Discard' : 'New game'}
+              {confirm === 'discard' ? 'Discard' : 'New Game'}
             </Button>
           </>
         }

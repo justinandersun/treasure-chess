@@ -26,7 +26,6 @@
   width: 100%;
   padding: 12px 16px;
   border: 1px solid var(--border);
-  border-radius: var(--radius);
   background: var(--surface);
   text-align: left;
   cursor: pointer;
@@ -44,9 +43,8 @@
 }
 
 .name strong {
-  font-family: var(--font-display);
-  font-size: 1.15rem;
-  font-weight: 500;
+  font-size: 1rem;
+  font-weight: 700;
 }
 
 .points {
@@ -57,7 +55,6 @@
   display: grid;
   grid-template-columns: repeat(8, 1fr);
   max-width: 320px;
-  border-radius: 2px;
   overflow: hidden;
 }
 

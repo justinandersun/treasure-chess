@@ -1,7 +1,5 @@
 import type { Session } from '../app/appState';
 import { Button } from '../components/Button';
-import { PieceIcon } from '../pieces/PieceIcon';
-import { COLOR_NAME } from '../labels';
 import styles from './Screens.module.css';
 
 interface HomeProps {
@@ -13,33 +11,24 @@ interface HomeProps {
 
 function describeSession(session: Session): { action: string; detail: string } {
   const mode = session.kind === 'setup' ? session.setup.mode : session.mode;
-  const opponent = mode === 'computer' ? 'Against the computer' : 'Two players';
+  const opponent = mode === 'computer' ? 'Human vs. Computer' : 'Human vs. Human';
   if (session.kind === 'setup') {
-    return { action: 'Continue setup', detail: `${opponent} · choosing armies` };
+    return { action: 'Continue Setup', detail: `In Progress: ${opponent} · Drafting` };
   }
   const { game } = session;
-  if (game.result) return { action: 'View last game', detail: `${opponent} · finished` };
+  if (game.result) return { action: 'View Last Game', detail: `Finished: ${opponent}` };
   const moveNumber = Math.floor(game.ply / 2) + 1;
-  const toPlay =
-    mode === 'computer'
-      ? game.position.turn === 'w'
-        ? 'your move'
-        : 'computer to play'
-      : `${COLOR_NAME[game.position.turn]} to play`;
-  return { action: 'Continue game', detail: `${opponent} · move ${moveNumber} · ${toPlay}` };
+  return { action: 'Continue Game', detail: `In Progress: ${opponent} · Move ${moveNumber}` };
 }
 
 export function Home({ session, onNewGame, onContinue, onDiscard }: HomeProps) {
   const saved = session && describeSession(session);
   return (
     <section className={styles.centered} aria-labelledby="home-title">
-      <div className={styles.emblem} aria-hidden="true">
-        <PieceIcon type="gryphon" color="w" />
-      </div>
       <h1 id="home-title" className={styles.title}>
         Treasure Chess
       </h1>
-      <p className={styles.lede}>Chess, with an army of your own design.</p>
+      <p className={styles.lede}>A game of asymmetric armies.</p>
       <div className={styles.actions}>
         {saved && (
           <Button variant="primary" onClick={onContinue}>
@@ -47,12 +36,12 @@ export function Home({ session, onNewGame, onContinue, onDiscard }: HomeProps) {
           </Button>
         )}
         <Button variant={saved ? 'default' : 'primary'} onClick={onNewGame}>
-          New game
+          New Game
         </Button>
       </div>
       {saved && (
         <p className={styles.saved}>
-          Saved on this device: {saved.detail}.{' '}
+          {saved.detail} ·{' '}
           <button type="button" className={styles.link} onClick={onDiscard}>
             Discard
           </button>

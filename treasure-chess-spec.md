@@ -3,7 +3,7 @@
 ## 1. Overview
 Treasure Chess is a free, browser-based chess variant in which players draft and arrange custom armies of fairy pieces before playing on a standard 8×8 chessboard.
 
-Each player receives a treasury of 40 points to purchase pieces from an expanded roster. Players must fill their pawn row, select a King, and purchase at least one additional back-rank piece. The remaining army composition and placement are customizable.
+Each player has 40 points to spend on pieces from an expanded roster. Players must fill their pawn row, select a King, and purchase at least one additional king-row piece. The remaining army composition and placement are customizable.
 
 The core experience is **Draft → Place → Play**.
 
@@ -11,7 +11,7 @@ The application supports two local players on one device or one player against a
 
 ### Product principles
 - **Simple:** Minimal UI, familiar chess interactions, no unnecessary features.
-- **Fast:** Easy to start a game using preset or custom armies.
+- **Fast:** Easy to start a game using starter or custom armies.
 - **Approachable:** Piece movements and game rules are easy to discover.
 - **Quiet:** Minimal animation, sound, and medieval branding.
 - **Private:** No accounts, tracking, ads, or paywall.
@@ -28,13 +28,13 @@ The application supports two local players on one device or one player against a
 - No game clock is used.
 
 ### 2.2 Army Construction
-Each player receives a treasury of **40 points**.
+Each player has **40 points** to spend.
 - Every army must contain exactly one King, costing 1 point.
 - All eight squares of the pawn row must be filled.
 - Players may freely mix the three available pawn types.
-- Each army must contain at least one non-King, non-pawn piece on its back rank.
-- Players may purchase multiple copies of any piece, subject to treasury and placement constraints.
-- Players may leave back-rank squares empty.
+- Each army must contain at least one non-King, non-pawn piece on its king row.
+- Players may purchase multiple copies of any piece, subject to the point budget and placement constraints.
+- Players may leave king-row squares empty.
 - Unspent points is permitted but provides no benefit.
 - Purchased pieces must fit within their designated starting ranks.
 
@@ -42,10 +42,10 @@ White's starting ranks are 1 and 2; Black's are 8 and 7.
 
 ### 2.3 Deployment
 - After drafting, each player arranges their purchased pieces.
-- Pawns occupy the pawn row; other pieces occupy the back rank.
+- Pawns occupy the pawn row; other pieces occupy the king row.
 - White's King must start on d1 or e1.
 - Black's King must start on d8 or e8.
-- All other back-rank pieces may occupy any available back-rank square.
+- All other king-row pieces may occupy any available king-row square.
 - Players draft and deploy privately, then reveal their completed armies simultaneously.
 - No changes are permitted after both armies are locked.
 
@@ -89,7 +89,7 @@ Notation letters are unique identifiers. Traditional chess notation letters are 
 - En passant is not permitted.
 
 ### 2.6 Promotion
-- Promotion is mandatory when a pawn reaches the opponent's back rank.
+- Promotion is mandatory when a pawn reaches the opponent's king row.
 - A pawn may promote to any non-King, non-pawn piece type in its player's original starting army.
 - A piece type remains eligible even if all original pieces of that type have been captured.
 - Multiple pawns may promote to the same piece type.
@@ -120,8 +120,8 @@ The following pieces are excluded from v1 but may be introduced later:
 
 **Single-player**
 - One human plays against a basic computer opponent.
-- The human may use a preset army or draft a custom army.
-- The computer uses a player-selected preset army and formation.
+- The human may use a starter army or draft a custom army.
+- The computer uses a player-selected starter army and formation.
 - The computer must generate legal moves and provide a reasonable basic challenge.
 - Advanced AI, opening books, and difficulty settings are not required for v1.
 
@@ -136,9 +136,9 @@ The following pieces are excluded from v1 but may be introduced later:
 - Display all pieces, grouped by family.
 - Show each piece's name, symbol, cost, and movement reference.
 - Allow players to add and remove pieces.
-- Display treasury expenditure and remaining points.
+- Display points spent and remaining.
 - Validate all army construction constraints.
-- Offer preset armies for quick starting.
+- Offer starter armies for quick starting.
 
 **Place**
 - Display the chessboard and available pieces.
@@ -262,6 +262,6 @@ Treasure Chess v1 is ready when:
 
 **Phase 2 — Local multiplayer:** Drafting, deployment, playable board, rules reference, undo, and browser persistence.
 
-**Phase 3 — Computer opponent:** Preset armies, basic search and evaluation, and background calculation.
+**Phase 3 — Computer opponent:** Starter armies, basic search and evaluation, and background calculation.
 
 **Phase 4 — Release:** Mobile and desktop refinement, accessibility, game testing, and production deployment.

@@ -30,11 +30,11 @@ export type SetupStep =
   | 'draft'
   /** `color` is arranging pieces. */
   | 'place'
-  /** Pass the device to `color` (who has not seen the other army). */
+  /** Pass the Device to `color` (who has not seen the other army). */
   | 'handoff'
   /** Both armies are locked; waiting to reveal. */
   | 'ready'
-  /** Against the computer: choosing the computer's preset army. */
+  /** Against the computer: choosing the computer's starter army. */
   | 'opponent'
   /** Both armies are shown; the game can start. */
   | 'reveal';
@@ -66,12 +66,17 @@ export type SetupAction =
   | { readonly type: 'continue' }
   | { readonly type: 'choose-opponent'; readonly presetId: string };
 
+/** Every army has exactly one King, so drafts always include it and it cannot be changed. */
+export function withKing(draft: ArmyDraft): ArmyDraft {
+  return draft.king === 1 ? draft : { ...draft, king: 1 };
+}
+
 export function initialSetup(mode: GameMode = 'local'): SetupState {
   return {
     mode,
     step: 'draft',
     color: 'w',
-    drafts: { w: {}, b: {} },
+    drafts: { w: { king: 1 }, b: { king: 1 } },
     deployments: { w: emptyDeployment(), b: emptyDeployment() },
   };
 }
@@ -86,14 +91,14 @@ function update<K extends 'drafts' | 'deployments'>(
 
 /** Actions that do not apply to the current step leave the state unchanged. */
 export function setupReducer(state: SetupState, action: SetupAction): SetupState {
-  const draft = state.drafts[state.color];
+  const draft = withKing(state.drafts[state.color]);
   const deployment = state.deployments[state.color];
   switch (action.type) {
     case 'set-draft':
-      return state.step === 'draft' ? update(state, 'drafts', action.draft) : state;
+      return state.step === 'draft' ? update(state, 'drafts', withKing(action.draft)) : state;
 
     case 'adjust-draft':
-      if (state.step !== 'draft') return state;
+      if (state.step !== 'draft' || action.piece === 'king') return state;
       if (action.delta > 0 && addBlocker(draft, action.piece)) return state;
       return update(state, 'drafts', adjustDraft(draft, action.piece, action.delta));
 
@@ -107,7 +112,11 @@ export function setupReducer(state: SetupState, action: SetupAction): SetupState
     case 'to-place':
       if (state.step !== 'draft' || validateDraft(draft).length > 0) return state;
       return {
-        ...update(state, 'deployments', reconcileDeployment(draft, deployment)),
+        ...update(
+          update(state, 'drafts', draft),
+          'deployments',
+          reconcileDeployment(draft, deployment),
+        ),
         step: 'place',
       };
 

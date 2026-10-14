@@ -22,7 +22,7 @@ export function Reveal({ white, black, mode, onStart }: RevealProps) {
   const points = (d: Deployment) => draftCost(deploymentDraft(d));
   return (
     <section className={styles.place} aria-labelledby="reveal-title">
-      <h1 id="reveal-title">The armies</h1>
+      <h1 id="reveal-title">The Armies</h1>
       <p className={styles.instruction}>
         {mode === 'computer'
           ? `You (White) spent ${points(white)} points; the computer spent ${points(black)}. You move first.`
@@ -35,7 +35,7 @@ export function Reveal({ white, black, mode, onStart }: RevealProps) {
       />
       <div className={styles.actions}>
         <Button variant="primary" onClick={onStart} autoFocus>
-          Start game
+          Start Game
         </Button>
       </div>
     </section>

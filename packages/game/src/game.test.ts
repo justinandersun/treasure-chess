@@ -10,6 +10,9 @@ import {
   isPromotion,
   legalMoves,
   legalMovesFrom,
+  capturedPieces,
+  initialState,
+  material,
   moveHistory,
   playMove,
   repetitionCount,
@@ -306,5 +309,25 @@ describe('draws by repetition and move count', () => {
     expect(quiet.result).toEqual({ kind: 'draw', reason: 'seventy-five-move-rule' });
     const mate = play({ ...game('7k/6pp/8/8/8/8/8/R5K1 w'), halfmoveClock: 149 }, 'a1a8');
     expect(mate.result).toEqual({ kind: 'checkmate', winner: 'w' });
+  });
+});
+
+describe('captures and material', () => {
+  const start = game('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w');
+
+  it('counts each side’s remaining points, King included', () => {
+    expect(material(start.position)).toEqual({ w: 40, b: 40 });
+  });
+
+  it('lists what each side has captured, in order', () => {
+    const s = play(start, 'e2e4', 'd7d5', 'e4d5', 'd8d5', 'b1c3', 'd5a2', 'a1a2');
+    expect(capturedPieces(s)).toEqual({ w: ['pawn', 'queen'], b: ['pawn', 'pawn'] });
+    expect(material(s.position)).toEqual({ w: 38, b: 30 });
+  });
+
+  it('finds the starting state for a rematch', () => {
+    const s = play(start, 'e2e4', 'd7d5');
+    expect(initialState(s)).toBe(start);
+    expect(initialState(start)).toBe(start);
   });
 });

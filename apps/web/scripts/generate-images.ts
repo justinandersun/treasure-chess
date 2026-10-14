@@ -26,8 +26,8 @@ const PALETTE = {
   dark: '#b1a999',
   border: '#e3dfd6',
 };
-const FONT = 'Helvetica Neue, Helvetica, Arial, sans-serif';
-const DISPLAY_FONT = 'Iowan Old Style, Palatino, Georgia, serif';
+const FONT = 'Inter, Helvetica Neue, Helvetica, Arial, sans-serif';
+const DISPLAY_FONT = 'Bricolage Grotesque, Helvetica Neue, Arial, sans-serif';
 
 /** A piece drawn at (x, y) with the given width and height. */
 function pieceSvg(type: PieceType, color: Color, x: number, y: number, size: number): string {
@@ -91,11 +91,10 @@ function ogImage(): string {
   ];
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
     <rect width="1200" height="630" fill="${PALETTE.bg}"/>
-    <text x="80" y="250" font-family="${DISPLAY_FONT}" font-size="80" font-weight="400" fill="${PALETTE.fg}">Treasure Chess</text>
+    <text x="80" y="250" font-family="${DISPLAY_FONT}" font-size="80" font-weight="800" letter-spacing="-2" fill="${PALETTE.fg}">Treasure Chess</text>
     <rect x="82" y="284" width="96" height="2" fill="${PALETTE.accent}"/>
     <text font-family="${FONT}" font-size="34" fill="${PALETTE.muted}">
-      <tspan x="80" y="350">Chess, with an army</tspan>
-      <tspan x="80" y="396">of your own design.</tspan>
+      <tspan x="80" y="350">A game of asymmetric armies.</tspan>
     </text>
     <text x="80" y="480" font-family="${FONT}" font-size="18" letter-spacing="2" fill="${PALETTE.muted}">FREE · NO ACCOUNTS · PLAYS IN YOUR BROWSER</text>
     ${boardSvg(cells, 700, 95, 110)}

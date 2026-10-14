@@ -248,6 +248,29 @@ export function moveHistory(state: GameState): Move[] {
   return moves.reverse();
 }
 
+/** The state the game started from: same armies and placement, no moves played. */
+export function initialState(state: GameState): GameState {
+  let s = state;
+  while (s.previous) s = s.previous;
+  return s;
+}
+
+/** The enemy pieces each side has captured, in the order they were taken. */
+export function capturedPieces(state: GameState): Record<Color, PieceType[]> {
+  const captured: Record<Color, PieceType[]> = { w: [], b: [] };
+  for (let s = state; s.previous; s = s.previous) {
+    if (s.lastMove?.captured) captured[s.previous.position.turn].unshift(s.lastMove.captured);
+  }
+  return captured;
+}
+
+/** Total point cost of each side's pieces still on the board, King included. */
+export function material(position: Position): Record<Color, number> {
+  const total: Record<Color, number> = { w: 0, b: 0 };
+  for (const p of position.board) if (p) total[p.color] += PIECES[p.type].cost;
+  return total;
+}
+
 /** Whether the side to move is in check. */
 export function inCheck(state: GameState): boolean {
   return isInCheck(state.position.board, state.position.turn);

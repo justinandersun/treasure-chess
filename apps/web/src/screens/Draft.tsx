@@ -14,7 +14,7 @@ import {
 } from '@treasure-chess/game';
 import { useState } from 'react';
 import { Button } from '../components/Button';
-import { PieceGrid, PieceTile } from '../components/PieceTile';
+import { PieceIcon } from '../pieces/PieceIcon';
 import styles from './Draft.module.css';
 import type { GameMode } from '../app/setup';
 import { COLOR_NAME, FAMILY_NAMES } from '../labels';
@@ -23,8 +23,30 @@ const BLOCKER_TEXT: Record<AddBlocker, string> = {
   budget: 'Not enough points',
   'king-limit': 'Only one King',
   'pawn-row-full': 'Pawn row is full',
-  'back-rank-full': 'Back rank is full',
+  'back-rank-full': 'King row is full',
 };
+
+/** A footer counter that gains a check mark once its requirement is met. */
+function Requirement(props: {
+  readonly label: string;
+  readonly count: number;
+  readonly max: number;
+  readonly met: boolean;
+}) {
+  const { label, count, max, met } = props;
+  return (
+    <span className={met ? styles.met : undefined}>
+      {label} {count}/{max}
+      {met && (
+        <>
+          {' '}
+          <span aria-hidden="true">✓</span>
+          <span className="visually-hidden">(done)</span>
+        </>
+      )}
+    </span>
+  );
+}
 
 interface DraftProps {
   readonly color: Color;
@@ -55,16 +77,13 @@ export function Draft({
     <section className={styles.draft} aria-labelledby="draft-title">
       <header className={styles.intro}>
         <h1 id="draft-title">
-          {mode === 'computer' ? 'Draft your army' : `${COLOR_NAME[color]}: draft your army`}
+          {mode === 'computer' ? 'Draft Your Army' : `${COLOR_NAME[color]}: Draft Your Army`}
         </h1>
         <p className={styles.hint}>
-          Choose one King, eight infantry for the pawn row, and up to seven more pieces.{' '}
-          {mode === 'computer'
-            ? 'You play White; you will choose the computer’s army next.'
-            : 'Your opponent will not see your army until both are ready.'}
+          Choose eight infantry for the pawn row, and up to seven more pieces for the king row.
         </p>
         <div className={styles.quickStart}>
-          <label htmlFor="preset-select">Quick start</label>
+          <label htmlFor="preset-select">Starter Army</label>
           <select id="preset-select" value={presetId} onChange={(e) => setPresetId(e.target.value)}>
             {PRESETS.map((p) => (
               <option key={p.id} value={p.id}>
@@ -72,54 +91,117 @@ export function Draft({
               </option>
             ))}
           </select>
-          <Button onClick={() => onUsePreset(presetId)}>Use preset</Button>
+          <Button onClick={() => onUsePreset(presetId)}>Use</Button>
           <p className={styles.presetDescription}>
             {PRESETS.find((p) => p.id === presetId)?.description}
           </p>
         </div>
       </header>
 
-      {families.map((family) => (
-        <section key={family} className={styles.family} aria-labelledby={`family-${family}`}>
-          <h2 id={`family-${family}`} className={styles.familyName}>
-            {FAMILY_NAMES[family]}
-          </h2>
-          <PieceGrid>
+      <table className={styles.table}>
+        <caption className="visually-hidden">Pieces to draft</caption>
+        {families.map((family) => (
+          <tbody key={family}>
+            <tr>
+              {/* The first family's heading row also carries the column headers. */}
+              <th
+                scope="colgroup"
+                colSpan={family === families[0] ? 1 : 4}
+                className={`${styles.familyName} section-label`}
+              >
+                {FAMILY_NAMES[family]}
+              </th>
+              {family === families[0] && (
+                <>
+                  <th
+                    scope="col"
+                    className={`${styles.columnName} ${styles.center} ${styles.wide}`}
+                  >
+                    Notation
+                  </th>
+                  <th
+                    scope="col"
+                    className={`${styles.columnName} ${styles.center} ${styles.wide}`}
+                  >
+                    Points
+                  </th>
+                  <th scope="col" className={`${styles.columnName} ${styles.center}`}>
+                    Count
+                  </th>
+                </>
+              )}
+            </tr>
             {PIECE_DEFINITIONS.filter((d) => d.family === family).map((d) => {
               const count = draft[d.type] ?? 0;
               const blocker = addBlocker(draft, d.type);
               return (
-                <PieceTile key={d.type} type={d.type} color={color} description={d.summary}>
-                  <div className={styles.stepper} role="group" aria-label={`${d.name} count`}>
-                    <button
-                      type="button"
-                      className={styles.step}
-                      onClick={() => onAdjust(d.type, -1)}
-                      disabled={count === 0}
-                      aria-label={`Remove ${d.name}`}
-                    >
-                      −
-                    </button>
-                    <output className={styles.count} aria-live="polite">
-                      {count}
-                    </output>
-                    <button
-                      type="button"
-                      className={styles.step}
-                      onClick={() => onAdjust(d.type, 1)}
-                      disabled={blocker !== null}
-                      aria-label={`Add ${d.name}`}
-                      title={blocker ? BLOCKER_TEXT[blocker] : undefined}
-                    >
-                      +
-                    </button>
-                  </div>
-                </PieceTile>
+                <tr key={d.type} className={count > 0 ? styles.chosen : undefined}>
+                  <th scope="row" className={styles.pieceCell}>
+                    <div className={styles.piece}>
+                      <span className={styles.icon} aria-hidden="true">
+                        <PieceIcon type={d.type} color={color} />
+                      </span>
+                      <span className={styles.pieceText}>
+                        <span className={styles.name}>
+                          {d.name}
+                          <span className={styles.narrowMeta}>
+                            {' '}
+                            · {d.symbol} · {d.cost} {d.cost === 1 ? 'pt' : 'pts'}
+                          </span>
+                        </span>
+                        <span className={styles.summary}>{d.summary}</span>
+                      </span>
+                    </div>
+                  </th>
+                  <td className={`${styles.center} ${styles.wide}`}>{d.symbol}</td>
+                  <td className={`${styles.center} ${styles.wide}`}>{d.cost}</td>
+                  <td>
+                    {d.type === 'king' ? (
+                      <div className={styles.stepper}>
+                        <span className={styles.stepSpacer} />
+                        <output className={styles.count} aria-label="King count, always 1">
+                          1
+                        </output>
+                        <span className={styles.stepSpacer} />
+                      </div>
+                    ) : (
+                      <div className={styles.stepper} role="group" aria-label={`${d.name} count`}>
+                        <button
+                          type="button"
+                          className={styles.step}
+                          onClick={() => onAdjust(d.type, -1)}
+                          disabled={count === 0}
+                          aria-label={`Remove ${d.name}`}
+                        >
+                          −
+                        </button>
+                        <output className={styles.count} aria-live="polite">
+                          {count}
+                        </output>
+                        <button
+                          type="button"
+                          className={styles.step}
+                          onClick={() => onAdjust(d.type, 1)}
+                          disabled={blocker !== null}
+                          aria-label={`Add ${d.name}`}
+                          aria-describedby={blocker ? `blocked-${d.type}` : undefined}
+                        >
+                          +
+                        </button>
+                      </div>
+                    )}
+                    {blocker && (
+                      <p id={`blocked-${d.type}`} className={styles.blocked}>
+                        {BLOCKER_TEXT[blocker]}
+                      </p>
+                    )}
+                  </td>
+                </tr>
               );
             })}
-          </PieceGrid>
-        </section>
-      ))}
+          </tbody>
+        ))}
+      </table>
 
       <footer className={styles.footer}>
         <div className={styles.status}>
@@ -139,14 +221,20 @@ export function Draft({
             </span>
           </div>
           <p className={styles.slots}>
-            King {draft.king ?? 0}/1 · Pawn row {slots.infantry}/8 · Back rank {slots.backRank}/7
+            <Requirement
+              label="Pawn Row"
+              count={slots.infantry}
+              max={8}
+              met={slots.infantry === 8}
+            />
+            {' · '}
+            <Requirement
+              label="King Row"
+              count={slots.backRank}
+              max={7}
+              met={slots.backRank >= 1}
+            />
           </p>
-          {issues.length > 0 && (
-            <p className={styles.issue} aria-live="polite">
-              {issues[0]!.message}
-              {issues.length > 1 && ` (+${issues.length - 1} more)`}
-            </p>
-          )}
         </div>
         <div className={styles.actions}>
           {onBack && (
@@ -155,7 +243,7 @@ export function Draft({
             </Button>
           )}
           <Button variant="primary" onClick={onContinue} disabled={issues.length > 0}>
-            Place pieces
+            Next: Place
           </Button>
         </div>
       </footer>

@@ -1,4 +1,5 @@
 import { CANNOT_MATE_ALONE, PIECES, type PieceType, TREASURY } from '@treasure-chess/game';
+import { Button } from '../components/Button';
 import styles from './RulesContent.module.css';
 
 function listNames(types: Iterable<PieceType>): string {
@@ -13,21 +14,23 @@ export function RulesContent({ onShowPieces }: { readonly onShowPieces: () => vo
         Build an army of chess and fairy pieces, arrange it, and play chess on a standard board.
       </p>
 
-      <h3>1. Draft</h3>
+      <h3 className="section-label">Draft</h3>
       <ul>
         <li>Each player has {TREASURY} points to spend. Unspent points do nothing.</li>
-        <li>Buy exactly one King (1 point) and exactly eight infantry to fill the pawn row.</li>
-        <li>Buy between one and seven other pieces for the back rank. Copies are allowed.</li>
+        <li>
+          Every army includes one King (1 point). Buy exactly eight infantry to fill the pawn row.
+        </li>
+        <li>Buy between one and seven more pieces for the king row. Copies are allowed.</li>
       </ul>
 
-      <h3>2. Place</h3>
+      <h3 className="section-label">Place</h3>
       <ul>
-        <li>Infantry fill the pawn row; everything else goes on the back rank.</li>
-        <li>The King starts on the d- or e-file. Back-rank squares may be left empty.</li>
+        <li>Infantry fill the pawn row; everything else goes on the king row.</li>
+        <li>The King starts on the d- or e-file. King-row squares may be left empty.</li>
         <li>Players draft and place in private; both armies are revealed together.</li>
       </ul>
 
-      <h3>3. Play</h3>
+      <h3 className="section-label">Play</h3>
       <ul>
         <li>White moves first. Normal chess rules apply: check, checkmate, and stalemate.</li>
         <li>There is no castling, no en passant, and no clock.</li>
@@ -40,13 +43,13 @@ export function RulesContent({ onShowPieces }: { readonly onShowPieces: () => vo
         </li>
       </ul>
 
-      <h3>Promotion</h3>
+      <h3 className="section-label">Promotion</h3>
       <p>
-        Infantry reaching the far rank must promote to any non-King, non-infantry piece type from
-        their side’s starting army — even if all of that type have been captured.
+        Infantry reaching the opponent’s king row must promote to any non-King, non-infantry piece
+        type from their side’s starting army — even if all of that type have been captured.
       </p>
 
-      <h3>Winning and drawing</h3>
+      <h3 className="section-label">End</h3>
       <ul>
         <li>Checkmate wins. Either player may resign at any time.</li>
         <li>Stalemate is a draw.</li>
@@ -61,11 +64,11 @@ export function RulesContent({ onShowPieces }: { readonly onShowPieces: () => vo
         </li>
       </ul>
 
-      <p className={styles.legend}>
-        <button type="button" className={styles.link} onClick={onShowPieces}>
-          See all pieces
-        </button>
-      </p>
+      <div className={styles.more}>
+        <Button onClick={onShowPieces}>
+          Pieces <span aria-hidden="true">→</span>
+        </Button>
+      </div>
     </div>
   );
 }

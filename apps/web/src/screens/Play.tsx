@@ -1,11 +1,14 @@
 import {
   algebraicHistory,
+  capturedPieces,
   claimableDraw,
   claimDraw,
   type Color,
   findKing,
   type GameState,
   inCheck,
+  initialState,
+  material,
   opposite,
   PIECES,
   type PieceType,
@@ -28,10 +31,12 @@ import { useComputerPlayer } from '../ai/useComputerPlayer';
 import { Board } from '../components/Board';
 import { Button } from '../components/Button';
 import { Dialog } from '../components/Dialog';
+import { PieceTile } from '../components/PieceTile';
 import { PieceIcon } from '../pieces/PieceIcon';
 import { PIECE_COLORS } from '../pieces/pieceArt';
 import { resultDetail, resultHeadline, sideName } from './gameText';
 import { COLOR_NAME } from '../labels';
+import { ArmyBar } from './ArmyBar';
 import { MoveHistory } from './MoveHistory';
 import styles from './Play.module.css';
 
@@ -68,6 +73,13 @@ export function Play({ game, mode, onChange, onNewGame }: PlayProps) {
   // Only the player whose turn it is may claim; the computer decides its own claims.
   const claim = thinking ? null : claimableDraw(game);
   const undone = computer ? undoToPlayerTurn(game, opposite(computer)) : undo(game);
+  const points = material(game.position);
+  const captured = useMemo(() => capturedPieces(game), [game]);
+  const selectedPiece = selection ? board[selection.square] : null;
+  const rematch = () => update(initialState(game));
+  const armyBar = (color: Color) => (
+    <ArmyBar color={color} points={points[color]} captured={captured[color]} />
+  );
   const lastMoveText = useMemo(() => {
     const history = algebraicHistory(game);
     return history.length ? `${sideName(opposite(turn), player)} played ${history.at(-1)}. ` : '';
@@ -93,7 +105,7 @@ export function Play({ game, mode, onChange, onNewGame }: PlayProps) {
   else status = `${COLOR_NAME[turn]} to move${check !== null ? ' — check!' : ''}`;
   if (!game.result && selection?.mode === 'inspect') {
     const p = board[selection.square]!;
-    status = `Inspecting ${COLOR_NAME[p.color]} ${PIECES[p.type].name} on ${squareName(selection.square)}`;
+    status = `${COLOR_NAME[p.color]} ${PIECES[p.type].name} on ${squareName(selection.square)}`;
   }
 
   return (
@@ -121,6 +133,8 @@ export function Play({ game, mode, onChange, onNewGame }: PlayProps) {
           lastMove={game.lastMove}
           checkSquare={check}
           onSquareClick={handleSquare}
+          above={armyBar(opposite(orientation))}
+          below={armyBar(orientation)}
         />
       </div>
 
@@ -129,24 +143,32 @@ export function Play({ game, mode, onChange, onNewGame }: PlayProps) {
           <Button onClick={() => update(undone)} disabled={undone === game}>
             Undo
           </Button>
-          <Button onClick={() => setOrientation(opposite(orientation))}>Flip board</Button>
+          <Button onClick={() => setOrientation(opposite(orientation))}>Flip Board</Button>
           <Button onClick={() => setDialog('resign')} disabled={!!game.result}>
             Resign
           </Button>
           <Button onClick={() => (game.result ? onNewGame() : setDialog('new-game'))}>
-            New game
+            New Game
           </Button>
+          {game.result && (
+            <Button variant="primary" className={styles.wide} onClick={rematch}>
+              Rematch
+            </Button>
+          )}
           {claim && (
             <Button
               variant="primary"
               className={styles.wide}
               onClick={() => update(claimDraw(game))}
             >
-              Claim draw ({claim === 'threefold-repetition' ? 'repetition' : '50 moves'})
+              Claim Draw ({claim === 'threefold-repetition' ? 'Repetition' : '50 Moves'})
             </Button>
           )}
         </div>
-        <h2 className={styles.panelHeading}>Moves</h2>
+        {selectedPiece && (
+          <PieceTile type={selectedPiece.type} color={selectedPiece.color} as="div" />
+        )}
+        <h2 className={`${styles.panelHeading} section-label`}>Moves</h2>
         <MoveHistory game={game} />
         {game.result && (
           <p className={styles.resultNote}>
@@ -158,7 +180,7 @@ export function Play({ game, mode, onChange, onNewGame }: PlayProps) {
 
       <Dialog
         open={promotion !== null}
-        title="Promote to"
+        title="Choose a Promotion"
         size="small"
         onClose={() => setPromotion(null)}
       >
@@ -197,7 +219,7 @@ export function Play({ game, mode, onChange, onNewGame }: PlayProps) {
                   update(resign(game, color));
                 }}
               >
-                {player ? 'Resign' : `${COLOR_NAME[color]} resigns`}
+                {player ? 'Resign' : `${COLOR_NAME[color]} Resigns`}
               </Button>
             ))}
           </>
@@ -212,16 +234,16 @@ export function Play({ game, mode, onChange, onNewGame }: PlayProps) {
 
       <Dialog
         open={dialog === 'new-game'}
-        title="Start a new game?"
+        title="Start a New Game?"
         size="small"
         onClose={() => setDialog(null)}
         actions={
           <>
             <Button variant="quiet" onClick={() => setDialog(null)}>
-              Keep playing
+              Keep Playing
             </Button>
             <Button variant="primary" onClick={onNewGame}>
-              New game
+              New Game
             </Button>
           </>
         }
@@ -237,11 +259,12 @@ export function Play({ game, mode, onChange, onNewGame }: PlayProps) {
         actions={
           <>
             <Button variant="quiet" onClick={() => update(undone)} disabled={undone === game}>
-              Undo move
+              Undo Move
             </Button>
-            <Button onClick={() => setReviewing(game)}>Review board</Button>
-            <Button variant="primary" onClick={onNewGame}>
-              New game
+            <Button onClick={() => setReviewing(game)}>Review Board</Button>
+            <Button onClick={onNewGame}>New Game</Button>
+            <Button variant="primary" onClick={rematch}>
+              Rematch
             </Button>
           </>
         }

@@ -11,8 +11,8 @@ export async function move(page: Page, from: string, to: string) {
 }
 
 export async function usePreset(page: Page, presetId: string) {
-  await page.getByLabel('Quick start').selectOption(presetId);
-  await page.getByRole('button', { name: 'Use preset' }).click();
+  await page.getByLabel('Starter Army').selectOption(presetId);
+  await page.getByRole('button', { name: 'Use', exact: true }).click();
 }
 
 /**
@@ -21,41 +21,41 @@ export async function usePreset(page: Page, presetId: string) {
  */
 export async function startNewGame(
   page: Page,
-  mode: 'Two players' | 'Against the computer',
+  mode: 'Human vs. Human' | 'Human vs. Computer',
   { replace = false } = {},
 ) {
   await page.goto('/');
   await page.getByRole('button', { name: 'Treasure Chess' }).click();
-  await page.getByRole('button', { name: 'New game' }).click();
+  await page.getByRole('button', { name: 'New Game' }).click();
   if (replace) {
     await page
-      .getByRole('dialog', { name: 'Start a new game?' })
-      .getByRole('button', { name: 'New game' })
+      .getByRole('dialog', { name: 'Start a New Game?' })
+      .getByRole('button', { name: 'New Game' })
       .click();
   }
-  await page.getByRole('button', { name: new RegExp(mode) }).click();
+  await page.getByRole('button', { name: mode }).click();
 }
 
 /** Sets up a two-player game with presets for both sides and starts it. */
 export async function startLocalGame(page: Page, white: string, black: string, replace = false) {
-  await startNewGame(page, 'Two players', { replace });
+  await startNewGame(page, 'Human vs. Human', { replace });
   await usePreset(page, white);
-  await page.getByRole('button', { name: 'Lock in army' }).click();
-  await page.getByRole('button', { name: "I'm Black — continue" }).click();
+  await page.getByRole('button', { name: 'Done', exact: true }).click();
+  await page.getByRole('button', { name: 'Continue', exact: true }).click();
   await usePreset(page, black);
-  await page.getByRole('button', { name: 'Lock in army' }).click();
-  await page.getByRole('button', { name: 'Reveal armies' }).click();
-  await page.getByRole('button', { name: 'Start game' }).click();
+  await page.getByRole('button', { name: 'Done', exact: true }).click();
+  await page.getByRole('button', { name: 'Reveal', exact: true }).click();
+  await page.getByRole('button', { name: 'Start Game' }).click();
   await expect(page.getByRole('status')).toContainText('White to move');
 }
 
 /** Sets up a game against the computer and starts it. */
 export async function startComputerGame(page: Page, mine: string, theirs: string) {
-  await startNewGame(page, 'Against the computer');
+  await startNewGame(page, 'Human vs. Computer');
   await usePreset(page, mine);
-  await page.getByRole('button', { name: 'Lock in army' }).click();
+  await page.getByRole('button', { name: 'Done', exact: true }).click();
   await page.getByRole('button', { name: new RegExp(`^${theirs}`) }).click();
-  await page.getByRole('button', { name: 'Start game' }).click();
+  await page.getByRole('button', { name: 'Start Game' }).click();
   await expect(page.getByRole('status')).toContainText('Your move');
 }
 

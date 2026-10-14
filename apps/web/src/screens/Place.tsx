@@ -101,12 +101,12 @@ export function Place({ color, mode, draft, deployment, onChange, onBack, onLock
         ? `Choose where to move the ${PIECES[selectedPiece].name}, or return it to the tray.`
         : remaining > 0
           ? 'Choose a piece below, then a highlighted square. Tap a placed piece to move it.'
-          : 'All pieces placed. Tap a piece to rearrange, or lock in your army.';
+          : 'All pieces placed. Tap a piece to rearrange it, or choose Done.';
 
   return (
     <section className={styles.place} aria-labelledby="place-title">
       <h1 id="place-title">
-        {mode === 'computer' ? 'Place your army' : `${COLOR_NAME[color]}: place your army`}
+        {mode === 'computer' ? 'Place Your Army' : `${COLOR_NAME[color]}: Place Your Army`}
       </h1>
       <p className={styles.instruction} role="status">
         {instruction}
@@ -152,17 +152,17 @@ export function Place({ color, mode, draft, deployment, onChange, onBack, onLock
 
       <div className={styles.actions}>
         {selectedSlot && (
-          <Button onClick={() => change(removeAt(deployment, selectedSlot))}>Return to tray</Button>
+          <Button onClick={() => change(removeAt(deployment, selectedSlot))}>Return to Tray</Button>
         )}
+        <Button variant="quiet" onClick={onBack}>
+          Back
+        </Button>
         <Button onClick={() => change(randomDeployment(draft, createRng(Date.now())))}>
           Random
         </Button>
         <Button onClick={() => change(emptyDeployment())}>Clear</Button>
-        <Button variant="quiet" onClick={onBack}>
-          Back to draft
-        </Button>
         <Button variant="primary" onClick={onLock} disabled={remaining > 0 || issues.length > 0}>
-          Lock in army
+          Done
         </Button>
       </div>
     </section>
