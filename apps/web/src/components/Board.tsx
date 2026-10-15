@@ -8,7 +8,7 @@ import {
   type Square,
   squareName,
 } from '@treasure-chess/game';
-import { type KeyboardEvent, type ReactNode, useRef, useState } from 'react';
+import { type KeyboardEvent, type PointerEvent, type ReactNode, useRef, useState } from 'react';
 import { COLOR_NAME } from '../labels';
 import { PieceIcon } from '../pieces/PieceIcon';
 import styles from './Board.module.css';
@@ -30,6 +30,8 @@ export interface BoardProps {
   /** Square of a King in check. */
   readonly checkSquare?: Square | null;
   readonly onSquareClick?: (sq: Square) => void;
+  /** Starts a drag from a square; squares then ignore touch scrolling. */
+  readonly onSquarePointerDown?: (sq: Square, event: PointerEvent<HTMLButtonElement>) => void;
   readonly label?: string;
   /** Display rows to show (0 = top), e.g. [6, 7] for the player's own two ranks. */
   readonly rows?: readonly number[];
@@ -59,6 +61,7 @@ export function Board({
   lastMove = null,
   checkSquare = null,
   onSquareClick,
+  onSquarePointerDown,
   label = 'Chessboard',
   rows = ALL_ROWS,
   above,
@@ -111,6 +114,7 @@ export function Board({
               sq === selected && selectionStyle === 'inspect' && styles.inspect,
               sq === checkSquare && styles.check,
               target && styles[target],
+              onSquarePointerDown && styles.draggable,
             ];
             return (
               <div key={sq} role="gridcell" className={styles.cell}>
@@ -123,6 +127,8 @@ export function Board({
                   className={classes.filter(Boolean).join(' ')}
                   tabIndex={sq === focusSquare ? 0 : -1}
                   aria-label={describeSquare(sq, piece, notes)}
+                  data-square={sq}
+                  onPointerDown={onSquarePointerDown && ((e) => onSquarePointerDown(sq, e))}
                   onClick={() => {
                     setFocusSquare(sq);
                     onSquareClick?.(sq);

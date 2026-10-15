@@ -8,7 +8,7 @@ export function PiecesContent() {
   return (
     <div className={styles.pieces}>
       <p className={styles.legend}>
-        Diagrams show a White piece on an empty board: <span aria-hidden="true">●</span> moves or
+        Diagrams show a piece on an empty board: <span aria-hidden="true">●</span> moves or
         captures, <span aria-hidden="true">○</span> moves only, <span aria-hidden="true">×</span>{' '}
         captures only.
       </p>

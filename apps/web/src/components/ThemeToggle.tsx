@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 type Theme = 'light' | 'dark';
 
@@ -14,10 +14,23 @@ function currentTheme(): Theme {
   return set === 'light' || set === 'dark' ? set : systemTheme();
 }
 
+/** Points the browser's UI color (address bar, etc.) at the page background in use. */
+function syncThemeColor() {
+  const color = getComputedStyle(document.body).backgroundColor;
+  for (const meta of document.querySelectorAll('meta[name="theme-color"]')) {
+    meta.setAttribute('content', color);
+  }
+}
+
 /** Switches between light and dark, remembering the choice on this device. */
 export function ThemeToggle({ className }: { readonly className?: string | undefined }) {
   const [theme, setTheme] = useState<Theme>(currentTheme);
   const next: Theme = theme === 'dark' ? 'light' : 'dark';
+
+  // Only a saved choice overrides the system theme; without one, the media-specific tags apply.
+  useEffect(() => {
+    if (document.documentElement.dataset.theme) syncThemeColor();
+  }, [theme]);
 
   function toggle() {
     document.documentElement.dataset.theme = next;

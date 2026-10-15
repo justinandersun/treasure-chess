@@ -17,6 +17,20 @@
   color: var(--muted);
 }
 
+/* The Armies: even space above and below the board, with the title and text kept together. */
+.reveal {
+  gap: 20px;
+}
+
+.reveal h1 {
+  margin-bottom: -12px;
+}
+
+.summary {
+  margin: 0;
+  color: var(--muted);
+}
+
 .tray {
   display: flex;
   flex-wrap: wrap;
@@ -40,6 +54,40 @@
   border: 2px solid transparent;
   background: var(--square-light);
   cursor: pointer;
+}
+
+.trayPiece {
+  touch-action: none;
+}
+
+/* Where a selected placed piece goes back to: a dashed circle holding a faint copy of it. */
+.returnSpot {
+  width: 52px;
+  height: 52px;
+  padding: 8px;
+  border: 2px dashed var(--fg);
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+
+.returnSpot svg {
+  width: 100%;
+  height: 100%;
+  opacity: 0.45;
+}
+
+.returnSpot:hover {
+  background: var(--surface-2);
+}
+
+/* The piece following the pointer while dragging. */
+.ghost {
+  position: fixed;
+  z-index: 10;
+  transform: translate(-50%, -50%) scale(1.1);
+  pointer-events: none;
+  filter: drop-shadow(0 4px 8px rgb(0 0 0 / 0.35));
 }
 
 .trayPiece svg {
@@ -71,6 +119,51 @@
   margin: 0;
   padding-left: 1.2em;
   color: var(--danger);
+}
+
+.centered {
+  text-align: center;
+}
+
+.armyList {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.armyOption {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  text-align: left;
+  cursor: pointer;
+}
+
+.armyOption:hover {
+  border-color: var(--fg);
+}
+
+/* The army the computer is playing now. */
+.armyOption[aria-pressed='true'] {
+  border: 3px solid var(--fg);
+  padding: 10px;
+}
+
+.armyName {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.armyName span,
+.armyDescription {
+  color: var(--muted);
+  font-size: 0.85rem;
 }
 
 .actions {

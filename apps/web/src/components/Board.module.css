@@ -58,6 +58,10 @@
   background: var(--square-dark);
 }
 
+.draggable {
+  touch-action: none;
+}
+
 .square:focus-visible {
   outline: 3px solid var(--focus);
   outline-offset: -3px;

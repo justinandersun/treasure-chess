@@ -10,9 +10,10 @@ export async function move(page: Page, from: string, to: string) {
   await square(page, to).click();
 }
 
+/** On the Draft screen: loads a starter army and goes on to placing it. */
 export async function usePreset(page: Page, presetId: string) {
   await page.getByLabel('Starter Army').selectOption(presetId);
-  await page.getByRole('button', { name: 'Use', exact: true }).click();
+  await page.getByRole('button', { name: 'Next', exact: true }).click();
 }
 
 /**
@@ -44,7 +45,6 @@ export async function startLocalGame(page: Page, white: string, black: string, r
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   await usePreset(page, black);
   await page.getByRole('button', { name: 'Done', exact: true }).click();
-  await page.getByRole('button', { name: 'Reveal', exact: true }).click();
   await page.getByRole('button', { name: 'Start Game' }).click();
   await expect(page.getByRole('status')).toContainText('White to move');
 }
@@ -54,7 +54,11 @@ export async function startComputerGame(page: Page, mine: string, theirs: string
   await startNewGame(page, 'Human vs. Computer');
   await usePreset(page, mine);
   await page.getByRole('button', { name: 'Done', exact: true }).click();
-  await page.getByRole('button', { name: new RegExp(`^${theirs}`) }).click();
+  await page.getByRole('button', { name: 'Change Army' }).click();
+  await page
+    .getByRole('dialog', { name: 'Computer’s Army' })
+    .getByRole('button', { name: new RegExp(`^${theirs}`) })
+    .click();
   await page.getByRole('button', { name: 'Start Game' }).click();
   await expect(page.getByRole('status')).toContainText('Your move');
 }

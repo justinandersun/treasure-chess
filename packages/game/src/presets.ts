@@ -1,4 +1,4 @@
-/** Ready-made armies with formations, for quick starts and the computer opponent. */
+/** Starter armies with formations: every draft begins as one, and the computer plays one. */
 
 import { type Deployment, parseDeployment } from './army';
 

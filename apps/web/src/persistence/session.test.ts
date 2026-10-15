@@ -38,12 +38,12 @@ function startedGame(): AppState {
   return run(
     initialAppState,
     { type: 'choose-mode', mode: 'local' },
-    setupAction({ type: 'use-preset', presetId: 'classic' }),
+    setupAction({ type: 'to-place' }),
     setupAction({ type: 'lock' }),
     setupAction({ type: 'continue' }),
-    setupAction({ type: 'use-preset', presetId: 'cavalry' }),
+    setupAction({ type: 'load-starter', presetId: 'cavalry' }),
+    setupAction({ type: 'to-place' }),
     setupAction({ type: 'lock' }),
-    setupAction({ type: 'continue' }),
     { type: 'start-game' },
   );
 }
@@ -95,16 +95,35 @@ describe('saving and restoring sessions', () => {
     const placingBlack = run(
       initialAppState,
       { type: 'choose-mode', mode: 'local' },
-      setupAction({ type: 'use-preset', presetId: 'classic' }),
+      setupAction({ type: 'to-place' }),
       setupAction({ type: 'lock' }),
       setupAction({ type: 'continue' }),
-      setupAction({ type: 'use-preset', presetId: 'menagerie' }),
+      setupAction({ type: 'load-starter', presetId: 'menagerie' }),
+      setupAction({ type: 'to-place' }),
     );
     const restored = reload(placingBlack);
     if (restored.session?.kind !== 'setup') throw new Error('expected a setup');
     expect(restored.session.setup).toMatchObject({ step: 'handoff', color: 'b', resume: 'place' });
     const resumed = appReducer(restored, setupAction({ type: 'continue' }));
     expect(resumed.session?.kind === 'setup' && resumed.session.setup.step).toBe('place');
+  });
+
+  it('moves setups saved at retired steps onto the board', () => {
+    const atReveal = run(
+      initialAppState,
+      { type: 'choose-mode', mode: 'computer' },
+      setupAction({ type: 'to-place' }),
+      setupAction({ type: 'lock', opponentPresetId: 'cavalry' }),
+    );
+    for (const step of ['ready', 'opponent']) {
+      const doc = JSON.parse(encodeSession(atReveal)!);
+      doc.session.setup.step = step;
+      const result = decodeSession(JSON.stringify(doc));
+      if (result.status !== 'restored' || result.state.session?.kind !== 'setup') {
+        throw new Error(`Not restored: ${JSON.stringify(result)}`);
+      }
+      expect(result.state.session.setup.step).toBe('reveal');
+    }
   });
 });
 
@@ -215,8 +234,8 @@ describe('schema migration', () => {
     const state = run(
       initialAppState,
       { type: 'choose-mode', mode: 'computer' },
-      setupAction({ type: 'use-preset', presetId: 'classic' }),
-      setupAction({ type: 'lock' }),
+      setupAction({ type: 'to-place' }),
+      setupAction({ type: 'lock', opponentPresetId: 'cavalry' }),
       setupAction({ type: 'choose-opponent', presetId: 'fortress' }),
       { type: 'start-game' },
     );

@@ -138,12 +138,19 @@ export function Play({ game, mode, onChange, onNewGame }: PlayProps) {
         />
       </div>
 
-      <aside className={styles.panel} aria-label="Game controls">
+      <aside className={`${styles.panel} ${styles.left}`} aria-label="Moves">
         <div className={styles.controls}>
+          <Button onClick={() => setOrientation(opposite(orientation))}>Flip Board</Button>
           <Button onClick={() => update(undone)} disabled={undone === game}>
             Undo
           </Button>
-          <Button onClick={() => setOrientation(opposite(orientation))}>Flip Board</Button>
+        </div>
+        <h2 className={`${styles.panelHeading} section-label`}>Moves</h2>
+        <MoveHistory game={game} />
+      </aside>
+
+      <aside className={`${styles.panel} ${styles.right}`} aria-label="Game controls">
+        <div className={styles.controls}>
           <Button onClick={() => setDialog('resign')} disabled={!!game.result}>
             Resign
           </Button>
@@ -151,30 +158,28 @@ export function Play({ game, mode, onChange, onNewGame }: PlayProps) {
             New Game
           </Button>
           {game.result && (
-            <Button variant="primary" className={styles.wide} onClick={rematch}>
+            <Button variant="primary" onClick={rematch}>
               Rematch
             </Button>
           )}
           {claim && (
             <Button
               variant="primary"
-              className={styles.wide}
+
               onClick={() => update(claimDraw(game))}
             >
               Claim Draw ({claim === 'threefold-repetition' ? 'Repetition' : '50 Moves'})
             </Button>
           )}
         </div>
-        {selectedPiece && (
-          <PieceTile type={selectedPiece.type} color={selectedPiece.color} as="div" />
-        )}
-        <h2 className={`${styles.panelHeading} section-label`}>Moves</h2>
-        <MoveHistory game={game} />
         {game.result && (
           <p className={styles.resultNote}>
             <strong>{resultHeadline(game.result, player)}.</strong>{' '}
             {resultDetail(game.result, player)}
           </p>
+        )}
+        {selectedPiece && (
+          <PieceTile type={selectedPiece.type} color={selectedPiece.color} as="div" />
         )}
       </aside>
 
@@ -207,28 +212,47 @@ export function Play({ game, mode, onChange, onNewGame }: PlayProps) {
         size="small"
         onClose={() => setDialog(null)}
         actions={
-          <>
-            <Button variant="quiet" onClick={() => setDialog(null)}>
-              Cancel
-            </Button>
-            {(player ? [player] : (['w', 'b'] as const)).map((color) => (
+          player ? (
+            <>
+              <Button variant="quiet" onClick={() => setDialog(null)}>
+                Cancel
+              </Button>
               <Button
-                key={color}
                 onClick={() => {
                   setDialog(null);
-                  update(resign(game, color));
+                  update(resign(game, player));
                 }}
               >
-                {player ? 'Resign' : `${COLOR_NAME[color]} Resigns`}
+                Resign
               </Button>
-            ))}
-          </>
+            </>
+          ) : (
+            // Two players: either side may resign, so both choices sit centered side by side.
+            <div className={styles.dialogActions}>
+              <div className={styles.dialogRow}>
+                {(['w', 'b'] as const).map((color) => (
+                  <Button
+                    key={color}
+                    onClick={() => {
+                      setDialog(null);
+                      update(resign(game, color));
+                    }}
+                  >
+                    {`${COLOR_NAME[color]} Resigns`}
+                  </Button>
+                ))}
+              </div>
+              <Button variant="quiet" onClick={() => setDialog(null)}>
+                Cancel
+              </Button>
+            </div>
+          )
         }
       >
         <p>
           {player
-            ? 'The computer wins if you resign. You can undo a resignation.'
-            : 'Either player may resign. The other player wins. You can undo a resignation.'}
+            ? 'The computer wins if you resign.'
+            : 'Either player may resign. The other player wins.'}
         </p>
       </Dialog>
 
@@ -257,16 +281,14 @@ export function Play({ game, mode, onChange, onNewGame }: PlayProps) {
         size="small"
         onClose={() => setReviewing(game)}
         actions={
-          <>
-            <Button variant="quiet" onClick={() => update(undone)} disabled={undone === game}>
-              Undo Move
-            </Button>
-            <Button onClick={() => setReviewing(game)}>Review Board</Button>
-            <Button onClick={onNewGame}>New Game</Button>
-            <Button variant="primary" onClick={rematch}>
-              Rematch
-            </Button>
-          </>
+          <div className={styles.dialogActions}>
+            <div className={styles.dialogRow}>
+              <Button variant="primary" onClick={rematch}>
+                Rematch
+              </Button>
+              <Button onClick={onNewGame}>New Game</Button>
+            </div>
+          </div>
         }
       >
         <p>{game.result && resultDetail(game.result, player)}</p>

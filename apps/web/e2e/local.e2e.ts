@@ -1,9 +1,9 @@
 import { expect, test } from '@playwright/test';
-import { move, movesList, startLocalGame, startNewGame, usePreset } from './helpers';
+import { move, movesList, square, startLocalGame, startNewGame, usePreset } from './helpers';
 
 test('two players set up in private and play to checkmate', async ({ page }) => {
   await startNewGame(page, 'Human vs. Human');
-  await expect(page.getByRole('heading', { name: 'White: Draft Your Army' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Draft Your Army' })).toBeVisible();
   await usePreset(page, 'classic');
   await page.getByRole('button', { name: 'Done', exact: true }).click();
 
@@ -13,7 +13,6 @@ test('two players set up in private and play to checkmate', async ({ page }) => 
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
   await usePreset(page, 'classic');
   await page.getByRole('button', { name: 'Done', exact: true }).click();
-  await page.getByRole('button', { name: 'Reveal', exact: true }).click();
   await page.getByRole('button', { name: 'Start Game' }).click();
 
   await move(page, 'f2', 'f3');
@@ -25,7 +24,9 @@ test('two players set up in private and play to checkmate', async ({ page }) => 
   await expect(result).toBeVisible();
   await expect(movesList(page)).toContainText('Qh4#');
 
-  await result.getByRole('button', { name: 'Undo Move' }).click();
+  // Closing the result dialog leaves the final position to review; Undo takes the move back.
+  await result.getByRole('button', { name: 'Close' }).click();
+  await page.getByRole('button', { name: 'Undo', exact: true }).click();
   await expect(result).toBeHidden();
   await expect(page.getByRole('status')).toContainText('Black to move');
 });
@@ -33,6 +34,7 @@ test('two players set up in private and play to checkmate', async ({ page }) => 
 test('custom drafting enforces the point budget and placement rules', async ({ page }) => {
   await startNewGame(page, 'Human vs. Human');
   const add = (name: string) => page.getByRole('button', { name: `Add ${name}` });
+  await page.getByRole('button', { name: 'Clear' }).click(); // drafts start as Classic
   await expect(add('King')).toHaveCount(0); // the King is always included
   for (let i = 0; i < 8; i++) await add('Sergeant').click();
   await add('Queen').click();
@@ -40,8 +42,10 @@ test('custom drafting enforces the point budget and placement rules', async ({ p
   // 1 + 16 + 18 = 35 points; a third Queen would cost 44.
   await expect(add('Queen')).toBeDisabled();
   await expect(add('Pawn')).toBeDisabled(); // pawn row full
-  await page.getByRole('button', { name: 'Next: Place' }).click();
+  await page.getByRole('button', { name: 'Next', exact: true }).click();
 
+  // Pieces kept from the Classic formation are already placed; start from an empty board.
+  await page.getByRole('button', { name: 'Clear' }).click();
   await page.getByRole('button', { name: /^King, 1 to place/ }).click();
   await expect(page.getByRole('button', { name: /^d1, empty, can move here/ })).toBeVisible();
   await expect(page.getByRole('button', { name: /^c1, empty, can move here/ })).toHaveCount(0);
@@ -56,14 +60,14 @@ test('reloading keeps the session and hides private armies', async ({ page }) =>
   await expect(page.getByRole('heading', { name: 'Pass the Device to White' })).toBeVisible();
   await expect(page.getByRole('grid')).toHaveCount(0);
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'White: Place Your Army' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Place Your Army' })).toBeVisible();
 
   await startLocalGame(page, 'classic', 'cavalry', true);
   await move(page, 'e2', 'e4');
   await page.reload();
   await expect(movesList(page)).toContainText('e4');
   await page.getByRole('button', { name: 'Treasure Chess' }).click();
-  await expect(page.getByRole('button', { name: 'Continue Game' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Resume Game' })).toBeVisible();
 });
 
 test('the Rules overlay links to the Pieces overlay', async ({ page }) => {
@@ -72,4 +76,30 @@ test('the Rules overlay links to the Pieces overlay', async ({ page }) => {
   await page.getByRole('dialog', { name: 'Rules' }).getByRole('button', { name: 'Pieces' }).click();
   await expect(page.getByRole('dialog', { name: 'Pieces' })).toBeVisible();
   await expect(page.getByRole('dialog', { name: 'Rules' })).toBeHidden();
+});
+
+test('pieces can be dragged onto the board, between squares, and back to the tray', async ({
+  page,
+}) => {
+  await startNewGame(page, 'Human vs. Human');
+  await usePreset(page, 'classic');
+  await page.getByRole('button', { name: 'Clear' }).click();
+
+  const tray = page.getByRole('group', { name: 'Pieces to place' });
+  await tray.getByRole('button', { name: /^King, 1 to place/ }).dragTo(square(page, 'e1'));
+  await expect(square(page, 'e1')).toHaveAccessibleName(/^e1, White King/);
+
+  await square(page, 'e1').dragTo(square(page, 'd1'));
+  await expect(square(page, 'd1')).toHaveAccessibleName(/^d1, White King/);
+  await expect(square(page, 'e1')).toHaveAccessibleName(/^e1, empty/);
+
+  await square(page, 'd1').dragTo(tray);
+  await expect(tray.getByRole('button', { name: /^King, 1 to place/ })).toBeVisible();
+
+  // Tapping a placed piece shows a circle in the tray that sends it back.
+  await tray.getByRole('button', { name: /^King, 1 to place/ }).dragTo(square(page, 'e1'));
+  await square(page, 'e1').click();
+  await tray.getByRole('button', { name: 'Return the King to the tray' }).click();
+  await expect(square(page, 'e1')).toHaveAccessibleName(/^e1, empty/);
+  await expect(tray.getByRole('button', { name: /^King, 1 to place/ })).toBeVisible();
 });

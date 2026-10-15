@@ -183,7 +183,7 @@ export const PIECE_DEFINITIONS: readonly PieceDefinition[] = [
     cost: 3,
     royal: false,
     movement: [{ kind: 'slide', directions: ORTHOGONAL, range: 2 }],
-    summary: 'Moves and captures one or two squares along a rank or file. Cannot jump.',
+    summary: 'Moves and captures one or two squares along a rank or file.',
   }),
   define({
     type: 'rook',
@@ -214,7 +214,7 @@ export const PIECE_DEFINITIONS: readonly PieceDefinition[] = [
     cost: 2,
     royal: false,
     movement: [{ kind: 'slide', directions: DIAGONAL, range: 2 }],
-    summary: 'Moves and captures one or two squares diagonally. Cannot jump.',
+    summary: 'Moves and captures one or two squares diagonally.',
   }),
   define({
     type: 'bishop',

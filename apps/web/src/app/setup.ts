@@ -1,14 +1,17 @@
 /**
  * Army setup before a game.
  *
- * Two players: each drafts and places privately, the device is handed over between them, and both
- * armies are revealed together.
+ * Every draft starts as the Classic starter army; players change it or load another starter.
  *
- *   White draft ⇄ White place → handoff → Black draft ⇄ Black place → ready → reveal
+ * Two players: each drafts and places privately, the device is handed over between them, and the
+ * board is shown once Black is done.
  *
- * Against the computer: the player (White) builds an army, then picks the computer's preset.
+ *   White draft ⇄ White place → handoff → Black draft ⇄ Black place → reveal
  *
- *   White draft ⇄ White place → opponent → reveal
+ * Against the computer: the player (White) builds an army, and the computer gets a random starter
+ * army, which the player can change before starting.
+ *
+ *   White draft ⇄ White place → reveal
  */
 
 import {
@@ -19,11 +22,12 @@ import {
   type Deployment,
   deploymentDraft,
   findPreset,
+  PRESETS,
   type PieceType,
   validateDeployment,
   validateDraft,
 } from '@treasure-chess/game';
-import { emptyDeployment, reconcileDeployment } from './placement';
+import { reconcileDeployment } from './placement';
 
 export type SetupStep =
   /** `color` is choosing pieces. */
@@ -32,11 +36,7 @@ export type SetupStep =
   | 'place'
   /** Pass the Device to `color` (who has not seen the other army). */
   | 'handoff'
-  /** Both armies are locked; waiting to reveal. */
-  | 'ready'
-  /** Against the computer: choosing the computer's starter army. */
-  | 'opponent'
-  /** Both armies are shown; the game can start. */
+  /** Both armies are shown; the game can start (the computer's army can still be changed). */
   | 'reveal';
 
 export type GameMode = 'local' | 'computer';
@@ -58,11 +58,13 @@ export type SetupAction =
   | { readonly type: 'set-draft'; readonly draft: ArmyDraft }
   /** Adds (+1) or removes (−1) one piece, if the army rules allow it. */
   | { readonly type: 'adjust-draft'; readonly piece: PieceType; readonly delta: 1 | -1 }
-  | { readonly type: 'use-preset'; readonly presetId: string }
+  /** Replaces the draft (and its suggested placement) with a starter army. */
+  | { readonly type: 'load-starter'; readonly presetId: string }
   | { readonly type: 'to-place' }
   | { readonly type: 'back-to-draft' }
   | { readonly type: 'set-deployment'; readonly deployment: Deployment }
-  | { readonly type: 'lock' }
+  /** Finishes placing. Against the computer, `opponentPresetId` is the computer's army. */
+  | { readonly type: 'lock'; readonly opponentPresetId?: string }
   | { readonly type: 'continue' }
   | { readonly type: 'choose-opponent'; readonly presetId: string };
 
@@ -71,13 +73,28 @@ export function withKing(draft: ArmyDraft): ArmyDraft {
   return draft.king === 1 ? draft : { ...draft, king: 1 };
 }
 
+/** The starter army every draft begins with. */
+export const DEFAULT_STARTER = PRESETS[0]!;
+
 export function initialSetup(mode: GameMode = 'local'): SetupState {
+  const draft = deploymentDraft(DEFAULT_STARTER.deployment);
+  const deployment = DEFAULT_STARTER.deployment;
   return {
     mode,
     step: 'draft',
     color: 'w',
-    drafts: { w: { king: 1 }, b: { king: 1 } },
-    deployments: { w: emptyDeployment(), b: emptyDeployment() },
+    drafts: { w: draft, b: draft },
+    deployments: { w: deployment, b: deployment },
+  };
+}
+
+/** Sets Black to a starter army (the computer's army). */
+function withOpponent(state: SetupState, presetId: string | undefined): SetupState {
+  const preset = (presetId && findPreset(presetId)) || DEFAULT_STARTER;
+  return {
+    ...state,
+    drafts: { ...state.drafts, b: deploymentDraft(preset.deployment) },
+    deployments: { ...state.deployments, b: preset.deployment },
   };
 }
 
@@ -102,11 +119,12 @@ export function setupReducer(state: SetupState, action: SetupAction): SetupState
       if (action.delta > 0 && addBlocker(draft, action.piece)) return state;
       return update(state, 'drafts', adjustDraft(draft, action.piece, action.delta));
 
-    case 'use-preset': {
+    case 'load-starter': {
       const preset = findPreset(action.presetId);
       if (state.step !== 'draft' || !preset) return state;
+      // The starter's formation is kept and reconciled with any later edits when placing.
       const next = update(state, 'drafts', deploymentDraft(preset.deployment));
-      return { ...update(next, 'deployments', preset.deployment), step: 'place' };
+      return update(next, 'deployments', preset.deployment);
     }
 
     case 'to-place':
@@ -128,29 +146,23 @@ export function setupReducer(state: SetupState, action: SetupAction): SetupState
 
     case 'lock':
       if (state.step !== 'place' || validateDeployment(deployment, draft).length > 0) return state;
-      if (state.mode === 'computer') return { ...state, step: 'opponent' };
+      if (state.mode === 'computer') {
+        return { ...withOpponent(state, action.opponentPresetId), step: 'reveal' };
+      }
       return state.color === 'w'
         ? { ...state, step: 'handoff', color: 'b' }
-        : { ...state, step: 'ready' };
+        : { ...state, step: 'reveal' };
 
-    case 'choose-opponent': {
-      const preset = findPreset(action.presetId);
-      if (state.step !== 'opponent' || !preset) return state;
-      return {
-        ...state,
-        step: 'reveal',
-        drafts: { ...state.drafts, b: deploymentDraft(preset.deployment) },
-        deployments: { ...state.deployments, b: preset.deployment },
-      };
+    case 'choose-opponent':
+      if (state.mode !== 'computer' || state.step !== 'reveal') return state;
+      if (!findPreset(action.presetId)) return state;
+      return withOpponent(state, action.presetId);
+
+    case 'continue': {
+      if (state.step !== 'handoff') return state;
+      const { resume, ...rest } = state;
+      return { ...rest, step: resume ?? 'draft' };
     }
-
-    case 'continue':
-      if (state.step === 'handoff') {
-        const { resume, ...rest } = state;
-        return { ...rest, step: resume ?? 'draft' };
-      }
-      if (state.step === 'ready') return { ...state, step: 'reveal' };
-      return state;
   }
 }
 

@@ -11,6 +11,7 @@ import {
   type ArmyDraft,
   type Color,
   type Deployment,
+  deploymentDraft,
   deserializeGame,
   PIECE_TYPES,
   type PieceType,
@@ -18,7 +19,13 @@ import {
   serializeGame,
 } from '@treasure-chess/game';
 import type { AppState, Session, View } from '../app/appState';
-import { type GameMode, gateAfterReload, type SetupState, type SetupStep } from '../app/setup';
+import {
+  DEFAULT_STARTER,
+  type GameMode,
+  gateAfterReload,
+  type SetupState,
+  type SetupStep,
+} from '../app/setup';
 
 export const STORAGE_KEY = 'treasure-chess/session';
 export const SESSION_SCHEMA_VERSION = 2;
@@ -63,7 +70,9 @@ export function encodeSession(state: AppState, now = new Date()): string | null 
 
 // ---- Validation -----------------------------------------------------------------------------
 
-const STEPS: readonly SetupStep[] = ['draft', 'place', 'handoff', 'ready', 'opponent', 'reveal'];
+const STEPS: readonly SetupStep[] = ['draft', 'place', 'handoff', 'reveal'];
+/** Steps from older builds, shown as the board with both armies. */
+const RETIRED_STEPS = ['ready', 'opponent'];
 const isMode = (v: unknown): v is GameMode => v === 'local' || v === 'computer';
 const isObject = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null;
 const isColor = (v: unknown): v is Color => v === 'w' || v === 'b';
@@ -84,6 +93,20 @@ function isRow(v: unknown): v is (PieceType | null)[] {
 
 function isDeployment(v: unknown): v is Deployment {
   return isObject(v) && isRow(v.backRank) && isRow(v.pawnRow);
+}
+
+/** Moves a setup saved at a retired step onto the board step (the computer gets a default army). */
+function upgradeSetup(v: unknown): unknown {
+  if (!isObject(v) || !RETIRED_STEPS.includes(v.step as string)) return v;
+  if (v.step === 'opponent' && isObject(v.drafts) && isObject(v.deployments)) {
+    return {
+      ...v,
+      step: 'reveal',
+      drafts: { ...v.drafts, b: deploymentDraft(DEFAULT_STARTER.deployment) },
+      deployments: { ...v.deployments, b: DEFAULT_STARTER.deployment },
+    };
+  }
+  return { ...v, step: 'reveal' };
 }
 
 function isSetup(v: unknown): v is SetupState {
@@ -136,8 +159,9 @@ export function decodeSession(text: string): LoadResult {
 
   const saved = doc.session;
   let session: Session;
-  if (isObject(saved) && saved.kind === 'setup' && isSetup(saved.setup)) {
-    session = { kind: 'setup', setup: gateAfterReload(saved.setup) };
+  const savedSetup = isObject(saved) && saved.kind === 'setup' ? upgradeSetup(saved.setup) : null;
+  if (isSetup(savedSetup)) {
+    session = { kind: 'setup', setup: gateAfterReload(savedSetup) };
   } else if (isObject(saved) && saved.kind === 'game' && isMode(saved.mode)) {
     try {
       session = { kind: 'game', game: deserializeGame(saved.game), mode: saved.mode };

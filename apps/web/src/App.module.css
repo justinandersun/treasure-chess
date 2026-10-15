@@ -23,6 +23,7 @@
   font-size: 1.3rem;
   font-weight: 800;
   letter-spacing: -0.02em;
+  white-space: nowrap;
   cursor: pointer;
 }
 
@@ -91,4 +92,24 @@
 
 .footer a:hover {
   color: var(--fg);
+}
+
+/* Small phones: keep the wordmark and menu on one line. */
+@media (max-width: 400px) {
+  .header {
+    gap: 4px;
+  }
+
+  .brand {
+    font-size: 1.1rem;
+  }
+
+  .nav {
+    gap: 0;
+  }
+
+  .navLink {
+    padding: 0 7px;
+    letter-spacing: 0.04em;
+  }
 }

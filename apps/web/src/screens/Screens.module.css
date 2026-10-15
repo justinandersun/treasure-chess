@@ -9,6 +9,7 @@
 }
 
 .title {
+  margin-bottom: 0.15em;
   font-size: clamp(2.75rem, 11vw, 4.5rem);
   letter-spacing: -0.035em;
   line-height: 1;
@@ -16,7 +17,7 @@
 
 .lede {
   max-width: 44ch;
-  margin-bottom: 2em;
+  margin: 0 0 2em;
   color: var(--muted);
   font-size: 1.1rem;
 }

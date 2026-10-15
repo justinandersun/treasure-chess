@@ -3,10 +3,12 @@ import {
   type AddBlocker,
   type ArmyDraft,
   type Color,
+  deploymentDraft,
   draftCost,
   draftSlots,
   type Family,
   PIECE_DEFINITIONS,
+  PIECE_TYPES,
   type PieceType,
   PRESETS,
   TREASURY,
@@ -16,15 +18,21 @@ import { useState } from 'react';
 import { Button } from '../components/Button';
 import { PieceIcon } from '../pieces/PieceIcon';
 import styles from './Draft.module.css';
-import type { GameMode } from '../app/setup';
-import { COLOR_NAME, FAMILY_NAMES } from '../labels';
+import { FAMILY_NAMES } from '../labels';
 
-const BLOCKER_TEXT: Record<AddBlocker, string> = {
-  budget: 'Not enough points',
-  'king-limit': 'Only one King',
-  'pawn-row-full': 'Pawn row is full',
-  'back-rank-full': 'King row is full',
-};
+/** Why a piece cannot be added, shown when its unavailable "+" is tapped. */
+function blockedMessage(blocker: AddBlocker, name: string): string {
+  switch (blocker) {
+    case 'budget':
+      return `Not enough points for a ${name}.`;
+    case 'pawn-row-full':
+      return 'The pawn row is full.';
+    case 'back-rank-full':
+      return 'The king row is full.';
+    case 'king-limit':
+      return 'Every army has exactly one King.';
+  }
+}
 
 /** A footer counter that gains a check mark once its requirement is met. */
 function Requirement(props: {
@@ -50,50 +58,77 @@ function Requirement(props: {
 
 interface DraftProps {
   readonly color: Color;
-  readonly mode: GameMode;
   readonly draft: ArmyDraft;
   readonly onAdjust: (piece: PieceType, delta: 1 | -1) => void;
-  readonly onUsePreset: (presetId: string) => void;
+  readonly onLoadStarter: (presetId: string) => void;
+  readonly onClear: () => void;
   readonly onContinue: () => void;
   readonly onBack?: () => void;
 }
 
+/** Whether two drafts have the same count of every piece type. */
+function sameDraft(a: ArmyDraft, b: ArmyDraft): boolean {
+  return PIECE_TYPES.every((t) => (a[t] ?? 0) === (b[t] ?? 0));
+}
+
 export function Draft({
   color,
-  mode,
   draft,
   onAdjust,
-  onUsePreset,
+  onLoadStarter,
+  onClear,
   onContinue,
   onBack,
 }: DraftProps) {
-  const [presetId, setPresetId] = useState(PRESETS[0]!.id);
+  const [notice, setNotice] = useState<string | null>(null);
   const spent = draftCost(draft);
   const slots = draftSlots(draft);
   const issues = validateDraft(draft);
   const families = Object.keys(FAMILY_NAMES) as Family[];
+  // The starter this draft matches, if it has not been changed.
+  const starter = PRESETS.find((p) => sameDraft(deploymentDraft(p.deployment), draft));
 
   return (
     <section className={styles.draft} aria-labelledby="draft-title">
       <header className={styles.intro}>
-        <h1 id="draft-title">
-          {mode === 'computer' ? 'Draft Your Army' : `${COLOR_NAME[color]}: Draft Your Army`}
-        </h1>
+        <h1 id="draft-title">Draft Your Army</h1>
         <p className={styles.hint}>
-          Choose eight infantry for the pawn row, and up to seven more pieces for the king row.
+          Your army starts as a starter army. Play it as is, switch to another, or change any piece
+          below.
         </p>
-        <div className={styles.quickStart}>
-          <label htmlFor="preset-select">Starter Army</label>
-          <select id="preset-select" value={presetId} onChange={(e) => setPresetId(e.target.value)}>
+        <div className={styles.starter}>
+          <label htmlFor="starter-select">Starter Army</label>
+          <select
+            id="starter-select"
+            value={starter?.id ?? 'custom'}
+            onChange={(e) => {
+              setNotice(null);
+              onLoadStarter(e.target.value);
+            }}
+          >
+            {!starter && (
+              <option value="custom" disabled>
+                Custom
+              </option>
+            )}
             {PRESETS.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.name}
               </option>
             ))}
           </select>
-          <Button onClick={() => onUsePreset(presetId)}>Use</Button>
-          <p className={styles.presetDescription}>
-            {PRESETS.find((p) => p.id === presetId)?.description}
+          <Button
+            onClick={() => {
+              setNotice(null);
+              onClear();
+            }}
+          >
+            Clear
+          </Button>
+          <p className={styles.starterDescription}>
+            {starter
+              ? starter.description
+              : 'Your own army. Choose a starter to start over from one.'}
           </p>
         </div>
       </header>
@@ -169,7 +204,10 @@ export function Draft({
                         <button
                           type="button"
                           className={styles.step}
-                          onClick={() => onAdjust(d.type, -1)}
+                          onClick={() => {
+                            setNotice(null);
+                            onAdjust(d.type, -1);
+                          }}
                           disabled={count === 0}
                           aria-label={`Remove ${d.name}`}
                         >
@@ -181,19 +219,18 @@ export function Draft({
                         <button
                           type="button"
                           className={styles.step}
-                          onClick={() => onAdjust(d.type, 1)}
-                          disabled={blocker !== null}
+                          // Stays focusable and tappable when unavailable, to explain why.
+                          aria-disabled={blocker !== null}
+                          onClick={() => {
+                            if (blocker) return setNotice(blockedMessage(blocker, d.name));
+                            setNotice(null);
+                            onAdjust(d.type, 1);
+                          }}
                           aria-label={`Add ${d.name}`}
-                          aria-describedby={blocker ? `blocked-${d.type}` : undefined}
                         >
                           +
                         </button>
                       </div>
-                    )}
-                    {blocker && (
-                      <p id={`blocked-${d.type}`} className={styles.blocked}>
-                        {BLOCKER_TEXT[blocker]}
-                      </p>
                     )}
                   </td>
                 </tr>
@@ -230,10 +267,13 @@ export function Draft({
             {' · '}
             <Requirement
               label="King Row"
-              count={slots.backRank}
-              max={7}
+              count={slots.backRank + 1}
+              max={8}
               met={slots.backRank >= 1}
             />
+          </p>
+          <p className={styles.notice} role="status">
+            {notice}
           </p>
         </div>
         <div className={styles.actions}>
@@ -243,7 +283,7 @@ export function Draft({
             </Button>
           )}
           <Button variant="primary" onClick={onContinue} disabled={issues.length > 0}>
-            Next: Place
+            Next
           </Button>
         </div>
       </footer>

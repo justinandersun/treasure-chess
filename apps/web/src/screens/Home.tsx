@@ -9,16 +9,14 @@ interface HomeProps {
   readonly onDiscard: () => void;
 }
 
-function describeSession(session: Session): { action: string; detail: string } {
+/** One line about the saved session, e.g. "Human vs. Computer: Move 12". */
+function describeSession(session: Session): string {
   const mode = session.kind === 'setup' ? session.setup.mode : session.mode;
   const opponent = mode === 'computer' ? 'Human vs. Computer' : 'Human vs. Human';
-  if (session.kind === 'setup') {
-    return { action: 'Continue Setup', detail: `In Progress: ${opponent} · Drafting` };
-  }
+  if (session.kind === 'setup') return `${opponent}: Drafting`;
   const { game } = session;
-  if (game.result) return { action: 'View Last Game', detail: `Finished: ${opponent}` };
-  const moveNumber = Math.floor(game.ply / 2) + 1;
-  return { action: 'Continue Game', detail: `In Progress: ${opponent} · Move ${moveNumber}` };
+  if (game.result) return `${opponent}: Finished`;
+  return `${opponent}: Move ${Math.floor(game.ply / 2) + 1}`;
 }
 
 export function Home({ session, onNewGame, onContinue, onDiscard }: HomeProps) {
@@ -28,20 +26,24 @@ export function Home({ session, onNewGame, onContinue, onDiscard }: HomeProps) {
       <h1 id="home-title" className={styles.title}>
         Treasure Chess
       </h1>
-      <p className={styles.lede}>A game of asymmetric armies.</p>
+      <p className={styles.lede}>A chess game of asymmetric armies.</p>
       <div className={styles.actions}>
-        {saved && (
-          <Button variant="primary" onClick={onContinue}>
-            {saved.action}
+        {saved ? (
+          <>
+            <Button variant="primary" onClick={onContinue}>
+              Resume Game
+            </Button>
+            <Button onClick={onNewGame}>New Game</Button>
+          </>
+        ) : (
+          <Button variant="primary" onClick={onNewGame}>
+            New Game
           </Button>
         )}
-        <Button variant={saved ? 'default' : 'primary'} onClick={onNewGame}>
-          New Game
-        </Button>
       </div>
       {saved && (
         <p className={styles.saved}>
-          {saved.detail} ·{' '}
+          {saved} ·{' '}
           <button type="button" className={styles.link} onClick={onDiscard}>
             Discard
           </button>

@@ -2,38 +2,38 @@
 
 Treasure Chess is a free, browser-based chess variant in which players draft and arrange custom armies of fairy pieces before playing on a standard 8×8 chessboard.
 
-**Draft → Place → Play.** Spend 40 gold on an army, arrange it on your first two ranks, and play a friend on the same device or the built-in computer opponent. No accounts, ads, or tracking; your game is saved in your browser.
+A game of asymmetric armies. Spend 40 points on an army, arrange it on your first two ranks, and play a friend on the same device or the built-in computer opponent. No accounts, ads, or tracking; your game is saved in your browser.
 
 The full rules and product spec are in [treasure-chess-spec.md](treasure-chess-spec.md).
 
 ## How to play
 
-1. **Draft.** Buy exactly one King, eight infantry for the pawn row (Pawns, Scouts, and Sergeants in any mix), and one to seven other pieces. Total cost may not exceed 40 gold. Presets are available for a quick start.
-2. **Place.** Infantry fill the pawn row; everything else goes on the back rank, with the King on the d- or e-file. In two-player games each army is placed in private and revealed together.
-3. **Play.** Normal chess, with no castling, en passant, or clock. Infantry promote on the far rank to any non-King piece type from their starting army. Checkmate wins; stalemate, repetition, the 50/75-move rules, and dead positions draw.
+1. **Draft.** Every army includes one King. Buy eight infantry for the pawn row (Pawns, Scouts, and Sergeants in any mix) and one to seven more pieces for the king row, within 40 points. Drafts start as a starter army you can play as is, swap for another, or edit.
+2. **Place.** Infantry fill the pawn row; everything else goes on the king row, with the King on the d- or e-file. Drag pieces into place or tap a piece and then a square. In two-player games each army is placed in private.
+3. **Play.** Normal chess, with no castling, en passant, or clock. Infantry promote on the opponent's king row to any non-King, non-infantry piece type from their starting army. Checkmate wins; stalemate, repetition, the 50/75-move rules, and dead positions draw.
 
 ### Pieces
 
-| Family   | Piece    | Gold | Movement                                                           |
-| -------- | -------- | ---: | ------------------------------------------------------------------ |
-| Infantry | Pawn     |    1 | Standard chess pawn                                                |
-| Infantry | Scout    |    1 | Moves diagonally forward; captures straight forward                |
-| Infantry | Sergeant |    2 | Moves and captures one square in any forward direction             |
-| Rook     | Bastion  |    3 | One or two squares orthogonally; can jump                          |
-| Rook     | Rook     |    5 | Standard chess rook                                                |
-| Rook     | Gryphon  |    6 | One diagonal step, then may slide outward orthogonally             |
-| Bishop   | Priest   |    2 | One or two squares diagonally; can jump                            |
-| Bishop   | Bishop   |    3 | Standard chess bishop                                              |
-| Bishop   | Cardinal |    5 | One orthogonal step, then may slide outward diagonally             |
-| Knight   | Camel    |    2 | (1,3) jumper                                                       |
-| Knight   | Knight   |    3 | Standard chess knight                                              |
-| Knight   | Elephant |    6 | Knight + Camel jumps                                               |
-| Royalty  | Consort  |    3 | One square in any direction                                        |
-| Royalty  | Falconer |    8 | Jumps exactly two squares: orthogonally, diagonally, or knightwise |
-| Royalty  | Queen    |    9 | Standard chess queen                                               |
-| Royalty  | King     |    1 | Standard chess king, without castling                              |
+| Family    | Piece    | Points | Movement                                                           |
+| --------- | -------- | -----: | ------------------------------------------------------------------ |
+| Infantry  | Pawn     |      1 | Standard chess pawn                                                |
+| Infantry  | Scout    |      1 | Moves diagonally forward; captures straight forward                |
+| Infantry  | Sergeant |      2 | Moves and captures one square in any forward direction             |
+| Castle    | Bastion  |      3 | One or two squares orthogonally                                    |
+| Castle    | Rook     |      5 | Standard chess rook                                                |
+| Castle    | Gryphon  |      6 | One diagonal step, then may slide outward orthogonally             |
+| Cathedral | Priest   |      2 | One or two squares diagonally                                      |
+| Cathedral | Bishop   |      3 | Standard chess bishop                                              |
+| Cathedral | Cardinal |      5 | One orthogonal step, then may slide outward diagonally             |
+| Cavalry   | Camel    |      2 | (1,3) jumper                                                       |
+| Cavalry   | Knight   |      3 | Standard chess knight                                              |
+| Cavalry   | Elephant |      6 | Knight + Camel jumps                                               |
+| Court     | Consort  |      3 | One square in any direction                                        |
+| Court     | Falconer |      8 | Jumps exactly two squares: orthogonally, diagonally, or knightwise |
+| Court     | Queen    |      9 | Standard chess queen                                               |
+| Court     | King     |      1 | Standard chess king, without castling                              |
 
-The in-app **Rules** screen has movement diagrams for every piece.
+The in-app **Pieces** overlay has a movement diagram for every piece; **Rules** covers the rest.
 
 ## Development
 
@@ -49,7 +49,7 @@ pnpm e2e        # end-to-end tests (first run: pnpm --filter @treasure-chess/web
 
 ### Project layout
 
-- **`packages/game`** — the rules engine, in pure TypeScript with no DOM: piece catalog and move generation, legality, promotion, draws, army validation, notation, saved-game format, presets, and the computer opponent (`src/ai`). Unit tests sit next to the source; `pnpm --filter @treasure-chess/game bench` measures move-generation and search speed.
+- **`packages/game`** — the rules engine, in pure TypeScript with no DOM: piece catalog and move generation, legality, promotion, draws, army validation, notation, saved-game format, starter armies, and the computer opponent (`src/ai`). Unit tests sit next to the source; `pnpm --filter @treasure-chess/game bench` measures move-generation and search speed.
 - **`apps/web`** — the React + Vite front end: screens, board, piece artwork (`src/pieces/pieceArt.ts`), session persistence (`src/persistence`), and the computer opponent's Web Worker (`src/ai`). Playwright tests live in `apps/web/e2e`.
 
 ### Testing
@@ -60,7 +60,7 @@ pnpm e2e        # end-to-end tests (first run: pnpm --filter @treasure-chess/web
 
 ### Images
 
-After changing piece artwork, regenerate the link-preview image and home-screen icon in `apps/web/public/` and commit them:
+After changing piece artwork, regenerate the link-preview image, home-screen icon, and favicon in `apps/web/public/` and commit them:
 
 ```bash
 pnpm --filter @treasure-chess/web images
