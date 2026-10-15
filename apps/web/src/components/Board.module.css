@@ -104,6 +104,21 @@
   pointer-events: none;
 }
 
+/*
+ * A piece arriving from another square slides in from it. The piece box is 88% of a square, so a
+ * one-square step is 100% / 0.88 of the piece's own size.
+ */
+.arrive {
+  z-index: 2;
+  animation: slide 0.25s ease-out;
+}
+
+@keyframes slide {
+  from {
+    transform: translate(calc(var(--dx) * 113.64%), calc(var(--dy) * 113.64%));
+  }
+}
+
 /* Destination markers sit above the piece so captures stay visible. */
 .move::after,
 .capture::after,

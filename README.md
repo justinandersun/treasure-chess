@@ -2,7 +2,7 @@
 
 Treasure Chess is a free, browser-based chess variant in which players draft and arrange custom armies of fairy pieces before playing on a standard 8×8 chessboard.
 
-A game of asymmetric armies. Spend 40 points on an army, arrange it on your first two ranks, and play a friend on the same device or the built-in computer opponent. No accounts, ads, or tracking; your game is saved in your browser.
+A chess game of asymmetric armies. Spend 40 points on an army, arrange it on your first two ranks, and play a friend on the same device or the built-in computer opponent. No accounts, ads, or tracking; your game is saved in your browser.
 
 The full rules and product spec are in [treasure-chess-spec.md](treasure-chess-spec.md).
 

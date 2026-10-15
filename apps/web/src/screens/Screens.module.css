@@ -16,9 +16,9 @@
 }
 
 /*
- * On hover, a glint of gold sweeps across the title once. The text is painted by a gradient that
- * is solid --fg except for a narrow gold band, parked off to the right until the sweep. Skipped
- * for reduced motion and in forced-colors mode, where it stays plain text.
+ * On hover (or once on load, on touch screens), a glint of gold sweeps across the title. The text
+ * is painted by a gradient that is solid --fg except for a narrow gold band, parked off to the
+ * right until the sweep. Skipped for reduced motion and in forced-colors mode (plain text there).
  */
 @media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
   @supports (background-clip: text) or (-webkit-background-clip: text) {
@@ -42,6 +42,13 @@
 
     .title:hover {
       animation: glint 1.4s ease-in-out;
+    }
+
+    /* Touch screens cannot hover, so the glint plays once as Home appears. */
+    @media (hover: none) {
+      .title {
+        animation: glint 1.4s ease-in-out 0.5s both;
+      }
     }
   }
 }
@@ -77,6 +84,15 @@
     flex-direction: column;
     align-items: stretch;
   }
+}
+
+.shared {
+  max-width: 44ch;
+  margin: 0 0 1.5em;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 0.9rem;
 }
 
 .saved {

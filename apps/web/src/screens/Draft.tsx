@@ -143,19 +143,13 @@ export function Draft({
               {/* The first family's heading row also carries the column headers. */}
               <th
                 scope="colgroup"
-                colSpan={family === families[0] ? 1 : 4}
+                colSpan={family === families[0] ? 1 : 3}
                 className={`${styles.familyName} section-label`}
               >
                 {FAMILY_NAMES[family]}
               </th>
               {family === families[0] && (
                 <>
-                  <th
-                    scope="col"
-                    className={`${styles.columnName} ${styles.center} ${styles.wide}`}
-                  >
-                    Notation
-                  </th>
                   <th
                     scope="col"
                     className={`${styles.columnName} ${styles.center} ${styles.wide}`}
@@ -186,11 +180,10 @@ export function Draft({
                       </span>
                       <span className={styles.name}>{d.name}</span>
                       <span className={styles.narrowMeta}>
-                        · {d.symbol} · {d.cost} {d.cost === 1 ? 'pt' : 'pts'}
+                        · {d.cost} {d.cost === 1 ? 'pt' : 'pts'}
                       </span>
                     </button>
                   </th>
-                  <td className={`${styles.center} ${styles.wide}`}>{d.symbol}</td>
                   <td className={`${styles.center} ${styles.wide}`}>{d.cost}</td>
                   <td>
                     {d.type === 'king' ? (

@@ -3,7 +3,7 @@
 ## 1. Overview
 Treasure Chess is a free, browser-based chess variant in which players draft and arrange custom armies of fairy pieces before playing on a standard 8×8 chessboard.
 
-Each player has 40 points to spend on pieces from an expanded roster. Players must fill their pawn row, select a King, and purchase at least one additional king-row piece. The remaining army composition and placement are customizable.
+Each player has 40 points to spend on pieces from an expanded roster. Every army includes a King; players must fill their pawn row and purchase at least one additional king-row piece. The remaining army composition and placement are customizable.
 
 The core experience is **Draft → Place → Play**.
 
@@ -121,32 +121,32 @@ The following pieces are excluded from v1 but may be introduced later:
 **Single-player**
 - One human plays against a basic computer opponent.
 - The human may use a starter army or draft a custom army.
-- The computer uses a player-selected starter army and formation.
+- The computer plays a randomly chosen starter army and formation, which the player may change before the game starts.
 - The computer must generate legal moves and provide a reasonable basic challenge.
 - Advanced AI, opening books, and difficulty settings are not required for v1.
 
 ### 3.2 Core Screens
 **Home**
-- New Game
-- Continue Game, when a saved local session exists
-- Rules
-- Select local multiplayer or computer opponent
+- Play a Friend (local multiplayer) and Play Computer (single-player) start a new game.
+- Resume Game, with a one-line status and Discard, when a saved local session exists.
+- Rules and Pieces references are available from the header on every screen.
 
 **Draft**
-- Display all pieces, grouped by family.
-- Show each piece's name, symbol, cost, and movement reference.
-- Allow players to add and remove pieces.
-- Display points spent and remaining.
+- Every draft starts as a starter army (Classic by default); players may switch starters, edit the army, or clear it to build from scratch.
+- Display all pieces, grouped by family, with each piece's name, cost, and count; selecting a piece shows its movement diagram and description.
+- The King is always included and cannot be removed.
+- Allow players to add and remove pieces, explaining why a piece cannot be added.
+- Display points spent and remaining, and pawn-row and king-row counts.
 - Validate all army construction constraints.
-- Offer starter armies for quick starting.
 
 **Place**
-- Display the chessboard and available pieces.
-- Allow tap/click or drag-and-drop placement.
+- Display the player's two ranks and the pieces still to place.
+- Keep a starter army's formation, adjusted for any changes made while drafting.
+- Allow tap/click or drag-and-drop placement, repositioning, and returning pieces to the tray.
 - Enforce pawn-rank and King-position restrictions.
-- Support random valid placement.
-- Allow repositioning before locking the army.
-- Advance to play when both armies are ready.
+- Support random valid placement and clearing the board.
+- Allow sharing the army as a link; opening the link offers it as the starting army.
+- When both armies are ready, show them together with Start Game (and, against the computer, an option to change the computer's army).
 
 **Play**
 - Display the board, current turn, and game status.
@@ -155,18 +155,21 @@ The following pieces are excluded from v1 but may be introduced later:
 - Allow inspection of an opposing piece's movement and attack pattern.
 - Display selected pieces, the previous move, and check.
 - Present eligible promotion options when required.
-- Provide Undo, Resign, New Game, and Rules controls.
+- Show each side's remaining points and the pieces it has captured beside its king row.
+- Show the selected piece's movement diagram and description.
+- Provide Flip Board, Undo, Resign, and New Game controls, and Rematch when play ends.
 - Show a game result when play ends.
-- Support optional move history.
+- Show the move history, with piece icons.
+- Briefly animate the computer's moves.
 
-**Rules**
-- Provide a concise explanation of army construction, deployment, movement, promotion, and victory conditions.
-- Display all pieces with movement diagrams.
-- Remain accessible throughout the game without losing progress.
+**Rules and Pieces**
+- Rules: a concise explanation of army construction, deployment, movement, promotion, winning, and draws.
+- Pieces: all pieces with movement diagrams.
+- Both open as overlays from the header and remain accessible without losing progress.
 
 ### 3.3 Interaction Rules
 - Primary movement interaction is tap/click a piece, then tap/click a legal destination.
-- Drag-and-drop may be supported as an additional interaction.
+- Drag-and-drop is supported as an additional interaction.
 - Selecting another friendly piece changes selection.
 - Selecting the selected piece again clears selection.
 - Illegal moves do not alter game state.
@@ -188,14 +191,14 @@ The following pieces are excluded from v1 but may be introduced later:
 ## 4. Non-Functional Requirements
 | Area | Requirement |
 |---|---|
-| Platforms | Modern desktop and mobile browsers |
+| Platforms | Modern desktop and mobile browsers; installable and playable offline |
 | Performance | Fast load, responsive moves, non-blocking computer calculation |
 | Layout | Responsive; entire chessboard visible without horizontal scrolling |
 | Accessibility | Keyboard support, labeled controls, clear contrast, non-color-only indicators |
 | Design | Clean, minimal, chess-first visual language |
 | Animation | Minimal; respect reduced-motion preferences |
 | Sound | Not required; off by default if included |
-| Privacy | No accounts, ads, tracking, or analytics |
+| Privacy | No accounts, ads, tracking, or analytics; fonts and assets are self-hosted |
 | Reliability | Deterministic rules and reproducible game state |
 | Hosting | GitHub and Vercel |
 | Cost | Free to play, with no paywall |

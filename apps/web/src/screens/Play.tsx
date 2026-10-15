@@ -68,6 +68,16 @@ export function Play({ game, mode, onChange, onNewGame }: PlayProps) {
   const [reviewing, setReviewing] = useState<GameState | null>(null);
 
   const { board, turn } = game.position;
+
+  // Slide the computer's move in, once, when it arrives (not after an undo or a reload).
+  const [seenPly, setSeenPly] = useState(game.ply);
+  const [slidePly, setSlidePly] = useState<number | null>(null);
+  if (game.ply !== seenPly) {
+    setSeenPly(game.ply);
+    const computerMoved = game.ply > seenPly && computer !== null && opposite(turn) === computer;
+    setSlidePly(computerMoved ? game.ply : null);
+  }
+  const slide = slidePly === game.ply ? game.lastMove : null;
   const marks = useMemo(() => selectionMarks(game, selection), [game, selection]);
   const check = inCheck(game) ? findKing(board, turn) : null;
   const thinking = computer !== null && turn === computer && !game.result;
@@ -132,6 +142,7 @@ export function Play({ game, mode, onChange, onNewGame }: PlayProps) {
           selectionStyle={selection?.mode === 'inspect' ? 'inspect' : 'select'}
           targets={marks}
           lastMove={game.lastMove}
+          animateMove={slide}
           checkSquare={check}
           onSquareClick={handleSquare}
           above={armyBar(opposite(orientation))}

@@ -166,7 +166,7 @@
   text-align: center;
 }
 
-/* Phones: fold notation and points into the piece cell. */
+/* Phones: fold points into the piece cell. */
 @media (max-width: 480px) {
   .table th,
   .table td {

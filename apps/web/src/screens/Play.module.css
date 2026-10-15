@@ -121,7 +121,19 @@
 }
 
 .move {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-weight: 500;
+}
+
+/* Piece icons sit on a light square so both colors read in either theme. */
+.moveIcon {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  padding: 1px;
+  background: var(--square-light);
 }
 
 .noMoves {

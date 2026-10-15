@@ -4,7 +4,7 @@
  * discarding replaces it.
  */
 
-import { createGameFromArmies, type GameState } from '@treasure-chess/game';
+import { createGameFromArmies, type Deployment, type GameState } from '@treasure-chess/game';
 import {
   type GameMode,
   initialSetup,
@@ -28,8 +28,8 @@ export interface AppState {
 
 export type AppAction =
   | { readonly type: 'go-home' }
-  /** Replaces any session with a fresh setup for `mode`. */
-  | { readonly type: 'new-game'; readonly mode: GameMode }
+  /** Replaces any session with a fresh setup for `mode`, starting White from `army` if given. */
+  | { readonly type: 'new-game'; readonly mode: GameMode; readonly army?: Deployment }
   | { readonly type: 'continue' }
   | { readonly type: 'discard-session' }
   | { readonly type: 'setup'; readonly action: SetupAction }
@@ -44,7 +44,10 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     case 'go-home':
       return { ...state, view: 'home' };
     case 'new-game':
-      return { view: 'session', session: { kind: 'setup', setup: initialSetup(action.mode) } };
+      return {
+        view: 'session',
+        session: { kind: 'setup', setup: initialSetup(action.mode, action.army) },
+      };
     case 'continue':
       return session ? { ...state, view: 'session' } : state;
     case 'discard-session':

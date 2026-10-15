@@ -8,7 +8,14 @@ import {
   type Square,
   squareName,
 } from '@treasure-chess/game';
-import { type KeyboardEvent, type PointerEvent, type ReactNode, useRef, useState } from 'react';
+import {
+  type CSSProperties,
+  type KeyboardEvent,
+  type PointerEvent,
+  type ReactNode,
+  useRef,
+  useState,
+} from 'react';
 import { COLOR_NAME } from '../labels';
 import { PieceIcon } from '../pieces/PieceIcon';
 import styles from './Board.module.css';
@@ -35,12 +42,24 @@ export interface BoardProps {
   readonly label?: string;
   /** Display rows to show (0 = top), e.g. [6, 7] for the player's own two ranks. */
   readonly rows?: readonly number[];
+  /** Slides the piece on `to` in from `from`, e.g. to show the computer's move. */
+  readonly animateMove?: { readonly from: Square; readonly to: Square } | null;
   /** Shown above and below the board, at the board's width. */
   readonly above?: ReactNode;
   readonly below?: ReactNode;
 }
 
 const ALL_ROWS = [0, 1, 2, 3, 4, 5, 6, 7];
+
+/** CSS offsets (in squares) from a move's destination back to its origin, for the slide. */
+function slideFrom(
+  move: { readonly from: Square; readonly to: Square },
+  orientation: Color,
+): CSSProperties {
+  const from = displayPosition(move.from, orientation);
+  const to = displayPosition(move.to, orientation);
+  return { '--dx': from.col - to.col, '--dy': from.row - to.row } as CSSProperties;
+}
 
 function describeSquare(sq: Square, piece: Piece | null, notes: string[]): string {
   const occupant = piece ? `${COLOR_NAME[piece.color]} ${PIECES[piece.type].name}` : 'empty';
@@ -66,6 +85,7 @@ export function Board({
   rows = ALL_ROWS,
   above,
   below,
+  animateMove = null,
 }: BoardProps) {
   const [focusSquare, setFocusSquare] = useState<Square>(
     () => (orientation === 'w' ? 4 /* e1 */ : 60) /* e8 */,
@@ -146,7 +166,16 @@ export function Board({
                     </span>
                   )}
                   {piece && (
-                    <span className={styles.piece}>
+                    <span
+                      // Remounting on a new move restarts the slide.
+                      key={animateMove?.to === sq ? `${animateMove.from}-${sq}` : 'still'}
+                      className={[styles.piece, animateMove?.to === sq && styles.arrive]
+                        .filter(Boolean)
+                        .join(' ')}
+                      style={
+                        animateMove?.to === sq ? slideFrom(animateMove, orientation) : undefined
+                      }
+                    >
                       <PieceIcon type={piece.type} color={piece.color} />
                     </span>
                   )}

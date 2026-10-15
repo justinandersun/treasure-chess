@@ -247,3 +247,20 @@ export function formatDeployment(deployment: Deployment): [back: string, pawns: 
     types.map((t) => (t ? PIECES[t].symbol : '.')).join('');
   return [row(deployment.backRank), row(deployment.pawnRow)];
 }
+
+/** Shareable text for an army: king row then pawn row, a-file first ("RNBQKBNR-PPPPPPPP"). */
+export function armyCode(deployment: Deployment): string {
+  return formatDeployment(deployment).join('-');
+}
+
+/** Parses an {@link armyCode}; null unless it describes a complete, valid army. */
+export function parseArmyCode(code: string): Deployment | null {
+  const match = /^([A-Za-z.]{8})-([A-Za-z.]{8})$/.exec(code.trim());
+  if (!match) return null;
+  try {
+    const deployment = parseDeployment(match[1]!.toUpperCase(), match[2]!.toUpperCase());
+    return isValidArmy(deployment) ? deployment : null;
+  } catch {
+    return null;
+  }
+}

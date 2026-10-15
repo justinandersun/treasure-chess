@@ -32,6 +32,7 @@ import {
   squareSlot,
   trayCounts,
 } from '../app/placement';
+import { armyLink } from '../app/share';
 import { Board, type TargetKind } from '../components/Board';
 import { Button } from '../components/Button';
 import { PieceIcon } from '../pieces/PieceIcon';
@@ -190,6 +191,24 @@ export function Place({ color, draft, deployment, onChange, onBack, onLock }: Pl
     drag &&
     (drag.source.kind === 'tray' ? drag.source.type : pieceAtSlot(deployment, drag.source.slot));
 
+  // Sharing: the system share sheet where there is one (phones), otherwise copy the link.
+  const [shareStatus, setShareStatus] = useState('');
+  async function shareArmy() {
+    const url = armyLink(deployment);
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: 'A Treasure Chess army', url });
+        return;
+      }
+      await navigator.clipboard.writeText(url);
+      setShareStatus('Link copied.');
+    } catch (error) {
+      // Closing the share sheet is not an error worth reporting.
+      if (error instanceof DOMException && error.name === 'AbortError') return;
+      setShareStatus(`Copy this link: ${url}`);
+    }
+  }
+
   const selectedSlot = selection?.kind === 'slot' ? selection.slot : null;
   const selectedPiece = selectedSlot ? pieceAtSlot(deployment, selectedSlot) : null;
   const instruction =
@@ -286,6 +305,15 @@ export function Place({ color, draft, deployment, onChange, onBack, onLock }: Pl
           Done
         </Button>
       </div>
+
+      {remaining === 0 && issues.length === 0 && (
+        <p className={styles.share}>
+          <button type="button" className={styles.shareLink} onClick={shareArmy}>
+            Share This Army
+          </button>
+          <span role="status">{shareStatus}</span>
+        </p>
+      )}
     </section>
   );
 }

@@ -76,15 +76,16 @@ export function withKing(draft: ArmyDraft): ArmyDraft {
 /** The starter army every draft begins with. */
 export const DEFAULT_STARTER = PRESETS[0]!;
 
-export function initialSetup(mode: GameMode = 'local'): SetupState {
+/** A fresh setup. `army` (e.g. one shared by link) replaces White's starting army. */
+export function initialSetup(mode: GameMode = 'local', army?: Deployment): SetupState {
   const draft = deploymentDraft(DEFAULT_STARTER.deployment);
   const deployment = DEFAULT_STARTER.deployment;
   return {
     mode,
     step: 'draft',
     color: 'w',
-    drafts: { w: draft, b: draft },
-    deployments: { w: deployment, b: deployment },
+    drafts: { w: army ? deploymentDraft(army) : draft, b: draft },
+    deployments: { w: army ?? deployment, b: deployment },
   };
 }
 

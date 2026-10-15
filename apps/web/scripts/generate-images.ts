@@ -3,6 +3,7 @@
  *   og-image.png          1200×630 link-preview image
  *   apple-touch-icon.png  180×180 home-screen icon
  *   favicon.svg           browser-tab icon
+ *   icon-192.png, icon-512.png, icon-maskable-512.png   installed-app icons (manifest)
  *
  * Run with `pnpm --filter @treasure-chess/web images` (Node 24+, which runs TypeScript directly).
  * Re-run after changing the piece art, then commit the images.
@@ -94,7 +95,7 @@ function ogImage(): string {
     <text x="80" y="250" font-family="${DISPLAY_FONT}" font-size="80" font-weight="800" letter-spacing="-2" fill="${PALETTE.fg}">Treasure Chess</text>
     <rect x="82" y="284" width="96" height="2" fill="${PALETTE.accent}"/>
     <text font-family="${FONT}" font-size="34" fill="${PALETTE.muted}">
-      <tspan x="80" y="350">A game of asymmetric armies.</tspan>
+      <tspan x="80" y="350">A chess game of asymmetric armies.</tspan>
     </text>
     <text x="80" y="480" font-family="${FONT}" font-size="18" letter-spacing="2" fill="${PALETTE.muted}">FREE · NO ACCOUNTS · PLAYS IN YOUR BROWSER</text>
     ${boardSvg(cells, 700, 95, 110)}
@@ -106,6 +107,20 @@ function touchIcon(): string {
   return `<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 180 180">
     <rect width="180" height="180" fill="${PALETTE.dark}"/>
     ${pieceSvg('gryphon', 'w', 12, 10, 156)}
+  </svg>`;
+}
+
+/**
+ * An installed-app icon: the gryphon on a full-bleed dark square. Maskable icons keep the piece
+ * inside the central safe zone, since the platform may crop to a circle or rounded square.
+ */
+function appIcon(size: number, maskable = false): string {
+  const piece = size * (maskable ? 0.62 : 0.86);
+  const x = (size - piece) / 2;
+  const y = (size - piece) / 2 - size * (maskable ? 0.01 : 0.02);
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+    <rect width="${size}" height="${size}" fill="${PALETTE.dark}"/>
+    ${pieceSvg('gryphon', 'w', x, y, piece)}
   </svg>`;
 }
 
@@ -126,5 +141,8 @@ function render(svg: string, file: string): void {
 
 render(ogImage(), 'og-image.png');
 render(touchIcon(), 'apple-touch-icon.png');
+render(appIcon(192), 'icon-192.png');
+render(appIcon(512), 'icon-512.png');
+render(appIcon(512, true), 'icon-maskable-512.png');
 writeFileSync(join(PUBLIC_DIR, 'favicon.svg'), `${favicon().replace(/\s*\n\s*/g, '')}\n`);
 console.log('Wrote public/favicon.svg');

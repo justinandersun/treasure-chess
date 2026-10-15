@@ -7,7 +7,7 @@ test('the computer replies, and undo takes back both moves', async ({ page }) =>
   await expect(page.getByRole('status')).toContainText('The computer is thinking');
   await expect(page.getByRole('status')).toContainText('Your move', { timeout: 10_000 });
   await expect(movesList(page).getByRole('listitem')).toHaveCount(1);
-  await expect(movesList(page)).toContainText(/1\.\s*e4\s*\S+/);
+  await expect(movesList(page)).toContainText(/1\.\s*Pawn e4\s*\S+/);
 
   await page.getByRole('button', { name: 'Undo' }).click();
   await expect(page.getByText('No moves yet.')).toBeVisible();
