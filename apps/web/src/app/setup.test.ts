@@ -10,7 +10,7 @@ import {
 
 const run = (state: SetupState, ...actions: SetupAction[]) => actions.reduce(setupReducer, state);
 const CLASSIC = PRESETS[0]!;
-const CAVALRY = PRESETS[1]!;
+const STAMPEDE = PRESETS[1]!;
 
 describe('starting drafts', () => {
   it('starts every draft as the Classic starter army, already placed', () => {
@@ -21,10 +21,10 @@ describe('starting drafts', () => {
   });
 
   it('loads another starter and keeps its formation without leaving the draft', () => {
-    const s = run(initialSetup(), { type: 'load-starter', presetId: 'cavalry' });
+    const s = run(initialSetup(), { type: 'load-starter', presetId: 'stampede' });
     expect(s.step).toBe('draft');
-    expect(s.drafts.w).toEqual(deploymentDraft(CAVALRY.deployment));
-    expect(run(s, { type: 'to-place' }).deployments.w).toEqual(CAVALRY.deployment);
+    expect(s.drafts.w).toEqual(deploymentDraft(STAMPEDE.deployment));
+    expect(run(s, { type: 'to-place' }).deployments.w).toEqual(STAMPEDE.deployment);
   });
 
   it('clearing leaves only the King', () => {
@@ -46,13 +46,13 @@ describe('local setup flow', () => {
 
     s = run(
       s,
-      { type: 'load-starter', presetId: 'cavalry' },
+      { type: 'load-starter', presetId: 'stampede' },
       { type: 'to-place' },
       { type: 'lock' },
     );
     expect(s.step).toBe('reveal');
     expect(s.deployments.w).toEqual(CLASSIC.deployment);
-    expect(s.deployments.b).toEqual(CAVALRY.deployment);
+    expect(s.deployments.b).toEqual(STAMPEDE.deployment);
   });
 
   it('cannot place an invalid draft or lock an incomplete placement', () => {
@@ -109,7 +109,7 @@ describe('local setup flow', () => {
     expect(run(s, { type: 'lock' })).toBe(s);
     expect(run(s, { type: 'continue' })).toBe(s);
     expect(run(s, { type: 'load-starter', presetId: 'nope' })).toBe(s);
-    expect(run(s, { type: 'choose-opponent', presetId: 'cavalry' })).toBe(s);
+    expect(run(s, { type: 'choose-opponent', presetId: 'stampede' })).toBe(s);
   });
 });
 
@@ -141,9 +141,9 @@ describe('reloading during setup', () => {
 describe('setup against the computer', () => {
   it('gives the computer the chosen starter army, which can be changed before starting', () => {
     let s = run(initialSetup('computer'), { type: 'to-place' });
-    s = run(s, { type: 'lock', opponentPresetId: 'cavalry' });
+    s = run(s, { type: 'lock', opponentPresetId: 'stampede' });
     expect([s.step, s.color]).toEqual(['reveal', 'w']);
-    expect(s.deployments.b).toEqual(CAVALRY.deployment);
+    expect(s.deployments.b).toEqual(STAMPEDE.deployment);
     expect(s.deployments.w).toEqual(CLASSIC.deployment);
 
     expect(run(s, { type: 'choose-opponent', presetId: 'nope' })).toBe(s);

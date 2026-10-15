@@ -22,24 +22,25 @@ export async function usePreset(page: Page, presetId: string) {
  */
 export async function startNewGame(
   page: Page,
-  mode: 'Human vs. Human' | 'Human vs. Computer',
+  mode: 'friend' | 'computer',
   { replace = false } = {},
 ) {
   await page.goto('/');
   await page.getByRole('button', { name: 'Treasure Chess' }).click();
-  await page.getByRole('button', { name: 'New Game' }).click();
+  await page
+    .getByRole('button', { name: mode === 'friend' ? 'Play a Friend' : 'Play Computer' })
+    .click();
   if (replace) {
     await page
       .getByRole('dialog', { name: 'Start a New Game?' })
       .getByRole('button', { name: 'New Game' })
       .click();
   }
-  await page.getByRole('button', { name: mode }).click();
 }
 
 /** Sets up a two-player game with presets for both sides and starts it. */
 export async function startLocalGame(page: Page, white: string, black: string, replace = false) {
-  await startNewGame(page, 'Human vs. Human', { replace });
+  await startNewGame(page, 'friend', { replace });
   await usePreset(page, white);
   await page.getByRole('button', { name: 'Done', exact: true }).click();
   await page.getByRole('button', { name: 'Continue', exact: true }).click();
@@ -51,7 +52,7 @@ export async function startLocalGame(page: Page, white: string, black: string, r
 
 /** Sets up a game against the computer and starts it. */
 export async function startComputerGame(page: Page, mine: string, theirs: string) {
-  await startNewGame(page, 'Human vs. Computer');
+  await startNewGame(page, 'computer');
   await usePreset(page, mine);
   await page.getByRole('button', { name: 'Done', exact: true }).click();
   await page.getByRole('button', { name: 'Change Army' }).click();

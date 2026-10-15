@@ -16,16 +16,24 @@ interface PieceTileProps {
   readonly level?: 3 | 4;
   /** `li` inside a PieceGrid; `div` when shown on its own. */
   readonly as?: 'li' | 'div';
+  /** False when the surrounding element already names the piece (e.g. a dialog title). */
+  readonly showName?: boolean;
 }
 
 /** A piece's name, icon, notation, and cost, over its movement diagram and description. */
-export function PieceTile({ type, color, level = 3, as: Element = 'li' }: PieceTileProps) {
+export function PieceTile({
+  type,
+  color,
+  level = 3,
+  as: Element = 'li',
+  showName = true,
+}: PieceTileProps) {
   const { name, symbol, cost, summary } = PIECES[type];
   const Heading = level === 3 ? 'h3' : 'h4';
   return (
     <Element className={styles.tile}>
       <div className={styles.head}>
-        <Heading className={styles.name}>{name}</Heading>
+        {showName && <Heading className={styles.name}>{name}</Heading>}
         <span className={styles.meta}>
           <span className={styles.icon} aria-hidden="true">
             <PieceIcon type={type} color={color} />

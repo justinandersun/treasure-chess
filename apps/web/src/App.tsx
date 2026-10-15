@@ -1,11 +1,16 @@
 import { useEffect, useReducer, useState } from 'react';
 import styles from './App.module.css';
-import { appReducer, type AppState, initialAppState, isUnfinished } from './app/appState';
+import {
+  appReducer,
+  type AppState,
+  type GameMode,
+  initialAppState,
+  isUnfinished,
+} from './app/appState';
 import { Button } from './components/Button';
 import { Dialog } from './components/Dialog';
 import { ThemeToggle } from './components/ThemeToggle';
 import { browserStorage, loadSession, saveSession } from './persistence/session';
-import { ChooseMode } from './screens/ChooseMode';
 import { Home } from './screens/Home';
 import { Play } from './screens/Play';
 import { PiecesContent } from './screens/PiecesContent';
@@ -29,14 +34,19 @@ export function App() {
   const [state, dispatch] = useReducer(appReducer, boot.state);
   const [notice, setNotice] = useState(boot.notice);
   const [overlay, setOverlay] = useState<'rules' | 'pieces' | null>(null);
-  const [confirm, setConfirm] = useState<'replace' | 'discard' | null>(null);
+  // Replacing unfinished work (with the mode to start next) or discarding asks first.
+  const [confirm, setConfirm] = useState<
+    { readonly kind: 'replace'; readonly mode: GameMode } | { readonly kind: 'discard' } | null
+  >(null);
   const { view, session } = state;
 
   useEffect(() => saveSession(storage, state), [state]);
 
   const goHome = () => dispatch({ type: 'go-home' });
-  const requestNewGame = () =>
-    isUnfinished(session) ? setConfirm('replace') : dispatch({ type: 'new-game' });
+  const requestNewGame = (mode: GameMode) =>
+    isUnfinished(session)
+      ? setConfirm({ kind: 'replace', mode })
+      : dispatch({ type: 'new-game', mode });
 
   return (
     <div className={styles.app}>
@@ -69,13 +79,7 @@ export function App() {
             session={session}
             onNewGame={requestNewGame}
             onContinue={() => dispatch({ type: 'continue' })}
-            onDiscard={() => setConfirm('discard')}
-          />
-        )}
-        {view === 'choose-mode' && (
-          <ChooseMode
-            onChoose={(mode) => dispatch({ type: 'choose-mode', mode })}
-            onBack={goHome}
+            onDiscard={() => setConfirm({ kind: 'discard' })}
           />
         )}
         {view === 'session' && session?.kind === 'setup' && (
@@ -91,7 +95,7 @@ export function App() {
             game={session.game}
             mode={session.mode}
             onChange={(game) => dispatch({ type: 'update-game', game })}
-            onNewGame={() => dispatch({ type: 'new-game' })}
+            onNewGame={goHome}
           />
         )}
       </main>
@@ -101,6 +105,15 @@ export function App() {
         <a href="https://andersun.com" target="_blank" rel="noopener noreferrer">
           Justin Andersun
           <span className="visually-hidden"> (opens in a new tab)</span>
+        </a>
+        {' · '}
+        <a
+          href="https://github.com/justinandersun/treasure-chess"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Source
+          <span className="visually-hidden"> code on GitHub (opens in a new tab)</span>
         </a>
       </footer>
 
@@ -114,7 +127,7 @@ export function App() {
 
       <Dialog
         open={confirm !== null}
-        title={confirm === 'discard' ? 'Discard Saved Game?' : 'Start a New Game?'}
+        title={confirm?.kind === 'discard' ? 'Discard Saved Game?' : 'Start a New Game?'}
         size="small"
         onClose={() => setConfirm(null)}
         actions={
@@ -125,17 +138,18 @@ export function App() {
             <Button
               variant="primary"
               onClick={() => {
-                dispatch({ type: confirm === 'discard' ? 'discard-session' : 'new-game' });
+                if (confirm?.kind === 'replace') dispatch({ type: 'new-game', mode: confirm.mode });
+                else dispatch({ type: 'discard-session' });
                 setConfirm(null);
               }}
             >
-              {confirm === 'discard' ? 'Discard' : 'New Game'}
+              {confirm?.kind === 'discard' ? 'Discard' : 'New Game'}
             </Button>
           </>
         }
       >
         <p>
-          {confirm === 'discard'
+          {confirm?.kind === 'discard'
             ? 'Your saved game will be deleted. This cannot be undone.'
             : 'Your saved game is not finished. Setting up a new game will replace it.'}
         </p>

@@ -44,10 +44,11 @@ interface PlayProps {
   readonly game: GameState;
   readonly mode: GameMode;
   readonly onChange: (game: GameState) => void;
+  /** Leaves for Home, where a new game is chosen (the current one stays saved until then). */
   readonly onNewGame: () => void;
 }
 
-type OpenDialog = 'resign' | 'new-game' | null;
+type OpenDialog = 'resign' | null;
 interface PendingPromotion {
   readonly from: Square;
   readonly to: Square;
@@ -154,9 +155,7 @@ export function Play({ game, mode, onChange, onNewGame }: PlayProps) {
           <Button onClick={() => setDialog('resign')} disabled={!!game.result}>
             Resign
           </Button>
-          <Button onClick={() => (game.result ? onNewGame() : setDialog('new-game'))}>
-            New Game
-          </Button>
+          <Button onClick={onNewGame}>New Game</Button>
           {game.result && (
             <Button variant="primary" onClick={rematch}>
               Rematch
@@ -254,25 +253,6 @@ export function Play({ game, mode, onChange, onNewGame }: PlayProps) {
             ? 'The computer wins if you resign.'
             : 'Either player may resign. The other player wins.'}
         </p>
-      </Dialog>
-
-      <Dialog
-        open={dialog === 'new-game'}
-        title="Start a New Game?"
-        size="small"
-        onClose={() => setDialog(null)}
-        actions={
-          <>
-            <Button variant="quiet" onClick={() => setDialog(null)}>
-              Keep Playing
-            </Button>
-            <Button variant="primary" onClick={onNewGame}>
-              New Game
-            </Button>
-          </>
-        }
-      >
-        <p>This game is not finished. Starting a new game will discard it.</p>
       </Dialog>
 
       <Dialog

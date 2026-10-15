@@ -15,6 +15,47 @@
   line-height: 1;
 }
 
+/*
+ * On hover, a glint of gold sweeps across the title once. The text is painted by a gradient that
+ * is solid --fg except for a narrow gold band, parked off to the right until the sweep. Skipped
+ * for reduced motion and in forced-colors mode, where it stays plain text.
+ */
+@media (prefers-reduced-motion: no-preference) and (forced-colors: none) {
+  @supports (background-clip: text) or (-webkit-background-clip: text) {
+    .title {
+      /* Room for glyph edges, which the clipped background would otherwise cut off. */
+      padding-block: 0.08em;
+      margin-block: -0.08em 0.07em;
+      background: linear-gradient(
+          100deg,
+          var(--fg) 42%,
+          var(--highlight) 48%,
+          #f3dc9a 50%,
+          var(--highlight) 52%,
+          var(--fg) 58%
+        )
+        100% 0 / 300% 100% no-repeat;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .title:hover {
+      animation: glint 1.4s ease-in-out;
+    }
+  }
+}
+
+@keyframes glint {
+  from {
+    background-position: 100% 0;
+  }
+
+  to {
+    background-position: 0 0;
+  }
+}
+
 .lede {
   max-width: 44ch;
   margin: 0 0 2em;
@@ -30,11 +71,12 @@
   margin-bottom: 24px;
 }
 
-.choices {
-  display: grid;
-  gap: 12px;
-  width: min(100%, 320px);
-  margin-bottom: 16px;
+/* Narrow phones: stack the buttons at one width instead of wrapping unevenly. */
+@media (max-width: 520px) {
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 
 .saved {

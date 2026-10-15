@@ -33,15 +33,15 @@ const setupAction = (action: Extract<AppAction, { type: 'setup' }>['action']): A
   action,
 });
 
-/** Classic vs Cavalry, revealed and started. */
+/** Classic vs Stampede, revealed and started. */
 function startedGame(): AppState {
   return run(
     initialAppState,
-    { type: 'choose-mode', mode: 'local' },
+    { type: 'new-game', mode: 'local' },
     setupAction({ type: 'to-place' }),
     setupAction({ type: 'lock' }),
     setupAction({ type: 'continue' }),
-    setupAction({ type: 'load-starter', presetId: 'cavalry' }),
+    setupAction({ type: 'load-starter', presetId: 'stampede' }),
     setupAction({ type: 'to-place' }),
     setupAction({ type: 'lock' }),
     { type: 'start-game' },
@@ -94,7 +94,7 @@ describe('saving and restoring sessions', () => {
   it('restores a setup behind a handoff so the army stays hidden', () => {
     const placingBlack = run(
       initialAppState,
-      { type: 'choose-mode', mode: 'local' },
+      { type: 'new-game', mode: 'local' },
       setupAction({ type: 'to-place' }),
       setupAction({ type: 'lock' }),
       setupAction({ type: 'continue' }),
@@ -111,9 +111,9 @@ describe('saving and restoring sessions', () => {
   it('moves setups saved at retired steps onto the board', () => {
     const atReveal = run(
       initialAppState,
-      { type: 'choose-mode', mode: 'computer' },
+      { type: 'new-game', mode: 'computer' },
       setupAction({ type: 'to-place' }),
-      setupAction({ type: 'lock', opponentPresetId: 'cavalry' }),
+      setupAction({ type: 'lock', opponentPresetId: 'stampede' }),
     );
     for (const step of ['ready', 'opponent']) {
       const doc = JSON.parse(encodeSession(atReveal)!);
@@ -144,7 +144,7 @@ describe('rejecting bad saved data', () => {
 
   it('discards setups with invalid contents', () => {
     const doc = JSON.parse(
-      encodeSession(run(initialAppState, { type: 'choose-mode', mode: 'local' }))!,
+      encodeSession(run(initialAppState, { type: 'new-game', mode: 'local' }))!,
     );
     const withSetup = (setup: unknown) =>
       JSON.stringify({ ...doc, session: { kind: 'setup', setup } });
@@ -218,7 +218,7 @@ describe('schema migration', () => {
       mode: 'local',
     });
     const setup = decodeSession(
-      asVersion1(run(initialAppState, { type: 'choose-mode', mode: 'local' })),
+      asVersion1(run(initialAppState, { type: 'new-game', mode: 'local' })),
     );
     expect(setup.status === 'restored' && setup.state.session).toMatchObject({
       kind: 'setup',
@@ -233,10 +233,10 @@ describe('schema migration', () => {
   it('round-trips games against the computer', () => {
     const state = run(
       initialAppState,
-      { type: 'choose-mode', mode: 'computer' },
+      { type: 'new-game', mode: 'computer' },
       setupAction({ type: 'to-place' }),
-      setupAction({ type: 'lock', opponentPresetId: 'cavalry' }),
-      setupAction({ type: 'choose-opponent', presetId: 'fortress' }),
+      setupAction({ type: 'lock', opponentPresetId: 'stampede' }),
+      setupAction({ type: 'choose-opponent', presetId: 'bulwark' }),
       { type: 'start-game' },
     );
     expect(state.session).toMatchObject({ kind: 'game', mode: 'computer' });

@@ -60,7 +60,7 @@ export function Setup({ setup, dispatch, onStart, onCancel }: SetupProps) {
           message={
             setup.resume
               ? 'Setup was restored. Continue when you are ready to keep building your army in private.'
-              : `${COLOR_NAME[opposite(color)]}'s army is placed and hidden. Continue when you are ready to draft in private.`
+              : `${COLOR_NAME[opposite(color)]}’s army is ready and hidden.`
           }
           action="Continue"
           onContinue={() => dispatch({ type: 'continue' })}

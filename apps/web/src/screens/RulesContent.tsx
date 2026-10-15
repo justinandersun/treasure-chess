@@ -11,66 +11,55 @@ export function RulesContent({ onShowPieces }: { readonly onShowPieces: () => vo
   return (
     <div className={styles.rules}>
       <p className={styles.lede}>
-        Each player builds and places an army and then seeks to checkmate their opponent's king on
-        an 8x8 board.
+        Each player builds an army, places it, and then tries to checkmate the opponent’s king on a
+        standard 8×8 board.
       </p>
 
-      <h3 className="section-label">Draft</h3>
-      <ul>
-        <li>Each player has up to {TREASURY} points to spend.</li>
-        <li>Every army comes with one king (1 point).</li>
-        <li>Buy exactly eight infantry for the pawn row.</li>
-        <li>
-          Buy one to seven more pieces for the king row. You may buy more than one of a piece.
-        </li>
-        <li>To skip drafting, use a starter army.</li>
-      </ul>
+      <h3 className="section-label">Drafting</h3>
+      <p>
+        Each player has up to {TREASURY} points to spend. Every army comes with a king (1 point),
+        exactly eight infantry for the pawn row, and one to seven more pieces for the king row. Each
+        draft starts as a starter army, which players can keep, swap for another, or change piece by
+        piece.
+      </p>
 
-      <h3 className="section-label">Place</h3>
-      <ul>
-        <li>Infantry go on the pawn row. All other pieces go on the king row.</li>
-        <li>The king must start on the d- or e-file. King-row squares may stay empty.</li>
-        <li>Each player drafts and places in private. Both armies are revealed together.</li>
-      </ul>
+      <h3 className="section-label">Placement</h3>
+      <p>
+        Infantry go on the pawn row and everything else on the king row, with the king on the d- or
+        e-file. King-row squares may stay empty. Players draft and place in private, then both
+        armies are revealed together.
+      </p>
 
       <h3 className="section-label">Play</h3>
-      <ul>
-        <li>White moves first. Standard chess rules apply, including check and checkmate.</li>
-        <li>There is no castling, no en passant, and no clock.</li>
-        <li>
-          Pieces that jump pass over any piece in the way, but must land on an empty square or
-          capture.
-        </li>
-        <li>
-          Infantry only move forward. From the pawn row, an infantry piece may move two squares in
-          one of its directions if both squares are empty. A two-square move cannot capture.
-        </li>
-        <li>Select any piece on the board to see how it moves.</li>
-      </ul>
+      <p>
+        White moves first, and standard chess rules apply, without castling, en passant, or a clock.
+        Pieces that jump pass over anything in their way but must land on an empty square or
+        capture. Infantry only move forward: from the pawn row, an infantry piece may move two
+        squares in one of its directions if both are empty, but that move cannot capture.
+      </p>
+      <p>Players can select any piece on the board to see how it moves.</p>
 
       <h3 className="section-label">Promotion</h3>
       <p>
-        Infantry that reach the opponent’s king row must promote. Choose any piece type from your
-        starting army except the King and infantry, even if every piece of that type has been
-        captured.
+        Infantry that reach the opponent’s king row must promote, to any piece type from that
+        player’s starting army other than the king and infantry.
       </p>
 
-      <h3 className="section-label">End</h3>
-      <ul>
-        <li>Checkmate wins. Either player may resign at any time.</li>
-        <li>
-          Stalemate, when the player to move has no legal move but is not in check, is a draw.
-        </li>
-        <li>
-          The player to move may claim a draw when the same position has appeared three times, or
-          after 50 moves by each player with no capture or infantry move.
-        </li>
-        <li>
-          The game is a draw automatically after five repetitions, after 75 moves by each player
-          with no capture or infantry move, or when neither side can checkmate. For example, a king
-          and a lone {listNames(CANNOT_MATE_ALONE)} against a bare king.
-        </li>
-      </ul>
+      <h3 className="section-label">Winning</h3>
+      <p>
+        A player wins by checkmating the opponent’s king. Either player may also resign at any time,
+        which gives the other player the win.
+      </p>
+
+      <h3 className="section-label">Draws</h3>
+      <p>
+        The game is a draw by stalemate when the player to move has no legal move but is not in
+        check. The player to move may claim a draw after the same position appears three times, or
+        after 50 moves by each player with no capture or infantry move. The game is also drawn
+        automatically after five repetitions, after 75 moves by each player with no capture or
+        infantry move, or when neither side can checkmate. For example, a king and a lone{' '}
+        {listNames(CANNOT_MATE_ALONE)} against a bare king.
+      </p>
 
       <div className={styles.more}>
         <Button onClick={onShowPieces}>

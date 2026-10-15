@@ -19,7 +19,7 @@ export type Session =
   | { readonly kind: 'setup'; readonly setup: SetupState }
   | { readonly kind: 'game'; readonly game: GameState; readonly mode: GameMode };
 
-export type View = 'home' | 'choose-mode' | 'session';
+export type View = 'home' | 'session';
 
 export interface AppState {
   readonly view: View;
@@ -28,8 +28,8 @@ export interface AppState {
 
 export type AppAction =
   | { readonly type: 'go-home' }
-  | { readonly type: 'new-game' }
-  | { readonly type: 'choose-mode'; readonly mode: GameMode }
+  /** Replaces any session with a fresh setup for `mode`. */
+  | { readonly type: 'new-game'; readonly mode: GameMode }
   | { readonly type: 'continue' }
   | { readonly type: 'discard-session' }
   | { readonly type: 'setup'; readonly action: SetupAction }
@@ -44,8 +44,6 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     case 'go-home':
       return { ...state, view: 'home' };
     case 'new-game':
-      return { ...state, view: 'choose-mode' };
-    case 'choose-mode':
       return { view: 'session', session: { kind: 'setup', setup: initialSetup(action.mode) } };
     case 'continue':
       return session ? { ...state, view: 'session' } : state;

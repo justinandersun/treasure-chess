@@ -9,6 +9,7 @@ import {
   type Family,
   PIECE_DEFINITIONS,
   PIECE_TYPES,
+  PIECES,
   type PieceType,
   PRESETS,
   TREASURY,
@@ -16,6 +17,8 @@ import {
 } from '@treasure-chess/game';
 import { useState } from 'react';
 import { Button } from '../components/Button';
+import { Dialog } from '../components/Dialog';
+import { PieceTile } from '../components/PieceTile';
 import { PieceIcon } from '../pieces/PieceIcon';
 import styles from './Draft.module.css';
 import { FAMILY_NAMES } from '../labels';
@@ -81,6 +84,7 @@ export function Draft({
   onBack,
 }: DraftProps) {
   const [notice, setNotice] = useState<string | null>(null);
+  const [detail, setDetail] = useState<PieceType | null>(null);
   const spent = draftCost(draft);
   const slots = draftSlots(draft);
   const issues = validateDraft(draft);
@@ -93,8 +97,8 @@ export function Draft({
       <header className={styles.intro}>
         <h1 id="draft-title">Draft Your Army</h1>
         <p className={styles.hint}>
-          Your army starts as a starter army. Play it as is, switch to another, or change any piece
-          below.
+          Build an army of eight infantry and up to seven more pieces, within {TREASURY} points.
+          Choose a starter army, edit it, or clear it to build from scratch.
         </p>
         <div className={styles.starter}>
           <label htmlFor="starter-select">Starter Army</label>
@@ -126,9 +130,7 @@ export function Draft({
             Clear
           </Button>
           <p className={styles.starterDescription}>
-            {starter
-              ? starter.description
-              : 'Your own army. Choose a starter to start over from one.'}
+            {starter ? starter.description : 'An army of your own design'}
           </p>
         </div>
       </header>
@@ -172,21 +174,21 @@ export function Draft({
               return (
                 <tr key={d.type} className={count > 0 ? styles.chosen : undefined}>
                   <th scope="row" className={styles.pieceCell}>
-                    <div className={styles.piece}>
+                    {/* Tapping a piece shows how it moves, keeping the table short. */}
+                    <button
+                      type="button"
+                      className={styles.piece}
+                      aria-haspopup="dialog"
+                      onClick={() => setDetail(d.type)}
+                    >
                       <span className={styles.icon} aria-hidden="true">
                         <PieceIcon type={d.type} color={color} />
                       </span>
-                      <span className={styles.pieceText}>
-                        <span className={styles.name}>
-                          {d.name}
-                          <span className={styles.narrowMeta}>
-                            {' '}
-                            · {d.symbol} · {d.cost} {d.cost === 1 ? 'pt' : 'pts'}
-                          </span>
-                        </span>
-                        <span className={styles.summary}>{d.summary}</span>
+                      <span className={styles.name}>{d.name}</span>
+                      <span className={styles.narrowMeta}>
+                        · {d.symbol} · {d.cost} {d.cost === 1 ? 'pt' : 'pts'}
                       </span>
-                    </div>
+                    </button>
                   </th>
                   <td className={`${styles.center} ${styles.wide}`}>{d.symbol}</td>
                   <td className={`${styles.center} ${styles.wide}`}>{d.cost}</td>
@@ -287,6 +289,15 @@ export function Draft({
           </Button>
         </div>
       </footer>
+
+      <Dialog
+        open={detail !== null}
+        title={detail ? PIECES[detail].name : ''}
+        size="small"
+        onClose={() => setDetail(null)}
+      >
+        {detail && <PieceTile type={detail} color={color} as="div" showName={false} />}
+      </Dialog>
     </section>
   );
 }

@@ -2,17 +2,12 @@
   margin: 2em 0 0.5em;
 }
 
-.rules ul {
+.rules p {
   margin: 0;
-  padding-left: 1.2em;
 }
 
-.rules li + li {
-  margin-top: 0.35em;
-}
-
-.rules li::marker {
-  color: var(--muted);
+.rules p + p {
+  margin-top: 0.6em;
 }
 
 .lede {

@@ -43,10 +43,10 @@ describe('presets', () => {
       ]),
     ).toEqual([
       ['classic', 'RNBQKBNR', 'PPPPPPPP', 40],
-      ['cavalry', 'MNEFKENM', 'PSPSSPSP', 39],
-      ['fortress', 'TR.OKORT', 'GGGGGGGG', 39],
-      ['royal-court', 'IBOQKFOI', 'PPPPPPPP', 39],
-      ['cathedral', 'ICBQKBCI', 'SSSSSSSS', 38],
+      ['stampede', 'MNEFKENM', 'PSPSSPSP', 39],
+      ['bulwark', 'TR.OKORT', 'GGGGGGGG', 39],
+      ['regency', 'IBOQKFOI', 'PPPPPPPP', 39],
+      ['conclave', 'ICBQKBCI', 'SSSSSSSS', 38],
       ['menagerie', 'MYCKF.YM', 'PGSPPSGP', 40],
     ]);
   });
