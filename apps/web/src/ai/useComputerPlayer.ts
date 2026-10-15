@@ -2,6 +2,7 @@ import {
   claimableDraw,
   claimDraw,
   type Color,
+  type Difficulty,
   type GameState,
   playMove,
   serializeGame,
@@ -9,8 +10,6 @@ import {
 import { useEffect, useRef } from 'react';
 import type { ThinkRequest, ThinkResponse } from './protocol';
 
-/** How long the computer may think per move. */
-export const THINK_TIME_MS = 1000;
 /** Replies arrive no faster than this, so the computer's move is easy to follow. */
 const MIN_REPLY_MS = 450;
 /** The computer claims an available draw when it judges itself this far behind (centipawns). */
@@ -24,6 +23,7 @@ const CLAIM_DRAW_BELOW = -100;
 export function useComputerPlayer(
   game: GameState,
   color: Color | null,
+  difficulty: Difficulty,
   onChange: (game: GameState) => void,
 ): void {
   const onChangeRef = useRef(onChange);
@@ -61,7 +61,7 @@ export function useComputerPlayer(
 
     const request: ThinkRequest = {
       game: serializeGame(game),
-      timeMs: THINK_TIME_MS,
+      difficulty,
       seed: Math.floor(Math.random() * 0x7fffffff) + 1,
     };
     worker.postMessage(request);
@@ -71,5 +71,5 @@ export function useComputerPlayer(
       clearTimeout(timer);
       worker.terminate();
     };
-  }, [game, color]);
+  }, [game, color, difficulty]);
 }

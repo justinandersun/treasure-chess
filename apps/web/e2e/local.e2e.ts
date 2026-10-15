@@ -109,14 +109,3 @@ test('pieces can be dragged onto the board, between squares, and back to the tra
   await expect(square(page, 'e1')).toHaveAccessibleName(/^e1, empty/);
   await expect(tray.getByRole('button', { name: /^King, 1 to place/ })).toBeVisible();
 });
-
-test('a shared army link becomes the starting army', async ({ page }) => {
-  await page.goto('/?army=MYCKF.YM-PGSPPSGP');
-  await expect(page.getByRole('status')).toContainText('Someone shared an army with you');
-  await expect(page).not.toHaveURL(/army=/); // reloading will not offer it again
-
-  await page.getByRole('button', { name: 'Play a Friend' }).click();
-  await expect(page.getByLabel('Starter Army')).toHaveValue('menagerie');
-  await page.getByRole('button', { name: 'Next', exact: true }).click();
-  await expect(page.getByRole('button', { name: 'Share This Army' })).toBeVisible();
-});

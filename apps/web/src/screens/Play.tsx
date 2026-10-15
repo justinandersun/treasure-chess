@@ -4,6 +4,7 @@ import {
   claimableDraw,
   claimDraw,
   type Color,
+  type Difficulty,
   findKing,
   type GameState,
   inCheck,
@@ -43,6 +44,7 @@ import styles from './Play.module.css';
 interface PlayProps {
   readonly game: GameState;
   readonly mode: GameMode;
+  readonly difficulty: Difficulty;
   readonly onChange: (game: GameState) => void;
   /** Leaves for Home, where a new game is chosen (the current one stays saved until then). */
   readonly onNewGame: () => void;
@@ -55,11 +57,11 @@ interface PendingPromotion {
   readonly choices: readonly PieceType[];
 }
 
-export function Play({ game, mode, onChange, onNewGame }: PlayProps) {
+export function Play({ game, mode, difficulty, onChange, onNewGame }: PlayProps) {
   // Against the computer the person plays White; in a two-player game they play both sides.
   const computer = mode === 'computer' ? COMPUTER_COLOR : null;
   const player = computer ? opposite(computer) : undefined;
-  useComputerPlayer(game, computer, onChange);
+  useComputerPlayer(game, computer, difficulty, onChange);
   const [selection, setSelection] = useState<Selection | null>(null);
   const [orientation, setOrientation] = useState<Color>('w');
   const [promotion, setPromotion] = useState<PendingPromotion | null>(null);

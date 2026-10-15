@@ -78,21 +78,16 @@
   margin-bottom: 24px;
 }
 
-/* Narrow phones: stack the buttons at one width instead of wrapping unevenly. */
+/* Narrow phones: stack the buttons at one comfortable width instead of wrapping unevenly. */
 @media (max-width: 520px) {
   .actions {
     flex-direction: column;
-    align-items: stretch;
+    align-items: center;
   }
-}
 
-.shared {
-  max-width: 44ch;
-  margin: 0 0 1.5em;
-  padding: 10px 14px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  font-size: 0.9rem;
+  .actions > * {
+    width: min(100%, 240px);
+  }
 }
 
 .saved {

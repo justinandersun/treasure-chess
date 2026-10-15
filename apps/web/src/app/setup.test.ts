@@ -157,3 +157,15 @@ describe('setup against the computer', () => {
     expect(gateAfterReload(placing)).toBe(placing);
   });
 });
+
+describe('computer difficulty', () => {
+  it('starts at Intermediate and can be changed against the computer only', () => {
+    const computer = initialSetup('computer');
+    expect(computer.difficulty).toBe('intermediate');
+    expect(run(computer, { type: 'set-difficulty', difficulty: 'beginner' }).difficulty).toBe(
+      'beginner',
+    );
+    const local = initialSetup('local');
+    expect(run(local, { type: 'set-difficulty', difficulty: 'beginner' })).toBe(local);
+  });
+});

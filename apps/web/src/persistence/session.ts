@@ -13,6 +13,8 @@ import {
   type Deployment,
   deploymentDraft,
   deserializeGame,
+  DIFFICULTIES,
+  type Difficulty,
   PIECE_TYPES,
   type PieceType,
   type SavedGame,
@@ -32,7 +34,12 @@ export const SESSION_SCHEMA_VERSION = 2;
 
 type SavedSession =
   | { readonly kind: 'setup'; readonly setup: SetupState }
-  | { readonly kind: 'game'; readonly game: SavedGame; readonly mode: GameMode };
+  | {
+      readonly kind: 'game';
+      readonly game: SavedGame;
+      readonly mode: GameMode;
+      readonly difficulty: Difficulty;
+    };
 
 interface SavedDocument {
   readonly schemaVersion: typeof SESSION_SCHEMA_VERSION;
@@ -58,7 +65,12 @@ export function encodeSession(state: AppState, now = new Date()): string | null 
   const saved: SavedSession =
     session.kind === 'setup'
       ? { kind: 'setup', setup: session.setup }
-      : { kind: 'game', game: serializeGame(session.game), mode: session.mode };
+      : {
+          kind: 'game',
+          game: serializeGame(session.game),
+          mode: session.mode,
+          difficulty: session.difficulty,
+        };
   const doc: SavedDocument = {
     schemaVersion: SESSION_SCHEMA_VERSION,
     savedAt: now.toISOString(),
@@ -95,9 +107,22 @@ function isDeployment(v: unknown): v is Deployment {
   return isObject(v) && isRow(v.backRank) && isRow(v.pawnRow);
 }
 
-/** Moves a setup saved at a retired step onto the board step (the computer gets a default army). */
-function upgradeSetup(v: unknown): unknown {
-  if (!isObject(v) || !RETIRED_STEPS.includes(v.step as string)) return v;
+/**
+ * Saves from before difficulty levels have none; the computer then played at what is now Advanced.
+ * New games default to DEFAULT_DIFFICULTY instead.
+ */
+const LEGACY_DIFFICULTY: Difficulty = 'advanced';
+const difficultyOr = (v: unknown): Difficulty =>
+  DIFFICULTIES.includes(v as Difficulty) ? (v as Difficulty) : LEGACY_DIFFICULTY;
+
+/**
+ * Brings a saved setup up to date: fills in a missing difficulty, and moves a setup saved at a
+ * retired step onto the board step (the computer gets a default army).
+ */
+function upgradeSetup(raw: unknown): unknown {
+  if (!isObject(raw)) return raw;
+  const v: Record<string, unknown> = { ...raw, difficulty: difficultyOr(raw.difficulty) };
+  if (!RETIRED_STEPS.includes(v.step as string)) return v;
   if (v.step === 'opponent' && isObject(v.drafts) && isObject(v.deployments)) {
     return {
       ...v,
@@ -111,7 +136,7 @@ function upgradeSetup(v: unknown): unknown {
 
 function isSetup(v: unknown): v is SetupState {
   if (!isObject(v) || !isMode(v.mode) || !STEPS.includes(v.step as SetupStep)) return false;
-  if (!isColor(v.color)) return false;
+  if (!isColor(v.color) || !DIFFICULTIES.includes(v.difficulty as Difficulty)) return false;
   if (v.resume !== undefined && v.resume !== 'draft' && v.resume !== 'place') return false;
   const { drafts, deployments } = v;
   return (
@@ -164,7 +189,12 @@ export function decodeSession(text: string): LoadResult {
     session = { kind: 'setup', setup: gateAfterReload(savedSetup) };
   } else if (isObject(saved) && saved.kind === 'game' && isMode(saved.mode)) {
     try {
-      session = { kind: 'game', game: deserializeGame(saved.game), mode: saved.mode };
+      session = {
+        kind: 'game',
+        game: deserializeGame(saved.game),
+        mode: saved.mode,
+        difficulty: difficultyOr(saved.difficulty),
+      };
     } catch {
       return { status: 'discarded', reason: 'The saved game could not be replayed.' };
     }

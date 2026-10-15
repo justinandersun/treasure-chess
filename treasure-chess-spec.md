@@ -123,7 +123,8 @@ The following pieces are excluded from v1 but may be introduced later:
 - The human may use a starter army or draft a custom army.
 - The computer plays a randomly chosen starter army and formation, which the player may change before the game starts.
 - The computer must generate legal moves and provide a reasonable basic challenge.
-- Advanced AI, opening books, and difficulty settings are not required for v1.
+- The player chooses the computer's level: Beginner, Intermediate (the default), or Advanced. Weaker levels search less deeply and sometimes choose a near-best move, but never miss a forced mate they can see.
+- Advanced AI and opening books are not required for v1.
 
 ### 3.2 Core Screens
 **Home**
@@ -145,8 +146,7 @@ The following pieces are excluded from v1 but may be introduced later:
 - Allow tap/click or drag-and-drop placement, repositioning, and returning pieces to the tray.
 - Enforce pawn-rank and King-position restrictions.
 - Support random valid placement and clearing the board.
-- Allow sharing the army as a link; opening the link offers it as the starting army.
-- When both armies are ready, show them together with Start Game (and, against the computer, an option to change the computer's army).
+- When both armies are ready, show them together with Start Game (and, against the computer, options to change the computer's army and level).
 
 **Play**
 - Display the board, current turn, and game status.

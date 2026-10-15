@@ -9,9 +9,7 @@ import {
   draftCost,
   draftSlots,
   formatDeployment,
-  armyCode,
   isValidArmy,
-  parseArmyCode,
   KING_FILES,
   parseDeployment,
   randomDeployment,
@@ -189,23 +187,5 @@ describe('draft editing helpers', () => {
     expect(adjustDraft({}, 'knight', 1)).toEqual({ knight: 1 });
     expect(adjustDraft({ knight: 1 }, 'knight', -1)).toEqual({});
     expect(adjustDraft({}, 'knight', -1)).toEqual({});
-  });
-});
-
-describe('army codes', () => {
-  it('round-trips an army through its shareable code', () => {
-    const army = parseDeployment('MYCKF.YM', 'PGSPPSGP');
-    expect(armyCode(army)).toBe('MYCKF.YM-PGSPPSGP');
-    expect(parseArmyCode('MYCKF.YM-PGSPPSGP')).toEqual(army);
-    expect(parseArmyCode(' myckf.ym-pgsppsgp ')).toEqual(army);
-    expect(parseArmyCode(armyCode(parseDeployment('...K.N..', 'PPPPPPPP')))).not.toBeNull();
-  });
-
-  it('rejects malformed codes and invalid armies', () => {
-    expect(parseArmyCode('')).toBeNull();
-    expect(parseArmyCode('RNBQKBNR')).toBeNull();
-    expect(parseArmyCode('RNBQKBNX-PPPPPPPP')).toBeNull(); // unknown symbol
-    expect(parseArmyCode('RNBQ.BNR-PPPPPPPP')).toBeNull(); // no King
-    expect(parseArmyCode('QQQQKQQQ-PPPPPPPP')).toBeNull(); // over budget
   });
 });

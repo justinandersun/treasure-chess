@@ -20,6 +20,7 @@ import {
   type ArmyDraft,
   type Color,
   type Deployment,
+  type Difficulty,
   deploymentDraft,
   findPreset,
   PRESETS,
@@ -46,6 +47,8 @@ export const COMPUTER_COLOR: Color = 'b';
 
 export interface SetupState {
   readonly mode: GameMode;
+  /** How strongly the computer plays (used only against the computer). */
+  readonly difficulty: Difficulty;
   readonly step: SetupStep;
   readonly color: Color;
   /** For a handoff: the private step `color` returns to (defaults to drafting). */
@@ -66,26 +69,30 @@ export type SetupAction =
   /** Finishes placing. Against the computer, `opponentPresetId` is the computer's army. */
   | { readonly type: 'lock'; readonly opponentPresetId?: string }
   | { readonly type: 'continue' }
-  | { readonly type: 'choose-opponent'; readonly presetId: string };
+  | { readonly type: 'choose-opponent'; readonly presetId: string }
+  | { readonly type: 'set-difficulty'; readonly difficulty: Difficulty };
 
 /** Every army has exactly one King, so drafts always include it and it cannot be changed. */
 export function withKing(draft: ArmyDraft): ArmyDraft {
   return draft.king === 1 ? draft : { ...draft, king: 1 };
 }
 
+/** The level a new game against the computer starts at. */
+export const DEFAULT_DIFFICULTY: Difficulty = 'intermediate';
+
 /** The starter army every draft begins with. */
 export const DEFAULT_STARTER = PRESETS[0]!;
 
-/** A fresh setup. `army` (e.g. one shared by link) replaces White's starting army. */
-export function initialSetup(mode: GameMode = 'local', army?: Deployment): SetupState {
+export function initialSetup(mode: GameMode = 'local'): SetupState {
   const draft = deploymentDraft(DEFAULT_STARTER.deployment);
   const deployment = DEFAULT_STARTER.deployment;
   return {
     mode,
+    difficulty: DEFAULT_DIFFICULTY,
     step: 'draft',
     color: 'w',
-    drafts: { w: army ? deploymentDraft(army) : draft, b: draft },
-    deployments: { w: army ?? deployment, b: deployment },
+    drafts: { w: draft, b: draft },
+    deployments: { w: deployment, b: deployment },
   };
 }
 
@@ -158,6 +165,9 @@ export function setupReducer(state: SetupState, action: SetupAction): SetupState
       if (state.mode !== 'computer' || state.step !== 'reveal') return state;
       if (!findPreset(action.presetId)) return state;
       return withOpponent(state, action.presetId);
+
+    case 'set-difficulty':
+      return state.mode === 'computer' ? { ...state, difficulty: action.difficulty } : state;
 
     case 'continue': {
       if (state.step !== 'handoff') return state;

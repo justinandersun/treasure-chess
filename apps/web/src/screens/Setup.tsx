@@ -74,6 +74,8 @@ export function Setup({ setup, dispatch, onStart, onCancel }: SetupProps) {
           mode={mode}
           onStart={onStart}
           onChangeOpponent={(presetId) => dispatch({ type: 'choose-opponent', presetId })}
+          difficulty={setup.difficulty}
+          onChangeDifficulty={(difficulty) => dispatch({ type: 'set-difficulty', difficulty })}
         />
       );
   }

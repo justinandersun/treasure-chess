@@ -3,13 +3,13 @@
   align-items: center;
   justify-content: center;
   gap: 0.5em;
-  min-height: 44px;
-  padding: 0.5em 1.4em;
+  min-height: 40px;
+  padding: 0.45em 1.1em;
   border: 3px solid var(--fg);
   background: transparent;
   font-size: 0.8rem;
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   cursor: pointer;
   text-align: center;
@@ -40,4 +40,13 @@
 
 .quiet {
   border-color: transparent;
+}
+
+/* Phones: a little more compact, still well above the 24px minimum touch target. */
+@media (max-width: 520px) {
+  .button {
+    min-height: 36px;
+    padding: 0.4em 0.9em;
+    font-size: 0.75rem;
+  }
 }

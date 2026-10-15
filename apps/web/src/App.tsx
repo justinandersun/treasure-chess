@@ -1,4 +1,3 @@
-import type { Deployment } from '@treasure-chess/game';
 import { useEffect, useReducer, useState } from 'react';
 import styles from './App.module.css';
 import {
@@ -11,7 +10,6 @@ import {
 import { Button } from './components/Button';
 import { Dialog } from './components/Dialog';
 import { ThemeToggle } from './components/ThemeToggle';
-import { takeSharedArmy } from './app/share';
 import { browserStorage, loadSession, saveSession } from './persistence/session';
 import { Home } from './screens/Home';
 import { Play } from './screens/Play';
@@ -21,23 +19,13 @@ import { Setup } from './screens/Setup';
 
 const storage = browserStorage();
 
-interface Boot {
-  readonly state: AppState;
-  readonly notice: string | null;
-  /** An army from a shared link, offered for the next new game. */
-  readonly sharedArmy: Deployment | null;
-}
-
-/** Restores the saved session (noting if one had to be thrown away) and reads any shared army. */
-function initialize(): Boot {
-  const sharedArmy = takeSharedArmy();
+/** Restores the saved session, noting if one had to be thrown away. */
+function initialize(): { state: AppState; notice: string | null } {
   const loaded = loadSession(storage);
-  const restored = loaded.status === 'restored' ? loaded.state : initialAppState;
+  if (loaded.status === 'restored') return { state: loaded.state, notice: null };
   return {
-    // A shared link opens on Home, where the army is offered.
-    state: sharedArmy ? { ...restored, view: 'home' } : restored,
+    state: initialAppState,
     notice: loaded.status === 'discarded' ? `${loaded.reason} A new session was started.` : null,
-    sharedArmy,
   };
 }
 
@@ -45,7 +33,6 @@ export function App() {
   const [boot] = useState(initialize);
   const [state, dispatch] = useReducer(appReducer, boot.state);
   const [notice, setNotice] = useState(boot.notice);
-  const [sharedArmy, setSharedArmy] = useState(boot.sharedArmy);
   const [overlay, setOverlay] = useState<'rules' | 'pieces' | null>(null);
   // Replacing unfinished work (with the mode to start next) or discarding asks first.
   const [confirm, setConfirm] = useState<
@@ -56,14 +43,10 @@ export function App() {
   useEffect(() => saveSession(storage, state), [state]);
 
   const goHome = () => dispatch({ type: 'go-home' });
-  const startNewGame = (mode: GameMode) => {
-    dispatch(
-      sharedArmy ? { type: 'new-game', mode, army: sharedArmy } : { type: 'new-game', mode },
-    );
-    setSharedArmy(null);
-  };
   const requestNewGame = (mode: GameMode) =>
-    isUnfinished(session) ? setConfirm({ kind: 'replace', mode }) : startNewGame(mode);
+    isUnfinished(session)
+      ? setConfirm({ kind: 'replace', mode })
+      : dispatch({ type: 'new-game', mode });
 
   return (
     <div className={styles.app}>
@@ -97,8 +80,6 @@ export function App() {
             onNewGame={requestNewGame}
             onContinue={() => dispatch({ type: 'continue' })}
             onDiscard={() => setConfirm({ kind: 'discard' })}
-            sharedArmy={sharedArmy !== null}
-            onDismissSharedArmy={() => setSharedArmy(null)}
           />
         )}
         {view === 'session' && session?.kind === 'setup' && (
@@ -113,6 +94,7 @@ export function App() {
           <Play
             game={session.game}
             mode={session.mode}
+            difficulty={session.difficulty}
             onChange={(game) => dispatch({ type: 'update-game', game })}
             onNewGame={goHome}
           />
@@ -157,7 +139,7 @@ export function App() {
             <Button
               variant="primary"
               onClick={() => {
-                if (confirm?.kind === 'replace') startNewGame(confirm.mode);
+                if (confirm?.kind === 'replace') dispatch({ type: 'new-game', mode: confirm.mode });
                 else dispatch({ type: 'discard-session' });
                 setConfirm(null);
               }}

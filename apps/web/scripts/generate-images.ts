@@ -111,23 +111,34 @@ function touchIcon(): string {
 }
 
 /**
- * An installed-app icon: the gryphon on a full-bleed dark square. Maskable icons keep the piece
- * inside the central safe zone, since the platform may crop to a circle or rounded square.
+ * An installed-app icon. The standard icon is just the gryphon on a transparent background, so the
+ * system shows the piece's own outline rather than framing a square tile. The maskable icon (which
+ * Android crops to a shape) is full-bleed, with the piece inside the central safe zone.
  */
 function appIcon(size: number, maskable = false): string {
-  const piece = size * (maskable ? 0.62 : 0.86);
-  const x = (size - piece) / 2;
-  const y = (size - piece) / 2 - size * (maskable ? 0.01 : 0.02);
+  const background = maskable
+    ? `<rect width="${size}" height="${size}" fill="${PALETTE.dark}"/>`
+    : '';
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
-    <rect width="${size}" height="${size}" fill="${PALETTE.dark}"/>
-    ${pieceSvg('gryphon', 'w', x, y, piece)}
+    ${background}
+    ${centeredGryphon(size, maskable ? 0.58 : 0.92)}
   </svg>`;
 }
 
+/**
+ * The gryphon centered in a `size` square, its drawn height `fill` × size. The artwork occupies
+ * x 6–39 and y 4.75–40 of its 45-unit box, so it is centered on that content, not the box.
+ */
+function centeredGryphon(size: number, fill: number): string {
+  const box = (fill * size * 45) / (40 - 4.75);
+  const unit = box / 45;
+  return pieceSvg('gryphon', 'w', size / 2 - 22.5 * unit, size / 2 - 22.375 * unit, box);
+}
+
+/** The browser-tab icon: just the gryphon, so the tab shows the piece's own outline. */
 function favicon(): string {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-    <rect width="32" height="32" rx="6" fill="${PALETTE.dark}"/>
-    ${pieceSvg('gryphon', 'w', 2, 2, 28)}
+    ${centeredGryphon(32, 0.97)}
   </svg>`;
 }
 

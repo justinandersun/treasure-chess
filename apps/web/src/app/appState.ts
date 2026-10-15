@@ -4,7 +4,7 @@
  * discarding replaces it.
  */
 
-import { createGameFromArmies, type Deployment, type GameState } from '@treasure-chess/game';
+import { createGameFromArmies, type Difficulty, type GameState } from '@treasure-chess/game';
 import {
   type GameMode,
   initialSetup,
@@ -17,7 +17,13 @@ export type { GameMode } from './setup';
 
 export type Session =
   | { readonly kind: 'setup'; readonly setup: SetupState }
-  | { readonly kind: 'game'; readonly game: GameState; readonly mode: GameMode };
+  | {
+      readonly kind: 'game';
+      readonly game: GameState;
+      readonly mode: GameMode;
+      /** The computer's level (games against the computer only). */
+      readonly difficulty: Difficulty;
+    };
 
 export type View = 'home' | 'session';
 
@@ -28,8 +34,8 @@ export interface AppState {
 
 export type AppAction =
   | { readonly type: 'go-home' }
-  /** Replaces any session with a fresh setup for `mode`, starting White from `army` if given. */
-  | { readonly type: 'new-game'; readonly mode: GameMode; readonly army?: Deployment }
+  /** Replaces any session with a fresh setup for `mode`. */
+  | { readonly type: 'new-game'; readonly mode: GameMode }
   | { readonly type: 'continue' }
   | { readonly type: 'discard-session' }
   | { readonly type: 'setup'; readonly action: SetupAction }
@@ -46,7 +52,7 @@ export function appReducer(state: AppState, action: AppAction): AppState {
     case 'new-game':
       return {
         view: 'session',
-        session: { kind: 'setup', setup: initialSetup(action.mode, action.army) },
+        session: { kind: 'setup', setup: initialSetup(action.mode) },
       };
     case 'continue':
       return session ? { ...state, view: 'session' } : state;
@@ -60,9 +66,9 @@ export function appReducer(state: AppState, action: AppAction): AppState {
       };
     case 'start-game': {
       if (session?.kind !== 'setup' || session.setup.step !== 'reveal') return state;
-      const { mode, deployments } = session.setup;
+      const { mode, difficulty, deployments } = session.setup;
       const game = createGameFromArmies(deployments.w, deployments.b);
-      return { ...state, session: { kind: 'game', game, mode } };
+      return { ...state, session: { kind: 'game', game, mode, difficulty } };
     }
     case 'update-game':
       return session?.kind === 'game'

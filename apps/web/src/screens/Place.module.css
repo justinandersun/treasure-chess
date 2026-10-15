@@ -29,6 +29,12 @@
 .summary {
   margin: 0;
   color: var(--muted);
+  font-size: 0.9rem;
+}
+
+/* Each half stays whole where it fits; only a half wider than the screen wraps inside. */
+.phrase {
+  display: inline-block;
 }
 
 .tray {
@@ -164,28 +170,6 @@
 .armyDescription {
   color: var(--muted);
   font-size: 0.85rem;
-}
-
-.share {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 4px 12px;
-  margin: 0;
-  color: var(--muted);
-  font-size: 0.9rem;
-  overflow-wrap: anywhere;
-}
-
-.shareLink {
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--fg);
-  font-weight: 700;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  cursor: pointer;
 }
 
 .actions {

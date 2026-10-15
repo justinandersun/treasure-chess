@@ -17,3 +17,4 @@ export * from './presets';
 export * from './zobrist';
 export { findBestMove, MATE_SCORE, MATE_THRESHOLD } from './ai/search';
 export type { SearchOptions, SearchResult } from './ai/search';
+export { DIFFICULTIES, DIFFICULTY_SEARCH, type Difficulty } from './ai/difficulty';

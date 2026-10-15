@@ -237,9 +237,26 @@ describe('schema migration', () => {
       setupAction({ type: 'to-place' }),
       setupAction({ type: 'lock', opponentPresetId: 'stampede' }),
       setupAction({ type: 'choose-opponent', presetId: 'bulwark' }),
+      setupAction({ type: 'set-difficulty', difficulty: 'beginner' }),
       { type: 'start-game' },
     );
-    expect(state.session).toMatchObject({ kind: 'game', mode: 'computer' });
-    expect(reload(state).session).toMatchObject({ kind: 'game', mode: 'computer' });
+    const expected = { kind: 'game', mode: 'computer', difficulty: 'beginner' };
+    expect(state.session).toMatchObject(expected);
+    expect(reload(state).session).toMatchObject(expected);
+  });
+
+  it('treats saves from before difficulty levels as Advanced, as the computer played then', () => {
+    const state = run(
+      initialAppState,
+      { type: 'new-game', mode: 'computer' },
+      setupAction({ type: 'to-place' }),
+    );
+    const doc = JSON.parse(encodeSession(state)!);
+    delete doc.session.setup.difficulty;
+    const result = decodeSession(JSON.stringify(doc));
+    if (result.status !== 'restored' || result.state.session?.kind !== 'setup') {
+      throw new Error(`Not restored: ${JSON.stringify(result)}`);
+    }
+    expect(result.state.session.setup.difficulty).toBe('advanced');
   });
 });

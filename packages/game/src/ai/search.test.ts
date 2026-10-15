@@ -8,6 +8,7 @@ import { parsePosition } from '../position';
 import { PRESETS } from '../presets';
 import { createRng } from '../rng';
 import { hashPosition } from '../zobrist';
+import { DIFFICULTY_SEARCH } from './difficulty';
 import { findBestMove, MATE_SCORE, type SearchOptions } from './search';
 import { SearchPosition } from './searchPosition';
 
@@ -151,5 +152,42 @@ describe('SearchPosition', () => {
     }
     pos.make({ from: parseSquare('f6'), to: parseSquare('g8'), piece: 'knight' });
     expect(pos.isRepetition()).toBe(true);
+  });
+});
+
+describe('difficulty levels', () => {
+  // Unlimited time so results depend only on depth and seed.
+  const level = (name: keyof typeof DIFFICULTY_SEARCH, seed: number): SearchOptions => ({
+    ...DIFFICULTY_SEARCH[name],
+    timeMs: Infinity,
+    seed,
+  });
+  const seeds = [1, 2, 3, 4, 5, 6, 7, 8];
+  const opening = createGameFromArmies(PRESETS[0]!.deployment, PRESETS[0]!.deployment);
+
+  it('Beginner still plays mate in one and takes free material', () => {
+    for (const seed of seeds) {
+      expect(coords(best(game('7k/6pp/8/8/8/8/8/R5K1 w'), level('beginner', seed)).move)).toBe(
+        'a1a8',
+      );
+      expect(coords(best(game('q3k3/8/8/8/8/8/8/R3K3 w'), level('beginner', seed)).move)).toBe(
+        'a1a8',
+      );
+    }
+  });
+
+  it('weaker levels vary their moves between games', () => {
+    for (const name of ['beginner', 'intermediate'] as const) {
+      const picks = new Set(seeds.map((seed) => coords(best(opening, level(name, seed)).move)));
+      expect(picks.size).toBeGreaterThan(1);
+    }
+  });
+
+  it('never chooses a move worse than the margin allows', () => {
+    for (const seed of seeds) {
+      const options = level('beginner', seed);
+      const top = best(opening, { ...options, margin: 0 }).score;
+      expect(best(opening, options).score).toBeGreaterThanOrEqual(top - options.margin!);
+    }
   });
 });

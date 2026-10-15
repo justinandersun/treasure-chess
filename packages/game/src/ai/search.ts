@@ -2,10 +2,12 @@
  * The computer opponent's search: iterative-deepening alpha-beta (negamax) with a transposition
  * table, check extensions, quiescence search on captures and promotions, and MVV-LVA / killer move
  * ordering. It stops at a time limit and returns the best move from the deepest finished search.
+ * With a `margin`, it instead picks among the near-best moves, which is how weaker levels play.
  */
 
 import type { GameState } from '../game';
 import type { Move } from '../movegen';
+import { createRng } from '../rng';
 import { hashPosition } from '../zobrist';
 import { evaluate, PIECE_VALUE } from './evaluate';
 import { SearchPosition } from './searchPosition';
@@ -21,6 +23,11 @@ export interface SearchOptions {
   readonly maxDepth?: number;
   /** Seed for the small evaluation noise that varies play between games. Defaults to 0. */
   readonly seed?: number;
+  /**
+   * Centipawns: choose at random (favoring better moves) among moves scoring within this much of
+   * the best, instead of always the best. A forced mate is always taken. Defaults to 0.
+   */
+  readonly margin?: number;
 }
 
 export interface SearchResult {
@@ -192,6 +199,17 @@ class Searcher {
     return { move: bestMove, score: alpha };
   }
 
+  /** The exact score of every root move at `depth` (or throws Stop). */
+  rootScores(depth: number, moves: Move[]): { move: Move; score: number }[] {
+    const { pos } = this;
+    return moves.map((move) => {
+      pos.make(move);
+      const score = -this.search(depth - 1, -Infinity, Infinity, 1);
+      pos.unmake(move);
+      return { move, score };
+    });
+  }
+
   legalRootMoves(): Move[] {
     const { pos } = this;
     const mover = pos.turn;
@@ -222,7 +240,7 @@ function searchPositionFor(state: GameState): SearchPosition {
  */
 export function findBestMove(state: GameState, options: SearchOptions = {}): SearchResult | null {
   if (state.result) return null;
-  const { timeMs = 1000, maxDepth = 64, seed = 0 } = options;
+  const { timeMs = 1000, maxDepth = 64, seed = 0, margin = 0 } = options;
   const searcher = new Searcher(searchPositionFor(state), timeMs, seed);
   let moves = searcher.legalRootMoves();
   if (moves.length === 0) return null;
@@ -242,5 +260,32 @@ export function findBestMove(state: GameState, options: SearchOptions = {}): Sea
       throw e;
     }
   }
+
+  if (margin > 0 && best.depth > 0 && Math.abs(best.score) < MATE_THRESHOLD) {
+    try {
+      const choice = pickNearBest(searcher.rootScores(best.depth, moves), margin, seed);
+      best = { ...best, ...choice };
+    } catch (e) {
+      if (!(e instanceof Stop)) throw e; // out of time: keep the best move
+    }
+  }
   return { ...best, nodes: searcher.nodes };
+}
+
+/** A random choice among moves within `margin` of the best, weighted toward the better ones. */
+function pickNearBest(
+  scored: readonly { move: Move; score: number }[],
+  margin: number,
+  seed: number,
+): { move: Move; score: number } {
+  const top = Math.max(...scored.map((s) => s.score));
+  const candidates = scored
+    .filter((s) => s.score >= top - margin)
+    .map((s) => ({ ...s, weight: margin - (top - s.score) + 1 }));
+  let r = createRng(seed)() * candidates.reduce((sum, c) => sum + c.weight, 0);
+  for (const c of candidates) {
+    r -= c.weight;
+    if (r < 0) return c;
+  }
+  return candidates[0]!;
 }

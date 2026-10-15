@@ -1,9 +1,9 @@
-import type { MoveInput, SavedGame } from '@treasure-chess/game';
+import type { Difficulty, MoveInput, SavedGame } from '@treasure-chess/game';
 
-/** Sent to the computer worker: the game so far and how long to think. */
+/** Sent to the computer worker: the game so far and how strongly to play. */
 export interface ThinkRequest {
   readonly game: SavedGame;
-  readonly timeMs: number;
+  readonly difficulty: Difficulty;
   readonly seed: number;
 }
 

@@ -3,7 +3,7 @@
  * saved game, replays it, searches, and posts back the chosen move.
  */
 
-import { deserializeGame, findBestMove } from '@treasure-chess/game';
+import { deserializeGame, DIFFICULTY_SEARCH, findBestMove } from '@treasure-chess/game';
 import type { ThinkRequest, ThinkResponse } from './protocol';
 
 /** The worker's global scope (typed by hand: the DOM and WebWorker type libraries conflict). */
@@ -13,8 +13,8 @@ const scope = self as unknown as {
 };
 
 scope.onmessage = (event) => {
-  const { game, timeMs, seed } = event.data;
-  const result = findBestMove(deserializeGame(game), { timeMs, seed });
+  const { game, difficulty, seed } = event.data;
+  const result = findBestMove(deserializeGame(game), { ...DIFFICULTY_SEARCH[difficulty], seed });
   const response: ThinkResponse = result
     ? {
         move: result.move.promotion
